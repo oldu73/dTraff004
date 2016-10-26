@@ -73,6 +73,16 @@ public class ConnectionEditDialogController {
     }
 
     /**
+     * Called when the user clicks test connection.
+     */
+    @FXML
+    private void handleTestConnection() {
+        if (isInputValid()) {
+            System.out.println("test connection..");
+        }
+    }
+
+    /**
      * Called when the user clicks ok.
      */
     @FXML

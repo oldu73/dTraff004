@@ -34,8 +34,9 @@
             <PasswordField fx:id="passwordField" GridPane.columnIndex="1" GridPane.rowIndex="3" />
          </children>
       </GridPane>
-      <ButtonBar layoutX="386.0" layoutY="346.0" prefHeight="40.0" prefWidth="200.0" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0">
+      <ButtonBar layoutX="386.0" layoutY="346.0" prefHeight="40.0" prefWidth="353.0" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0">
         <buttons>
+            <Button mnemonicParsing="false" onAction="#handleTestConnection" text="Test Connection" />
           <Button mnemonicParsing="false" onAction="#handleOk" text="OK" />
             <Button mnemonicParsing="false" onAction="#handleCancel" text="Cancel" />
         </buttons>
