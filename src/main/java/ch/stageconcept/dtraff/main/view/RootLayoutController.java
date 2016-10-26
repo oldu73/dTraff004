@@ -1,7 +1,7 @@
 package ch.stageconcept.dtraff.main.view;
 
 import ch.stageconcept.dtraff.main.MainApp;
-import ch.stageconcept.dtraff.servcon.model.Connection;
+import ch.stageconcept.dtraff.connection.model.DbConnect;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 
@@ -32,10 +32,10 @@ public class RootLayoutController {
      */
     @FXML
     private void handleNewConnection() {
-        Connection tempConnection = new Connection();
-        boolean okClicked = mainApp.showConnectionEditDialog(tempConnection);
+        DbConnect tempDbConnect = new DbConnect();
+        boolean okClicked = mainApp.showConnectionEditDialog(tempDbConnect);
         if (okClicked) {
-            mainApp.getConnectionsData().add(tempConnection);
+            mainApp.getDbConnects().add(tempDbConnect);
         }
     }
 

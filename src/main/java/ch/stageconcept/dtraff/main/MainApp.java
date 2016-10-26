@@ -1,8 +1,8 @@
 package ch.stageconcept.dtraff.main;
 
 import ch.stageconcept.dtraff.main.view.RootLayoutController;
-import ch.stageconcept.dtraff.servcon.model.Connection;
-import ch.stageconcept.dtraff.servcon.view.ConnectionEditDialogController;
+import ch.stageconcept.dtraff.connection.model.DbConnect;
+import ch.stageconcept.dtraff.connection.view.ConnectionEditDialogController;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -25,8 +25,8 @@ public class MainApp extends Application {
     private Stage primaryStage;
     private BorderPane rootLayout;
 
-    // The server connections data as an observable list of Connections.
-    private ObservableList<Connection> connectionsData = FXCollections.observableArrayList();
+    // The server connections data as an observable list of DbConnect objects.
+    private ObservableList<DbConnect> dbConnects = FXCollections.observableArrayList();
 
     /**
      * Constructor
@@ -36,11 +36,11 @@ public class MainApp extends Application {
     }
 
     /**
-     * Returns the server connections data as an observable list of Connections.
+     * Returns the server connections data as an observable list of DbConnect objects.
      * @return
      */
-    public ObservableList<Connection> getConnectionsData() {
-        return connectionsData;
+    public ObservableList<DbConnect> getDbConnects() {
+        return dbConnects;
     }
 
     @Override
@@ -89,18 +89,18 @@ public class MainApp extends Application {
     }
 
     /**
-     * Opens a dialog to edit details for the specified connection. If the user
-     * clicks OK, the changes are saved into the provided connection object and true
+     * Opens a dialog to edit details for the specified dbConnect. If the user
+     * clicks OK, the changes are saved into the provided dbConnect object and true
      * is returned.
      *
-     * @param connection the connection object to be edited
+     * @param dbConnect the dbConnect object to be edited
      * @return true if the user clicked OK, false otherwise.
      */
-    public boolean showConnectionEditDialog(Connection connection) {
+    public boolean showConnectionEditDialog(DbConnect dbConnect) {
         try {
             // Load the fxml file and create a new stage for the popup dialog.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("../servcon/view/ConnectionEditDialog.fxml"));
+            loader.setLocation(MainApp.class.getResource("../connection/view/ConnectionEditDialog.fxml"));
             AnchorPane page = (AnchorPane) loader.load();
 
             // Create the dialog Stage.
@@ -111,10 +111,10 @@ public class MainApp extends Application {
             Scene scene = new Scene(page);
             dialogStage.setScene(scene);
 
-            // Set the connection into the controller.
+            // Set the dbConnect into the controller.
             ConnectionEditDialogController controller = loader.getController();
             controller.setDialogStage(dialogStage);
-            controller.setConnection(connection);
+            controller.setDbConnect(dbConnect);
 
             // Show the dialog and wait until the user closes it
             dialogStage.showAndWait();

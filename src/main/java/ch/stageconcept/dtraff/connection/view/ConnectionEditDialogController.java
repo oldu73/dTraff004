@@ -1,18 +1,27 @@
-package ch.stageconcept.dtraff.servcon.view;
+package ch.stageconcept.dtraff.connection.view;
 
-import ch.stageconcept.dtraff.servcon.model.Connection;
+import ch.stageconcept.dtraff.connection.model.DbConnect;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 /**
- * Dialog to edit details of a connection.
+ * Dialog to edit details of a dbConnect.
  *
  * @author Olivier Durand
  */
 public class ConnectionEditDialogController {
+
+    private static final String DBTYPE1 = "MariaDB";
+    private static final String DBTYPE2 = "MySQL";
+    private static final String DBTYPE3 = "PostgreSQL";
+
+    @FXML
+    private ComboBox<String> databaseField;
+
+    private ObservableList<String> databaseFieldData;
 
     @FXML
     private TextField hostField;
@@ -24,7 +33,7 @@ public class ConnectionEditDialogController {
     private PasswordField passwordField;
 
     private Stage dialogStage;
-    private Connection connection;
+    private DbConnect dbConnect;
     private boolean okClicked = false;
 
     /**
@@ -33,6 +42,13 @@ public class ConnectionEditDialogController {
      */
     @FXML
     private void initialize() {
+        databaseFieldData = FXCollections.observableArrayList();
+
+        databaseFieldData.add(DBTYPE1);
+        databaseFieldData.add(DBTYPE2);
+        databaseFieldData.add(DBTYPE3);
+
+        databaseField.setItems(databaseFieldData);
     }
 
     /**
@@ -45,21 +61,23 @@ public class ConnectionEditDialogController {
     }
 
     /**
-     * Sets the connection to be edited in the dialog.
+     * Sets the dbConnect to be edited in the dialog.
      *
-     * @param connection
+     * @param dbConnect
      */
-    public void setConnection(Connection connection) {
-        this.connection = connection;
+    public void setDbConnect(DbConnect dbConnect) {
+        this.dbConnect = dbConnect;
 
-        //TODO Find a clean solution to pass connection parameter when it's a case of a new one
-        if (connection.getHost() != null) { // means that connection object contain only null values,
+        //TODO Find a clean solution to pass dbConnect parameter when it's a case of a new one
+        if (dbConnect.getHost() != null) {  // means that dbConnect object contain only null values,
                                             // not a really clean solution but for now it do the job
-                                            // and I have no other idea
-            hostField.setText(connection.getHost());
-            portField.setText(Integer.toString(connection.getPort()));
-            userField.setText(connection.getUser());
-            passwordField.setText(connection.getPassword());
+                                            // and I have no other idea...
+
+            //TODO Set databaseField
+            hostField.setText(dbConnect.getHost());
+            portField.setText(Integer.toString(dbConnect.getPort()));
+            userField.setText(dbConnect.getUser());
+            passwordField.setText(dbConnect.getPassword());
         }
     }
 
@@ -88,10 +106,11 @@ public class ConnectionEditDialogController {
     @FXML
     private void handleOk() {
         if (isInputValid()) {
-            connection.setHost(hostField.getText());
-            connection.setPort(Integer.parseInt(portField.getText()));
-            connection.setUser(userField.getText());
-            connection.setPassword(passwordField.getText());
+            //TODO dbConnect.setDriver
+            dbConnect.setHost(hostField.getText());
+            dbConnect.setPort(Integer.parseInt(portField.getText()));
+            dbConnect.setUser(userField.getText());
+            dbConnect.setPassword(passwordField.getText());
 
             okClicked = true;
             dialogStage.close();
@@ -113,6 +132,10 @@ public class ConnectionEditDialogController {
      */
     private boolean isInputValid() {
         String errorMessage = "";
+
+        if (databaseField.getSelectionModel().getSelectedItem() == null || databaseField.getSelectionModel().getSelectedItem().toString().length() == 0) {
+            errorMessage += "No valid database!\n";
+        }
 
         if (hostField.getText() == null || hostField.getText().length() == 0) {
             errorMessage += "No valid host!\n";
