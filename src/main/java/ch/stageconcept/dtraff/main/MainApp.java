@@ -1,9 +1,15 @@
 package ch.stageconcept.dtraff.main;
 
+import ch.stageconcept.dtraff.servcon.model.Connection;
+import ch.stageconcept.dtraff.servcon.view.ConnectionEditDialogController;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -17,6 +23,24 @@ public class MainApp extends Application {
 
     private Stage primaryStage;
     private BorderPane rootLayout;
+
+    // The server connections data as an observable list of Connections.
+    private ObservableList<Connection> connectionsData = FXCollections.observableArrayList();
+
+    /**
+     * Constructor
+     */
+    public MainApp() {
+        //TODO load connections data from preference file
+    }
+
+    /**
+     * Returns the server connections data as an observable list of Connections.
+     * @return
+     */
+    public ObservableList<Connection> getConnectionsData() {
+        return connectionsData;
+    }
 
     @Override
     public void start(Stage primaryStage) {
@@ -55,6 +79,44 @@ public class MainApp extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    /**
+     * Opens a dialog to edit details for the specified connection. If the user
+     * clicks OK, the changes are saved into the provided connection object and true
+     * is returned.
+     *
+     * @param connection the connection object to be edited
+     * @return true if the user clicked OK, false otherwise.
+     */
+    public boolean showConnectionEditDialog(Connection connection) {
+        try {
+            // Load the fxml file and create a new stage for the popup dialog.
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(MainApp.class.getResource("servcon/view/ConnectionEditDialog.fxml"));
+            AnchorPane page = (AnchorPane) loader.load();
+
+            // Create the dialog Stage.
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Edit Connection");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(primaryStage);
+            Scene scene = new Scene(page);
+            dialogStage.setScene(scene);
+
+            // Set the connection into the controller.
+            ConnectionEditDialogController controller = loader.getController();
+            controller.setDialogStage(dialogStage);
+            controller.setConnection(connection);
+
+            // Show the dialog and wait until the user closes it
+            dialogStage.showAndWait();
+
+            return controller.isOkClicked();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 }
