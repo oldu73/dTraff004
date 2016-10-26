@@ -1,6 +1,8 @@
 package ch.stageconcept.dtraff.servcon.model;
 
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 /**
@@ -15,31 +17,30 @@ public class Connection {
     private final StringProperty user;
     private final StringProperty password;
 
+    //TODO Server Type (MySQL, MariaDB, PostgreSQL)
+    //TODO Save password option
     //TODO SSL
 
     /**
      * Default constructor.
      */
     public Connection() {
-        this.host = null;
-        this.port = null;
-        this.user = null;
-        this.password = null;
+        this(null, 0, null, null);
     }
 
     /**
-     * Constructor with some initial data.
+     * Constructor.
      *
      * @param host
      * @param port
      * @param user
      * @param password
      */
-    public Connection(StringProperty host, IntegerProperty port, StringProperty user, StringProperty password) {
-        this.host = host;
-        this.port = port;
-        this.user = user;
-        this.password = password;
+    public Connection(String host, Integer port, String user, String password) {
+        this.host = new SimpleStringProperty(host);
+        this.port = new SimpleIntegerProperty(port);
+        this.user = new SimpleStringProperty(user);
+        this.password = new SimpleStringProperty(password);
     }
 
     public String getHost() {

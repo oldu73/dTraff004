@@ -45,17 +45,22 @@ public class ConnectionEditDialogController {
     }
 
     /**
-     * Sets the person to be edited in the dialog.
+     * Sets the connection to be edited in the dialog.
      *
      * @param connection
      */
     public void setConnection(Connection connection) {
         this.connection = connection;
 
-        hostField.setText(connection.getHost());
-        portField.setText(Integer.toString(connection.getPort()));
-        userField.setText(connection.getUser());
-        passwordField.setText(connection.getPassword());
+        //TODO Find a clean solution to pass connection parameter when it's a case of a new one
+        if (connection.getHost() != null) { // means that connection object contain only null values,
+                                            // not a really clean solution but for now it do the job
+                                            // and I have no other idea
+            hostField.setText(connection.getHost());
+            portField.setText(Integer.toString(connection.getPort()));
+            userField.setText(connection.getUser());
+            passwordField.setText(connection.getPassword());
+        }
     }
 
     /**

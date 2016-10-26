@@ -1,5 +1,6 @@
 package ch.stageconcept.dtraff.main;
 
+import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import ch.stageconcept.dtraff.servcon.model.Connection;
 import ch.stageconcept.dtraff.servcon.view.ConnectionEditDialogController;
 import javafx.application.Application;
@@ -57,12 +58,18 @@ public class MainApp extends Application {
         try {
             // Load root layout from fxml file.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("view/main.fxml"));
+            loader.setLocation(MainApp.class
+                    .getResource("view/RootLayout.fxml"));
             rootLayout = (BorderPane) loader.load();
 
             // Show the scene containing the root layout.
             Scene scene = new Scene(rootLayout);
             primaryStage.setScene(scene);
+
+            // Give the controller access to the main app.
+            RootLayoutController controller = loader.getController();
+            controller.setMainApp(this);
+
             primaryStage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -93,7 +100,7 @@ public class MainApp extends Application {
         try {
             // Load the fxml file and create a new stage for the popup dialog.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("servcon/view/ConnectionEditDialog.fxml"));
+            loader.setLocation(MainApp.class.getResource("../servcon/view/ConnectionEditDialog.fxml"));
             AnchorPane page = (AnchorPane) loader.load();
 
             // Create the dialog Stage.
