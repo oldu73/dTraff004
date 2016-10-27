@@ -1,11 +1,17 @@
 package ch.stageconcept.dtraff.connection.view;
 
 import ch.stageconcept.dtraff.connection.model.DbConnect;
+import ch.stageconcept.dtraff.connection.util.DbDescriptor;
+import ch.stageconcept.dtraff.connection.util.DbType;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Dialog to edit details of a dbConnect.
@@ -44,9 +50,14 @@ public class ConnectionEditDialogController {
     private void initialize() {
         databaseFieldData = FXCollections.observableArrayList();
 
-        databaseFieldData.add(DBTYPE1);
-        databaseFieldData.add(DBTYPE2);
-        databaseFieldData.add(DBTYPE3);
+        Set dbTypeSet = DbType.INSTANCE.getDbDescriptorHashMap().entrySet();
+        Iterator dbTypeIterator = dbTypeSet.iterator();
+
+        while(dbTypeIterator.hasNext()) {
+            Map.Entry mentry = (Map.Entry)dbTypeIterator.next();
+            DbDescriptor dbDescriptor = (DbDescriptor)mentry.getValue();
+            databaseFieldData.add(dbDescriptor.getDenomination());
+        }
 
         databaseField.setItems(databaseFieldData);
     }
