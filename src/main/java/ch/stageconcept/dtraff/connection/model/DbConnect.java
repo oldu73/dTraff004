@@ -39,11 +39,14 @@ public class DbConnect {
      * Default constructor.
      */
     public DbConnect() {
-        String dbTypeKey = DbType.MYSQL_KEY;
 
-        DbDescriptor dbDescriptor = DbType.INSTANCE.getDbDescriptorHashMap().get(dbTypeKey);
+        // Create object with default values chosen to be MySQL
 
-        this.key = new SimpleStringProperty(dbTypeKey);
+        String dbDefaultTypeKey = DbType.MYSQL_KEY;
+
+        DbDescriptor dbDescriptor = DbType.INSTANCE.getDbDescriptorMap().get(dbDefaultTypeKey);
+
+        this.key = new SimpleStringProperty(dbDefaultTypeKey);
 
         this.name = new SimpleStringProperty(dbDescriptor.getName());
         this.denomination = new SimpleStringProperty(dbDescriptor.getDenomination());

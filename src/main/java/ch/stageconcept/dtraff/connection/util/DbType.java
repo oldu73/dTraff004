@@ -1,6 +1,6 @@
 package ch.stageconcept.dtraff.connection.util;
 
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * Enum class to get database description from key value.
@@ -38,6 +38,7 @@ public enum DbType {
     private static final int POSTGRESQL_POR = 5432;
 
     private final HashMap<String, DbDescriptor> dbDescriptorHashMap;
+    private Map<String, DbDescriptor> dbDescriptorMap;
 
     private DbType() {
         DbDescriptor mariaDb = new DbDescriptor(DEFAULT_NAM, MARIADB_DEN, DEFAULT_HOS, MARIADB_POR, DEFAULT_USE, DEFAULT_PAS, MARIADB_DRI);
@@ -49,10 +50,14 @@ public enum DbType {
         dbDescriptorHashMap.put(MARIADB_KEY, mariaDb);
         dbDescriptorHashMap.put(MYSQL_KEY, mySql);
         dbDescriptorHashMap.put(POSTGRESQL_KEY, postgreSql);
+
+        // Sort HashMap by key
+        // SRC: https://www.mkyong.com/java/how-to-sort-a-map-in-java/
+        dbDescriptorMap = new TreeMap<String, DbDescriptor>(dbDescriptorHashMap);
     }
 
-    public HashMap<String, DbDescriptor> getDbDescriptorHashMap() {
-        return dbDescriptorHashMap;
+    public Map<String, DbDescriptor> getDbDescriptorMap() {
+        return dbDescriptorMap;
     }
 
 }

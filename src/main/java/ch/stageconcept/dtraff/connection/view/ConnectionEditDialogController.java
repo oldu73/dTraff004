@@ -49,7 +49,7 @@ public class ConnectionEditDialogController {
     private void initialize() {
         denominationFieldData = FXCollections.observableArrayList();
 
-        Set dbTypeSet = DbType.INSTANCE.getDbDescriptorHashMap().entrySet();
+        Set dbTypeSet = DbType.INSTANCE.getDbDescriptorMap().entrySet();
         Iterator dbTypeIterator = dbTypeSet.iterator();
 
         while(dbTypeIterator.hasNext()) {
@@ -58,7 +58,6 @@ public class ConnectionEditDialogController {
             denominationFieldData.add(dbDescriptor);
         }
 
-        //TODO Sort item alphabetically
         denominationField.setItems(denominationFieldData);
 
         // Synchronize denomination and port fields
@@ -86,7 +85,7 @@ public class ConnectionEditDialogController {
         this.dbConnect = dbConnect;
 
         nameField.setText(dbConnect.getName());
-        denominationField.getSelectionModel().select(DbType.INSTANCE.getDbDescriptorHashMap().get(dbConnect.getKey()));
+        denominationField.getSelectionModel().select(DbType.INSTANCE.getDbDescriptorMap().get(dbConnect.getKey()));
         hostField.setText(dbConnect.getHost());
         portField.setText(Integer.toString(dbConnect.getPort()));
         userField.setText(dbConnect.getUser());
