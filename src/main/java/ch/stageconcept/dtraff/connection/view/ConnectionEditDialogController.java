@@ -68,7 +68,13 @@ public class ConnectionEditDialogController {
     public void setDbConnect(DbConnect dbConnect) {
         this.dbConnect = dbConnect;
 
-        //TODO Find a clean solution to pass dbConnect parameter when it's a case of a new one
+        //TODO Solution to pass dbConnect parameter when it's a case of a new one: - Construct an object with MySQL default values
+        //name: default
+        //database: MySql
+        //port: xxx
+        //user: root
+        //password: root
+        //Autoselect field in form on focus to ease default values replacement
         if (dbConnect.getHost() != null) {  // means that dbConnect object contain only null values,
                                             // not a really clean solution but for now it do the job
                                             // and I have no other idea...

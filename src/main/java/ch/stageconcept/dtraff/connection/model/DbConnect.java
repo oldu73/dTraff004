@@ -23,6 +23,7 @@ public class DbConnect {
     private final ObjectProperty<Connection> connection;
     private final ObjectProperty<ResultSet> resultSet;
 
+    //TODO Connection name field
     //TODO Server Type (MySQL, MariaDB, PostgreSQL)
     //TODO Save password option
     //TODO SSL
