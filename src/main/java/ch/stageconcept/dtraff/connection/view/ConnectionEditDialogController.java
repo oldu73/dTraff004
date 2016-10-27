@@ -20,14 +20,13 @@ import java.util.Set;
  */
 public class ConnectionEditDialogController {
 
-    private static final String DBTYPE1 = "MariaDB";
-    private static final String DBTYPE2 = "MySQL";
-    private static final String DBTYPE3 = "PostgreSQL";
+    @FXML
+    private TextField nameField;
 
     @FXML
-    private ComboBox<String> databaseField;
+    private ComboBox<String> denominationField;
 
-    private ObservableList<String> databaseFieldData;
+    private ObservableList<String> denominationFieldData;
 
     @FXML
     private TextField hostField;
@@ -48,7 +47,7 @@ public class ConnectionEditDialogController {
      */
     @FXML
     private void initialize() {
-        databaseFieldData = FXCollections.observableArrayList();
+        denominationFieldData = FXCollections.observableArrayList();
 
         Set dbTypeSet = DbType.INSTANCE.getDbDescriptorHashMap().entrySet();
         Iterator dbTypeIterator = dbTypeSet.iterator();
@@ -56,10 +55,10 @@ public class ConnectionEditDialogController {
         while(dbTypeIterator.hasNext()) {
             Map.Entry mentry = (Map.Entry)dbTypeIterator.next();
             DbDescriptor dbDescriptor = (DbDescriptor)mentry.getValue();
-            databaseFieldData.add(dbDescriptor.getDenomination());
+            denominationFieldData.add(dbDescriptor.getDenomination());
         }
 
-        databaseField.setItems(databaseFieldData);
+        denominationField.setItems(denominationFieldData);
     }
 
     /**
@@ -79,23 +78,14 @@ public class ConnectionEditDialogController {
     public void setDbConnect(DbConnect dbConnect) {
         this.dbConnect = dbConnect;
 
-        //TODO Solution to pass dbConnect parameter when it's a case of a new one: - Construct an object with MySQL default values
-        //name: default
-        //database: MySql
-        //port: xxx
-        //user: root
-        //password: root
-        //Autoselect field in form on focus to ease default values replacement
-        if (dbConnect.getHost() != null) {  // means that dbConnect object contain only null values,
-                                            // not a really clean solution but for now it do the job
-                                            // and I have no other idea...
+        //TODO add listener on denomination field (or binding?) to synchronize port number
 
-            //TODO Set databaseField
-            hostField.setText(dbConnect.getHost());
-            portField.setText(Integer.toString(dbConnect.getPort()));
-            userField.setText(dbConnect.getUser());
-            passwordField.setText(dbConnect.getPassword());
-        }
+        nameField.setText(dbConnect.getName());
+        denominationField.getSelectionModel().select(dbConnect.getDenomination());
+        hostField.setText(dbConnect.getHost());
+        portField.setText(Integer.toString(dbConnect.getPort()));
+        userField.setText(dbConnect.getUser());
+        passwordField.setText(dbConnect.getPassword());
     }
 
     /**
@@ -150,7 +140,7 @@ public class ConnectionEditDialogController {
     private boolean isInputValid() {
         String errorMessage = "";
 
-        if (databaseField.getSelectionModel().getSelectedItem() == null || databaseField.getSelectionModel().getSelectedItem().toString().length() == 0) {
+        if (denominationField.getSelectionModel().getSelectedItem() == null || denominationField.getSelectionModel().getSelectedItem().toString().length() == 0) {
             errorMessage += "No valid database!\n";
         }
 

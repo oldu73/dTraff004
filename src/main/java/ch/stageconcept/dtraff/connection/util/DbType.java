@@ -26,7 +26,7 @@ public enum DbType {
     private static final int MARIADB_POR = 3306;
 
     // MySQL
-    private static final String MYSQL_KEY = "mysql";
+    public static final String MYSQL_KEY = "mysql";
     private static final String MYSQL_DEN = "MySQL";
     private static final String MYSQL_DRI = "com.mysql.jdbc.Driver";
     private static final int MYSQL_POR = 3306;

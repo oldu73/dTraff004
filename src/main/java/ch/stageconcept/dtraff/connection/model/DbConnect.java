@@ -1,5 +1,7 @@
 package ch.stageconcept.dtraff.connection.model;
 
+import ch.stageconcept.dtraff.connection.util.DbDescriptor;
+import ch.stageconcept.dtraff.connection.util.DbType;
 import javafx.beans.property.*;
 
 import java.sql.Connection;
@@ -15,15 +17,17 @@ public class DbConnect {
     // Attributes
     // #####################################################################
 
-    private final StringProperty driver;
+    private final StringProperty name;  // Connection name
+    private final StringProperty denomination;  // End user representation, MySQL instead of key value, mysql
     private final StringProperty host;
     private final IntegerProperty port;
     private final StringProperty user;
     private final StringProperty password;
+    private final StringProperty driver;
+
     private final ObjectProperty<Connection> connection;
     private final ObjectProperty<ResultSet> resultSet;
 
-    //TODO Connection name field
     //TODO Server Type (MySQL, MariaDB, PostgreSQL)
     //TODO Save password option
     //TODO SSL
@@ -35,24 +39,38 @@ public class DbConnect {
      * Default constructor.
      */
     public DbConnect() {
-        this(null, null, 0, null, null);
+        DbDescriptor dbDescriptor = DbType.INSTANCE.getDbDescriptorHashMap().get(DbType.MYSQL_KEY);
+
+        this.name = new SimpleStringProperty(dbDescriptor.getName());
+        this.denomination = new SimpleStringProperty(dbDescriptor.getDenomination());
+        this.host = new SimpleStringProperty(dbDescriptor.getHost());
+        this.port = new SimpleIntegerProperty(dbDescriptor.getPort());
+        this.user = new SimpleStringProperty(dbDescriptor.getUser());
+        this.password = new SimpleStringProperty(dbDescriptor.getPassword());
+        this.driver = new SimpleStringProperty(dbDescriptor.getDriver());
+        connection = null;
+        resultSet = null;
     }
 
     /**
      * Constructor.
      *
-     * @param driver
+     * @param name
+     * @param denomination
      * @param host
      * @param port
      * @param user
      * @param password
+     * @param driver
      */
-    public DbConnect(String driver, String host, Integer port, String user, String password) {
-        this.driver = new SimpleStringProperty(driver);
+    public DbConnect(String name, String denomination, String host, Integer port, String user, String password, String driver) {
+        this.name = new SimpleStringProperty(name);
+        this.denomination = new SimpleStringProperty(denomination);
         this.host = new SimpleStringProperty(host);
         this.port = new SimpleIntegerProperty(port);
         this.user = new SimpleStringProperty(user);
         this.password = new SimpleStringProperty(password);
+        this.driver = new SimpleStringProperty(driver);
         connection = null;
         resultSet = null;
     }
@@ -62,6 +80,30 @@ public class DbConnect {
 
     // Getters and Setters
     // #####################################################################
+
+    public String getName() {
+        return name.get();
+    }
+
+    public StringProperty nameProperty() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name.set(name);
+    }
+
+    public String getDenomination() {
+        return denomination.get();
+    }
+
+    public StringProperty denominationProperty() {
+        return denomination;
+    }
+
+    public void setDenomination(String denomination) {
+        this.denomination.set(denomination);
+    }
 
     public Connection getConnection() {
         return connection.get();
