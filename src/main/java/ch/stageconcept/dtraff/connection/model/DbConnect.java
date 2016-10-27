@@ -17,6 +17,7 @@ public class DbConnect {
     // Attributes
     // #####################################################################
 
+    private final StringProperty key;   // Key value to retrieve corresponding DbDescriptor object in DbType HashMap
     private final StringProperty name;  // Connection name
     private final StringProperty denomination;  // End user representation, MySQL instead of key value, mysql
     private final StringProperty host;
@@ -28,7 +29,6 @@ public class DbConnect {
     private final ObjectProperty<Connection> connection;
     private final ObjectProperty<ResultSet> resultSet;
 
-    //TODO Server Type (MySQL, MariaDB, PostgreSQL)
     //TODO Save password option
     //TODO SSL
 
@@ -39,7 +39,11 @@ public class DbConnect {
      * Default constructor.
      */
     public DbConnect() {
-        DbDescriptor dbDescriptor = DbType.INSTANCE.getDbDescriptorHashMap().get(DbType.MYSQL_KEY);
+        String dbTypeKey = DbType.MYSQL_KEY;
+
+        DbDescriptor dbDescriptor = DbType.INSTANCE.getDbDescriptorHashMap().get(dbTypeKey);
+
+        this.key = new SimpleStringProperty(dbTypeKey);
 
         this.name = new SimpleStringProperty(dbDescriptor.getName());
         this.denomination = new SimpleStringProperty(dbDescriptor.getDenomination());
@@ -55,6 +59,7 @@ public class DbConnect {
     /**
      * Constructor.
      *
+     * @param key
      * @param name
      * @param denomination
      * @param host
@@ -63,7 +68,8 @@ public class DbConnect {
      * @param password
      * @param driver
      */
-    public DbConnect(String name, String denomination, String host, Integer port, String user, String password, String driver) {
+    public DbConnect(String key, String name, String denomination, String host, Integer port, String user, String password, String driver) {
+        this.key = new SimpleStringProperty(key);
         this.name = new SimpleStringProperty(name);
         this.denomination = new SimpleStringProperty(denomination);
         this.host = new SimpleStringProperty(host);
@@ -80,6 +86,18 @@ public class DbConnect {
 
     // Getters and Setters
     // #####################################################################
+
+    public String getKey() {
+        return key.get();
+    }
+
+    public StringProperty keyProperty() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key.set(key);
+    }
 
     public String getName() {
         return name.get();

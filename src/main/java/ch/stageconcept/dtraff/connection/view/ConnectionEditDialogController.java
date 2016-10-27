@@ -25,10 +25,8 @@ public class ConnectionEditDialogController {
 
     @FXML
     private ComboBox<DbDescriptor> denominationField;
-    //private ComboBox<String> denominationField;
 
     private ObservableList<DbDescriptor> denominationFieldData;
-    //private ObservableList<String> denominationFieldData;
 
     @FXML
     private TextField hostField;
@@ -58,11 +56,16 @@ public class ConnectionEditDialogController {
             Map.Entry mentry = (Map.Entry)dbTypeIterator.next();
             DbDescriptor dbDescriptor = (DbDescriptor)mentry.getValue();
             denominationFieldData.add(dbDescriptor);
-            //denominationFieldData.add(dbDescriptor.getDenomination());
         }
 
         //TODO Sort item alphabetically
         denominationField.setItems(denominationFieldData);
+
+        // Synchronize denomination and port fields
+        denominationField.setOnAction((event) -> {
+            DbDescriptor dbDescriptor = denominationField.getSelectionModel().getSelectedItem();
+            portField.setText(Integer.toString(dbDescriptor.getPort()));
+        });
     }
 
     /**
@@ -82,10 +85,8 @@ public class ConnectionEditDialogController {
     public void setDbConnect(DbConnect dbConnect) {
         this.dbConnect = dbConnect;
 
-        //TODO add listener on denomination field (or binding?) to synchronize port number
-
         nameField.setText(dbConnect.getName());
-        //TODO denominationField.getSelectionModel().select(dbConnect.getDenomination());
+        denominationField.getSelectionModel().select(DbType.INSTANCE.getDbDescriptorHashMap().get(dbConnect.getKey()));
         hostField.setText(dbConnect.getHost());
         portField.setText(Integer.toString(dbConnect.getPort()));
         userField.setText(dbConnect.getUser());
@@ -117,6 +118,10 @@ public class ConnectionEditDialogController {
     @FXML
     private void handleOk() {
         if (isInputValid()) {
+
+            //TODO dbConnect.setKey
+            //TODO dbConnect.setName
+            //TODO dbConnect.setDenomination
             //TODO dbConnect.setDriver
             dbConnect.setHost(hostField.getText());
             dbConnect.setPort(Integer.parseInt(portField.getText()));
