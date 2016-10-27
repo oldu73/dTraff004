@@ -36,7 +36,14 @@ public class DbDescriptor {
         this.driver = driver;
     }
 
-    // Getters ###
+    // Method ###
+
+    @Override
+    public String toString() {
+        return denomination;
+    }
+
+    // Getter ###
 
     public String getName() {
         return name;

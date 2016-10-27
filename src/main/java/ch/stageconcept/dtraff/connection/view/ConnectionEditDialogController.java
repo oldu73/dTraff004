@@ -24,9 +24,11 @@ public class ConnectionEditDialogController {
     private TextField nameField;
 
     @FXML
-    private ComboBox<String> denominationField;
+    private ComboBox<DbDescriptor> denominationField;
+    //private ComboBox<String> denominationField;
 
-    private ObservableList<String> denominationFieldData;
+    private ObservableList<DbDescriptor> denominationFieldData;
+    //private ObservableList<String> denominationFieldData;
 
     @FXML
     private TextField hostField;
@@ -55,9 +57,11 @@ public class ConnectionEditDialogController {
         while(dbTypeIterator.hasNext()) {
             Map.Entry mentry = (Map.Entry)dbTypeIterator.next();
             DbDescriptor dbDescriptor = (DbDescriptor)mentry.getValue();
-            denominationFieldData.add(dbDescriptor.getDenomination());
+            denominationFieldData.add(dbDescriptor);
+            //denominationFieldData.add(dbDescriptor.getDenomination());
         }
 
+        //TODO Sort item alphabetically
         denominationField.setItems(denominationFieldData);
     }
 
@@ -81,7 +85,7 @@ public class ConnectionEditDialogController {
         //TODO add listener on denomination field (or binding?) to synchronize port number
 
         nameField.setText(dbConnect.getName());
-        denominationField.getSelectionModel().select(dbConnect.getDenomination());
+        //TODO denominationField.getSelectionModel().select(dbConnect.getDenomination());
         hostField.setText(dbConnect.getHost());
         portField.setText(Integer.toString(dbConnect.getPort()));
         userField.setText(dbConnect.getUser());
@@ -133,14 +137,19 @@ public class ConnectionEditDialogController {
     }
 
     /**
-     * Validates the user input in the text fields.
+     * Validates the user input in the fields.
      *
      * @return true if the input is valid
      */
     private boolean isInputValid() {
         String errorMessage = "";
 
-        if (denominationField.getSelectionModel().getSelectedItem() == null || denominationField.getSelectionModel().getSelectedItem().toString().length() == 0) {
+        if (nameField.getText() == null || nameField.getText().length() == 0) {
+            errorMessage += "No valid name!\n";
+        }
+
+        if (denominationField.getSelectionModel().getSelectedItem() == null ||
+                denominationField.getSelectionModel().getSelectedItem().toString().length() == 0) {
             errorMessage += "No valid database!\n";
         }
 
