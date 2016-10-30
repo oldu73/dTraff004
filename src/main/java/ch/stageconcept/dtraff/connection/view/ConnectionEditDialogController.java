@@ -106,9 +106,28 @@ public class ConnectionEditDialogController {
      */
     @FXML
     private void handleTestConnection() {
-        if (isInputValid()) {
+        if (setDbConnectValues()) {
             System.out.println("test connection..");
         }
+    }
+
+    /**
+     * Utility method to set attributes of dbConnect object
+     * from edit dialog form if fields contain valid values.
+     */
+    private boolean setDbConnectValues() {
+        if (isInputValid()) {
+            dbConnect.setKey(denominationField.getSelectionModel().getSelectedItem().getKey());
+            dbConnect.setName(nameField.getText());
+            dbConnect.setDenomination(denominationField.getSelectionModel().getSelectedItem().getDenomination());
+            dbConnect.setHost(hostField.getText());
+            dbConnect.setPort(Integer.parseInt(portField.getText()));
+            dbConnect.setUser(userField.getText());
+            dbConnect.setPassword(passwordField.getText());
+            dbConnect.setDriver(denominationField.getSelectionModel().getSelectedItem().getDriver());
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -116,17 +135,7 @@ public class ConnectionEditDialogController {
      */
     @FXML
     private void handleOk() {
-        if (isInputValid()) {
-
-            //TODO dbConnect.setKey
-            //TODO dbConnect.setName
-            //TODO dbConnect.setDenomination
-            //TODO dbConnect.setDriver
-            dbConnect.setHost(hostField.getText());
-            dbConnect.setPort(Integer.parseInt(portField.getText()));
-            dbConnect.setUser(userField.getText());
-            dbConnect.setPassword(passwordField.getText());
-
+        if (setDbConnectValues()) {
             okClicked = true;
             dialogStage.close();
         }

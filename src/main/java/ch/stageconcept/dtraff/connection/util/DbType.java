@@ -41,15 +41,15 @@ public enum DbType {
     private Map<String, DbDescriptor> dbDescriptorMap;
 
     private DbType() {
-        DbDescriptor mariaDb = new DbDescriptor(DEFAULT_NAM, MARIADB_DEN, DEFAULT_HOS, MARIADB_POR, DEFAULT_USE, DEFAULT_PAS, MARIADB_DRI);
-        DbDescriptor mySql = new DbDescriptor(DEFAULT_NAM, MYSQL_DEN, DEFAULT_HOS, MYSQL_POR, DEFAULT_USE, DEFAULT_PAS, MYSQL_DRI);
-        DbDescriptor postgreSql = new DbDescriptor(DEFAULT_NAM, POSTGRESQL_DEN, DEFAULT_HOS, POSTGRESQL_POR, DEFAULT_USE, DEFAULT_PAS, POSTGRESQL_DRI);
+        DbDescriptor mariaDb = new DbDescriptor(MARIADB_KEY, DEFAULT_NAM, MARIADB_DEN, DEFAULT_HOS, MARIADB_POR, DEFAULT_USE, DEFAULT_PAS, MARIADB_DRI);
+        DbDescriptor mySql = new DbDescriptor(MYSQL_KEY, DEFAULT_NAM, MYSQL_DEN, DEFAULT_HOS, MYSQL_POR, DEFAULT_USE, DEFAULT_PAS, MYSQL_DRI);
+        DbDescriptor postgreSql = new DbDescriptor(POSTGRESQL_KEY, DEFAULT_NAM, POSTGRESQL_DEN, DEFAULT_HOS, POSTGRESQL_POR, DEFAULT_USE, DEFAULT_PAS, POSTGRESQL_DRI);
 
         dbDescriptorHashMap = new HashMap<>();
 
-        dbDescriptorHashMap.put(MARIADB_KEY, mariaDb);
-        dbDescriptorHashMap.put(MYSQL_KEY, mySql);
-        dbDescriptorHashMap.put(POSTGRESQL_KEY, postgreSql);
+        dbDescriptorHashMap.put(mariaDb.getKey(), mariaDb);
+        dbDescriptorHashMap.put(mySql.getKey(), mySql);
+        dbDescriptorHashMap.put(postgreSql.getKey(), postgreSql);
 
         // Sort HashMap by key
         // SRC: https://www.mkyong.com/java/how-to-sort-a-map-in-java/
