@@ -26,6 +26,8 @@ public class DbConnect {
     private final StringProperty password;
     private final StringProperty driver;
 
+    private final StringProperty baseUrl;
+
     private final ObjectProperty<Connection> connection;
     private final ObjectProperty<ResultSet> resultSet;
 
@@ -55,6 +57,9 @@ public class DbConnect {
         this.user = new SimpleStringProperty(dbDescriptor.getUser());
         this.password = new SimpleStringProperty(dbDescriptor.getPassword());
         this.driver = new SimpleStringProperty(dbDescriptor.getDriver());
+
+        this.baseUrl = null;
+
         connection = null;
         resultSet = null;
     }
@@ -70,8 +75,9 @@ public class DbConnect {
      * @param user
      * @param password
      * @param driver
+     * @param baseUrl
      */
-    public DbConnect(String key, String name, String denomination, String host, Integer port, String user, String password, String driver) {
+    public DbConnect(String key, String name, String denomination, String host, Integer port, String user, String password, String driver, String baseUrl) {
         this.key = new SimpleStringProperty(key);
         this.name = new SimpleStringProperty(name);
         this.denomination = new SimpleStringProperty(denomination);
@@ -80,6 +86,9 @@ public class DbConnect {
         this.user = new SimpleStringProperty(user);
         this.password = new SimpleStringProperty(password);
         this.driver = new SimpleStringProperty(driver);
+
+        this.baseUrl = new SimpleStringProperty(baseUrl);
+
         connection = null;
         resultSet = null;
     }
@@ -89,6 +98,18 @@ public class DbConnect {
 
     // Getters and Setters
     // #####################################################################
+
+    public String getBaseUrl() {
+        return baseUrl.get();
+    }
+
+    public StringProperty baseUrlProperty() {
+        return baseUrl;
+    }
+
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl.set(baseUrl);
+    }
 
     public String getKey() {
         return key.get();

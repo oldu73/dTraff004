@@ -1,11 +1,13 @@
 package ch.stageconcept.dtraff.connection.util;
 
+import ch.stageconcept.dtraff.connection.model.DbConnect;
+
 /**
  * Database description fields.
  *
  * @author Olivier Durand
  */
-public class DbDescriptor {
+public abstract class DbDescriptor {
 
     private final String key;
     private final String name;  // Connection name
@@ -15,6 +17,16 @@ public class DbDescriptor {
     private final String user;
     private final String password;
     private final String driver;
+
+    // Constructors
+    // #####################################################################
+
+    /**
+     * Default constructor.
+     */
+    public DbDescriptor() {
+        this(null, null, null, null, 0, null, null, null);
+    }
 
     /**
      * Constructor.
@@ -38,14 +50,17 @@ public class DbDescriptor {
         this.password = password;
         this.driver = driver;
 
+        /* The most common approach to register a driver is to use Java's Class.forName() method,
+        to dynamically load the driver's class file into memory, which automatically registers it.
+        This method is preferable because it allows you to make the driver registration configurable and portable.
+
+        SRC: https://www.tutorialspoint.com/jdbc/jdbc-db-connections.htm
+        */
         try {
-            Class.forName(driver).newInstance();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            Class.forName(driver);
+        }
+        catch(ClassNotFoundException ex) {
+            System.out.println("Error: unable to load driver class!");
         }
     }
 
@@ -55,6 +70,14 @@ public class DbDescriptor {
     public String toString() {
         return denomination;
     }
+
+    /**
+     * Build base URL in order to establish database
+     * connection (e.g. jdbc:mysql://127.0.0.1 for MySQL)
+     *
+     * @param dbConnect
+     */
+    public abstract String getBaseUrl(DbConnect dbConnect);
 
     // Getter ###
 
