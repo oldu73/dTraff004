@@ -108,6 +108,9 @@ public class ConnectionEditDialogController {
     private void handleTestConnection() {
         if (setDbConnectValues()) {
             System.out.println("test connection..");
+
+            //TODO Establish connection in DbConnect class
+
         }
     }
 
@@ -117,14 +120,20 @@ public class ConnectionEditDialogController {
      */
     private boolean setDbConnectValues() {
         if (isInputValid()) {
-            dbConnect.setKey(denominationField.getSelectionModel().getSelectedItem().getKey());
+
+            DbDescriptor dbDescriptor = denominationField.getSelectionModel().getSelectedItem();
+
+            dbConnect.setKey(dbDescriptor.getKey());
             dbConnect.setName(nameField.getText());
-            dbConnect.setDenomination(denominationField.getSelectionModel().getSelectedItem().getDenomination());
+            dbConnect.setDenomination(dbDescriptor.getDenomination());
             dbConnect.setHost(hostField.getText());
             dbConnect.setPort(Integer.parseInt(portField.getText()));
             dbConnect.setUser(userField.getText());
             dbConnect.setPassword(passwordField.getText());
-            dbConnect.setDriver(denominationField.getSelectionModel().getSelectedItem().getDriver());
+            dbConnect.setDriver(dbDescriptor.getDriver());
+
+            dbConnect.setBaseUrl(dbDescriptor.getBaseUrl(dbConnect));
+
             return true;
         }
         return false;

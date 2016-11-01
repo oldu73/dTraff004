@@ -7,7 +7,7 @@ import ch.stageconcept.dtraff.connection.model.DbConnect;
  *
  * @author Olivier Durand
  */
-public abstract class DbDescriptor {
+public class DbDescriptor {
 
     private final String key;
     private final String name;  // Connection name
@@ -72,12 +72,14 @@ public abstract class DbDescriptor {
     }
 
     /**
-     * Build base URL in order to establish database
-     * connection (e.g. jdbc:mysql://127.0.0.1 for MySQL)
+     * Return base URL in order to establish database
+     * connection (default pattern is MySQL (MariaDB), c.f. BaseUrl "enum" class)
      *
      * @param dbConnect
      */
-    public abstract String getBaseUrl(DbConnect dbConnect);
+    public String getBaseUrl(DbConnect dbConnect) {
+        return BaseUrl.INSTANCE.getBaseUrl(dbConnect);
+    }
 
     // Getter ###
 

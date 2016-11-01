@@ -41,8 +41,8 @@ public enum DbType {
     private Map<String, DbDescriptor> dbDescriptorMap;
 
     private DbType() {
-        DbDescriptor mariaDb = new DbDescriptorMariaDb(MARIADB_KEY, DEFAULT_NAM, MARIADB_DEN, DEFAULT_HOS, MARIADB_POR, DEFAULT_USE, DEFAULT_PAS, MARIADB_DRI);
-        DbDescriptor mySql = new DbDescriptorMySql(MYSQL_KEY, DEFAULT_NAM, MYSQL_DEN, DEFAULT_HOS, MYSQL_POR, DEFAULT_USE, DEFAULT_PAS, MYSQL_DRI);
+        DbDescriptor mariaDb = new DbDescriptor(MARIADB_KEY, DEFAULT_NAM, MARIADB_DEN, DEFAULT_HOS, MARIADB_POR, DEFAULT_USE, DEFAULT_PAS, MARIADB_DRI);
+        DbDescriptor mySql = new DbDescriptor(MYSQL_KEY, DEFAULT_NAM, MYSQL_DEN, DEFAULT_HOS, MYSQL_POR, DEFAULT_USE, DEFAULT_PAS, MYSQL_DRI);
         DbDescriptor postgreSql = new DbDescriptorPostgreSql(POSTGRESQL_KEY, DEFAULT_NAM, POSTGRESQL_DEN, DEFAULT_HOS, POSTGRESQL_POR, DEFAULT_USE, DEFAULT_PAS, POSTGRESQL_DRI);
 
         dbDescriptorHashMap = new HashMap<>();

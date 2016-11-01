@@ -58,7 +58,7 @@ public class DbConnect {
         this.password = new SimpleStringProperty(dbDescriptor.getPassword());
         this.driver = new SimpleStringProperty(dbDescriptor.getDriver());
 
-        this.baseUrl = null;
+        this.baseUrl = new SimpleStringProperty();
 
         connection = null;
         resultSet = null;
@@ -95,6 +95,8 @@ public class DbConnect {
 
     // Methods
     // #####################################################################
+
+    //TODO Establish connection
 
     // Getters and Setters
     // #####################################################################

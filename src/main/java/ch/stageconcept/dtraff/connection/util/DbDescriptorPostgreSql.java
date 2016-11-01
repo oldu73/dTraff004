@@ -3,7 +3,7 @@ package ch.stageconcept.dtraff.connection.util;
 import ch.stageconcept.dtraff.connection.model.DbConnect;
 
 /**
- * PostgreSQL database description fields.
+ * PostgreSQL database description specificity.
  *
  * @author Olivier Durand
  */
@@ -29,13 +29,12 @@ public class DbDescriptorPostgreSql extends DbDescriptor {
 
     /**
      * Build base URL in order to establish database
-     * connection, PostgreSQL = "jdbc:postgresql://127.0.0.1/user:port"
+     * connection, PostgreSQL = "jdbc:postgresql://127.0.0.1:port/user"
      *
      * @param dbConnect
      */
     @Override
     public String getBaseUrl(DbConnect dbConnect) {
-
-        return null;
+        return BaseUrl.INSTANCE.getBaseUrl(dbConnect) + "/" + dbConnect.getUser();
     }
 }
