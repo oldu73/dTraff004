@@ -5,7 +5,9 @@ import ch.stageconcept.dtraff.connection.util.DbType;
 import javafx.beans.property.*;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * Model class for a server connection.
@@ -16,6 +18,8 @@ public class DbConnect {
 
     // Attributes
     // #####################################################################
+
+    private static final int VALID_CONNECTION_CHECK_TIMEOUT_SECONDS = 5;
 
     private final StringProperty key;   // Key value to retrieve corresponding DbDescriptor object in DbType HashMap
     private final StringProperty name;  // Connection name
@@ -60,8 +64,8 @@ public class DbConnect {
 
         this.baseUrl = new SimpleStringProperty();
 
-        connection = null;
-        resultSet = null;
+        this.connection = new SimpleObjectProperty<>();
+        this.resultSet = new SimpleObjectProperty<>();
     }
 
     /**
@@ -75,9 +79,8 @@ public class DbConnect {
      * @param user
      * @param password
      * @param driver
-     * @param baseUrl
      */
-    public DbConnect(String key, String name, String denomination, String host, Integer port, String user, String password, String driver, String baseUrl) {
+    public DbConnect(String key, String name, String denomination, String host, Integer port, String user, String password, String driver) {
         this.key = new SimpleStringProperty(key);
         this.name = new SimpleStringProperty(name);
         this.denomination = new SimpleStringProperty(denomination);
@@ -87,16 +90,58 @@ public class DbConnect {
         this.password = new SimpleStringProperty(password);
         this.driver = new SimpleStringProperty(driver);
 
-        this.baseUrl = new SimpleStringProperty(baseUrl);
+        this.baseUrl = new SimpleStringProperty();
 
-        connection = null;
-        resultSet = null;
+        this.connection = new SimpleObjectProperty<>();
+        this.resultSet = new SimpleObjectProperty<>();
     }
 
     // Methods
     // #####################################################################
 
-    //TODO Establish connection
+    /**
+     * Establish database connection.
+     */
+    public void doConnect() {
+
+        //TODO Put code in runnable task
+
+        try {
+            if (getConnection() == null || getConnection().isClosed()) {
+                setConnection(DriverManager.getConnection(getBaseUrl(), getUser(), getPassword()));
+
+                // http://stackoverflow.com/questions/7764671/java-jdbc-connection-status
+                if (getConnection().isValid(VALID_CONNECTION_CHECK_TIMEOUT_SECONDS)) {
+                    System.out.println("Connection successfully established..");
+                } else {
+                    System.out.println("Connection fail (" + VALID_CONNECTION_CHECK_TIMEOUT_SECONDS + " seconds)");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Unable to establish connection!");
+
+            //e.printStackTrace();
+        }
+    }
+
+    /**
+     * Close database connection.
+     */
+    public void undoConnect() {
+
+        //TODO Put code in runnable task
+
+        try {
+            if (getConnection() != null && !getConnection().isClosed()) {
+                getConnection().close();
+                System.out.println("Connection closed!");
+            }
+        } catch (SQLException e) {
+            System.out.println("Unable to close connection!");
+
+            //e.printStackTrace();
+        }
+    }
 
     // Getters and Setters
     // #####################################################################

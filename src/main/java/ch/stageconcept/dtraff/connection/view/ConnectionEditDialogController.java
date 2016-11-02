@@ -7,6 +7,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
 import java.util.Iterator;
@@ -37,6 +39,15 @@ public class ConnectionEditDialogController {
     @FXML
     private PasswordField passwordField;
 
+    @FXML
+    private Button testConnectionButton;
+
+    @FXML
+    private Button okButton;
+
+    @FXML
+    private Button cancelButton;
+
     private Stage dialogStage;
     private DbConnect dbConnect;
     private boolean okClicked = false;
@@ -64,6 +75,32 @@ public class ConnectionEditDialogController {
         denominationField.setOnAction((event) -> {
             DbDescriptor dbDescriptor = denominationField.getSelectionModel().getSelectedItem();
             portField.setText(Integer.toString(dbDescriptor.getPort()));
+        });
+
+        // Test Connection button, Enter key pressed event handler
+        testConnectionButton.addEventHandler(KeyEvent.KEY_PRESSED, ev -> {
+            if (ev.getCode() == KeyCode.ENTER) {
+                testConnectionButton.fire();
+                ev.consume();
+            }
+        });
+
+        //TODO check if there is a solution to remove code redundancy on event handler, Test OK Cancel buttons = same code
+
+        // Ok button, Enter key pressed event handler
+        okButton.addEventHandler(KeyEvent.KEY_PRESSED, ev -> {
+            if (ev.getCode() == KeyCode.ENTER) {
+                okButton.fire();
+                ev.consume();
+            }
+        });
+
+        // Cancel button, Enter key pressed event handler
+        cancelButton.addEventHandler(KeyEvent.KEY_PRESSED, ev -> {
+            if (ev.getCode() == KeyCode.ENTER) {
+                cancelButton.fire();
+                ev.consume();
+            }
         });
     }
 
@@ -109,8 +146,8 @@ public class ConnectionEditDialogController {
         if (setDbConnectValues()) {
             System.out.println("test connection..");
 
-            //TODO Establish connection in DbConnect class
-
+            dbConnect.doConnect();
+            dbConnect.undoConnect();
         }
     }
 
