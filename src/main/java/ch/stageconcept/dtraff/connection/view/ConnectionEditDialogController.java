@@ -5,6 +5,7 @@ import ch.stageconcept.dtraff.connection.util.DbDescriptor;
 import ch.stageconcept.dtraff.connection.util.DbType;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
@@ -41,6 +42,9 @@ public class ConnectionEditDialogController {
 
     @FXML
     private Button testConnectionButton;
+
+    @FXML
+    private ProgressIndicator testConnectionProgressIndicator;
 
     @FXML
     private Button okButton;
@@ -86,6 +90,7 @@ public class ConnectionEditDialogController {
         });
 
         //TODO check if there is a solution to remove code redundancy on event handler, Test OK Cancel buttons = same code
+        // Note on potential solution: - Manage key pressed at layout level on focused element (button)
 
         // Ok button, Enter key pressed event handler
         okButton.addEventHandler(KeyEvent.KEY_PRESSED, ev -> {
@@ -102,6 +107,9 @@ public class ConnectionEditDialogController {
                 ev.consume();
             }
         });
+
+        // Initial state of testConnectionProgressIndicator is hidden
+        testConnectionProgressIndicator.setVisible(false);
     }
 
     /**
@@ -146,8 +154,25 @@ public class ConnectionEditDialogController {
         if (setDbConnectValues()) {
             System.out.println("test connection..");
 
-            dbConnect.doConnect();
-            dbConnect.undoConnect();
+            Task task = new Task<Void>() {
+                @Override public Void call() {
+                    //Pause for 1 seconds to let progress indicator enough time to appear
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    dbConnect.doConnect();
+                    dbConnect.undoConnect();
+                    return null;
+                }
+            };
+
+            // Bind Test Connection button enable/disable and progress indicator visibility with above task running property
+            testConnectionButton.disableProperty().bind(task.runningProperty());
+            testConnectionProgressIndicator.visibleProperty().bind(task.runningProperty());
+
+            new Thread(task).start();
         }
     }
 

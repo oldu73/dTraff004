@@ -5,6 +5,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -43,10 +44,11 @@
       </GridPane>
       <ButtonBar layoutX="386.0" layoutY="346.0" prefHeight="40.0" prefWidth="353.0" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0">
         <buttons>
-            <Button fx:id="testConnectionButton" mnemonicParsing="false" onAction="#handleTestConnection" text="Test Connection" />
           <Button fx:id="okButton" mnemonicParsing="false" onAction="#handleOk" text="OK" />
             <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#handleCancel" text="Cancel" />
         </buttons>
       </ButtonBar>
+      <Button fx:id="testConnectionButton" layoutX="14.0" layoutY="354.0" mnemonicParsing="false" onAction="#handleTestConnection" text="Test Connection" AnchorPane.bottomAnchor="21.0" AnchorPane.leftAnchor="14.0" />
+      <ProgressIndicator fx:id="testConnectionProgressIndicator" layoutX="122.0" layoutY="354.0" prefHeight="25.0" prefWidth="25.0" AnchorPane.bottomAnchor="21.0" />
    </children>
 </AnchorPane>

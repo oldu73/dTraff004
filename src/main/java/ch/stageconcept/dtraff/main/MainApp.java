@@ -116,6 +116,9 @@ public class MainApp extends Application {
             controller.setDialogStage(dialogStage);
             controller.setDbConnect(dbConnect);
 
+            // Disable resize
+            dialogStage.setResizable(false);
+
             // Show the dialog and wait until the user closes it
             dialogStage.showAndWait();
 
