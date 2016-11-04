@@ -103,9 +103,6 @@ public class DbConnect {
      * Establish database connection.
      */
     public void doConnect() {
-
-        //TODO Put code in runnable task
-
         try {
             if (getConnection() == null || getConnection().isClosed()) {
                 setConnection(DriverManager.getConnection(getBaseUrl(), getUser(), getPassword()));
@@ -128,9 +125,6 @@ public class DbConnect {
      * Close database connection.
      */
     public void undoConnect() {
-
-        //TODO Put code in runnable task
-
         try {
             if (getConnection() != null && !getConnection().isClosed()) {
                 getConnection().close();
