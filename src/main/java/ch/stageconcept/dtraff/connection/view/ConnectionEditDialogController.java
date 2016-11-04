@@ -47,6 +47,9 @@ public class ConnectionEditDialogController {
     private ProgressIndicator testConnectionProgressIndicator;
 
     @FXML
+    private Label testConnectionLabel;
+
+    @FXML
     private Button okButton;
 
     @FXML
@@ -152,7 +155,7 @@ public class ConnectionEditDialogController {
     @FXML
     private void handleTestConnection() {
         if (setDbConnectValues()) {
-            System.out.println("test connection..");
+            testConnectionLabel.setText("Try to connect..");
 
             Task task = new Task<Void>() {
                 @Override public Void call() {
