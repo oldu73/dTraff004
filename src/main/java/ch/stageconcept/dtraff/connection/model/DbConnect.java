@@ -102,20 +102,26 @@ public class DbConnect {
     /**
      * Establish database connection.
      */
-    public void doConnect() {
+    public void doConnect(StringProperty connectionStatus) {
+
+        connectionStatus.set("Try to connect..");
+
         try {
             if (getConnection() == null || getConnection().isClosed()) {
                 setConnection(DriverManager.getConnection(getBaseUrl(), getUser(), getPassword()));
 
                 // http://stackoverflow.com/questions/7764671/java-jdbc-connection-status
                 if (getConnection().isValid(VALID_CONNECTION_CHECK_TIMEOUT_SECONDS)) {
-                    System.out.println("Connection successfully established..");
+                    //System.out.println("Connection successfully established..");
+                    connectionStatus.set("Connection successfully established..");
                 } else {
-                    System.out.println("Connection fail (" + VALID_CONNECTION_CHECK_TIMEOUT_SECONDS + " seconds)");
+                    //System.out.println("Connection fail (" + VALID_CONNECTION_CHECK_TIMEOUT_SECONDS + " seconds)");
+                    connectionStatus.set("Connection fail (" + VALID_CONNECTION_CHECK_TIMEOUT_SECONDS + " seconds)");
                 }
             }
         } catch (SQLException e) {
-            System.out.println("Unable to establish connection!");
+            //System.out.println("Unable to establish connection!");
+            connectionStatus.set("Unable to establish connection!");
 
             //e.printStackTrace();
         }

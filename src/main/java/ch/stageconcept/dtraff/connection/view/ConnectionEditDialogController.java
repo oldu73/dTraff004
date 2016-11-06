@@ -3,6 +3,11 @@ package ch.stageconcept.dtraff.connection.view;
 import ch.stageconcept.dtraff.connection.model.DbConnect;
 import ch.stageconcept.dtraff.connection.util.DbDescriptor;
 import ch.stageconcept.dtraff.connection.util.DbType;
+import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -12,6 +17,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -49,6 +55,8 @@ public class ConnectionEditDialogController {
     @FXML
     private Label testConnectionLabel;
 
+    private StringProperty testConnectionStatus;
+
     @FXML
     private Button okButton;
 
@@ -58,6 +66,9 @@ public class ConnectionEditDialogController {
     private Stage dialogStage;
     private DbConnect dbConnect;
     private boolean okClicked = false;
+
+    //TODO Manage case where every fields in the form are correct except the database type
+    //click on Test Connection button fall in an infinite loop
 
     /**
      * Initializes the controller class. This method is automatically called
@@ -113,6 +124,10 @@ public class ConnectionEditDialogController {
 
         // Initial state of testConnectionProgressIndicator is hidden
         testConnectionProgressIndicator.setVisible(false);
+
+        //TODO add comment to code below
+        testConnectionStatus = new SimpleStringProperty();
+        //testConnectionStatus.addListener((o, oldVal, newVal) -> testConnectionLabel.setText(newVal));
     }
 
     /**
@@ -155,7 +170,7 @@ public class ConnectionEditDialogController {
     @FXML
     private void handleTestConnection() {
         if (setDbConnectValues()) {
-            testConnectionLabel.setText("Try to connect..");
+            //testConnectionLabel.setText("Try to connect..");
 
             Task task = new Task<Void>() {
                 @Override public Void call() {
@@ -165,7 +180,12 @@ public class ConnectionEditDialogController {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    dbConnect.doConnect();
+                    //dbConnect.doConnect(testConnectionStatus);
+
+                    Platform.runLater(() -> {
+                        dbConnect.doConnect(testConnectionStatus);
+                    });
+
                     dbConnect.undoConnect();
                     return null;
                 }
@@ -174,6 +194,8 @@ public class ConnectionEditDialogController {
             // Bind Test Connection button enable/disable and progress indicator visibility with above task running property
             testConnectionButton.disableProperty().bind(task.runningProperty());
             testConnectionProgressIndicator.visibleProperty().bind(task.runningProperty());
+
+            testConnectionLabel.textProperty().bind(testConnectionStatus);
 
             new Thread(task).start();
         }
