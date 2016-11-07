@@ -101,46 +101,28 @@ public class DbConnect {
 
     /**
      * Establish database connection.
+     * @return true if the connection is OK
      */
-    public void doConnect(StringProperty connectionStatus) {
+    public boolean doConnect() throws SQLException {
 
-        connectionStatus.set("Try to connect..");
-
-        try {
             if (getConnection() == null || getConnection().isClosed()) {
                 setConnection(DriverManager.getConnection(getBaseUrl(), getUser(), getPassword()));
 
-                // http://stackoverflow.com/questions/7764671/java-jdbc-connection-status
-                if (getConnection().isValid(VALID_CONNECTION_CHECK_TIMEOUT_SECONDS)) {
-                    //System.out.println("Connection successfully established..");
-                    connectionStatus.set("Connection successfully established..");
-                } else {
-                    //System.out.println("Connection fail (" + VALID_CONNECTION_CHECK_TIMEOUT_SECONDS + " seconds)");
-                    connectionStatus.set("Connection fail (" + VALID_CONNECTION_CHECK_TIMEOUT_SECONDS + " seconds)");
-                }
+                // SRC: http://stackoverflow.com/questions/7764671/java-jdbc-connection-status
+                return getConnection().isValid(VALID_CONNECTION_CHECK_TIMEOUT_SECONDS);
             }
-        } catch (SQLException e) {
-            //System.out.println("Unable to establish connection!");
-            connectionStatus.set("Unable to establish connection!");
 
-            //e.printStackTrace();
-        }
+        return false;
     }
 
     /**
      * Close database connection.
      */
-    public void undoConnect() {
-        try {
+    public void undoConnect() throws SQLException {
             if (getConnection() != null && !getConnection().isClosed()) {
                 getConnection().close();
-                System.out.println("Connection closed!");
+                //System.out.println("Connection closed!");
             }
-        } catch (SQLException e) {
-            System.out.println("Unable to close connection!");
-
-            //e.printStackTrace();
-        }
     }
 
     // Getters and Setters

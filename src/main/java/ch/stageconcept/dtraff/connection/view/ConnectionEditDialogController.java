@@ -11,16 +11,21 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Dialog to edit details of a dbConnect.
@@ -55,8 +60,6 @@ public class ConnectionEditDialogController {
     @FXML
     private Label testConnectionLabel;
 
-    private StringProperty testConnectionStatus;
-
     @FXML
     private Button okButton;
 
@@ -66,9 +69,6 @@ public class ConnectionEditDialogController {
     private Stage dialogStage;
     private DbConnect dbConnect;
     private boolean okClicked = false;
-
-    //TODO Manage case where every fields in the form are correct except the database type
-    //click on Test Connection button fall in an infinite loop
 
     /**
      * Initializes the controller class. This method is automatically called
@@ -124,10 +124,6 @@ public class ConnectionEditDialogController {
 
         // Initial state of testConnectionProgressIndicator is hidden
         testConnectionProgressIndicator.setVisible(false);
-
-        //TODO add comment to code below
-        testConnectionStatus = new SimpleStringProperty();
-        //testConnectionStatus.addListener((o, oldVal, newVal) -> testConnectionLabel.setText(newVal));
     }
 
     /**
@@ -170,34 +166,78 @@ public class ConnectionEditDialogController {
     @FXML
     private void handleTestConnection() {
         if (setDbConnectValues()) {
-            //testConnectionLabel.setText("Try to connect..");
 
-            Task task = new Task<Void>() {
-                @Override public Void call() {
+            Task<Boolean> task = new Task<Boolean>() {
+                @Override public Boolean call() throws SQLException {
+
+                    // updateMessage("Try to connect..");
+
                     //Pause for 1 seconds to let progress indicator enough time to appear
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    //dbConnect.doConnect(testConnectionStatus);
 
-                    Platform.runLater(() -> {
-                        dbConnect.doConnect(testConnectionStatus);
-                    });
+                    if (dbConnect.doConnect()) {
+                        // updateMessage("Connection successfully established..");
+                        dbConnect.undoConnect();
+                        return Boolean.TRUE;
+                    } /* else {
+                        updateMessage("Unable to establish connection!");
+                    } */
 
-                    dbConnect.undoConnect();
-                    return null;
+                    return Boolean.FALSE;
                 }
             };
 
-            // Bind Test Connection button enable/disable and progress indicator visibility with above task running property
+            // Bind Test Connection button enable/disable and progress indicator visibility
+            // with above task running property
             testConnectionButton.disableProperty().bind(task.runningProperty());
             testConnectionProgressIndicator.visibleProperty().bind(task.runningProperty());
 
-            testConnectionLabel.textProperty().bind(testConnectionStatus);
+            // If above commented updateMessage in task is used,
+            // bind Test Connection label with message property
+            //testConnectionLabel.textProperty().bind(task.messageProperty());
 
-            new Thread(task).start();
+            task.setOnRunning(t -> {
+                testConnectionLabel.setText("Try to connect..");
+                testConnectionLabel.setTextFill(Color.BLACK);
+            });
+
+            // SRC: http://stackoverflow.com/questions/13935366/javafx-concurrent-task-setting-state
+            task.setOnSucceeded(t -> {
+                // This handler will be called if Task successfully executed code
+                // disregarding result of login operation
+
+                // and here we act according to result of code
+                if (task.getValue()) {
+                    // Successful login
+                    testConnectionLabel.setText("Connection successfully established..");
+                    testConnectionLabel.setTextFill(Color.GREEN);
+                } /* Unnecessary because exception thrown in case of bad parameters -> task.setOnFailed
+                else {
+                    // Unsuccessful login
+                    testConnectionLabel.setText("Unable to establish connection!");
+                    testConnectionLabel.setTextFill(Color.RED);
+                }
+                */
+            });
+
+            task.setOnFailed(new EventHandler<WorkerStateEvent>() {
+                @Override
+                public void handle(WorkerStateEvent t) {
+                    // This handler will be called if exception occurred during your task execution
+                    // E.g. network or db connection exceptions
+                    testConnectionLabel.setText("Unable to establish connection!");
+                    testConnectionLabel.setTextFill(Color.RED);
+                }
+            });
+
+            // Launch task..
+            Thread th = new Thread(task);
+            th.setDaemon(true);
+            th.start();
         }
     }
 
