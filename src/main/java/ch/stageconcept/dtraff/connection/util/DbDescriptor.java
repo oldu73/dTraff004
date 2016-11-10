@@ -1,6 +1,7 @@
 package ch.stageconcept.dtraff.connection.util;
 
 import ch.stageconcept.dtraff.connection.model.DbConnect;
+import javafx.scene.image.ImageView;
 
 /**
  * Database description fields.
@@ -18,6 +19,8 @@ public class DbDescriptor {
     private final String password;
     private final String driver;
 
+    private final String icon;
+
     // Constructors
     // #####################################################################
 
@@ -25,7 +28,7 @@ public class DbDescriptor {
      * Default constructor.
      */
     public DbDescriptor() {
-        this(null, null, null, null, 0, null, null, null);
+        this(null, null, null, null, 0, null, null, null, null);
     }
 
     /**
@@ -39,8 +42,9 @@ public class DbDescriptor {
      * @param user
      * @param password
      * @param driver
+     * @param icon
      */
-    public DbDescriptor(String key, String name, String denomination, String host, int port, String user, String password, String driver) {
+    public DbDescriptor(String key, String name, String denomination, String host, int port, String user, String password, String driver, String icon) {
         this.key = key;
         this.name = name;
         this.denomination = denomination;
@@ -49,6 +53,8 @@ public class DbDescriptor {
         this.user = user;
         this.password = password;
         this.driver = driver;
+
+        this.icon = icon;
 
         /* The most common approach to register a driver is to use Java's Class.forName() method,
         to dynamically load the driver's class file into memory, which automatically registers it.
@@ -82,6 +88,10 @@ public class DbDescriptor {
     }
 
     // Getter ###
+
+    public String getIcon() {
+        return icon;
+    }
 
     public String getKey() {
         return key;

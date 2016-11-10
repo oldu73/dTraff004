@@ -1,5 +1,7 @@
 package ch.stageconcept.dtraff.connection.util;
 
+import javafx.scene.image.ImageView;
+
 import java.util.*;
 
 /**
@@ -18,6 +20,7 @@ public enum DbType {
     private static final String DEFAULT_HOS = "127.0.0.1";
     private static final String DEFAULT_USE = "root";
     private static final String DEFAULT_PAS = "root";
+    private static final String DEFAULT_ICON = "serverDefault001.gif";
 
     // MariaDB
     private static final String MARIADB_KEY = "mariadb";    // Key value to retrieve object in Map, AND seed string in base URL "jdbc:mariadb://127.0.0.1:port"
@@ -41,9 +44,9 @@ public enum DbType {
     private Map<String, DbDescriptor> dbDescriptorMap;
 
     private DbType() {
-        DbDescriptor mariaDb = new DbDescriptor(MARIADB_KEY, DEFAULT_NAM, MARIADB_DEN, DEFAULT_HOS, MARIADB_POR, DEFAULT_USE, DEFAULT_PAS, MARIADB_DRI);
-        DbDescriptor mySql = new DbDescriptor(MYSQL_KEY, DEFAULT_NAM, MYSQL_DEN, DEFAULT_HOS, MYSQL_POR, DEFAULT_USE, DEFAULT_PAS, MYSQL_DRI);
-        DbDescriptor postgreSql = new DbDescriptorPostgreSql(POSTGRESQL_KEY, DEFAULT_NAM, POSTGRESQL_DEN, DEFAULT_HOS, POSTGRESQL_POR, DEFAULT_USE, DEFAULT_PAS, POSTGRESQL_DRI);
+        DbDescriptor mariaDb = new DbDescriptor(MARIADB_KEY, DEFAULT_NAM, MARIADB_DEN, DEFAULT_HOS, MARIADB_POR, DEFAULT_USE, DEFAULT_PAS, MARIADB_DRI, DEFAULT_ICON);
+        DbDescriptor mySql = new DbDescriptor(MYSQL_KEY, DEFAULT_NAM, MYSQL_DEN, DEFAULT_HOS, MYSQL_POR, DEFAULT_USE, DEFAULT_PAS, MYSQL_DRI, DEFAULT_ICON);
+        DbDescriptor postgreSql = new DbDescriptorPostgreSql(POSTGRESQL_KEY, DEFAULT_NAM, POSTGRESQL_DEN, DEFAULT_HOS, POSTGRESQL_POR, DEFAULT_USE, DEFAULT_PAS, POSTGRESQL_DRI, DEFAULT_ICON);
 
         dbDescriptorHashMap = new HashMap<>();
 

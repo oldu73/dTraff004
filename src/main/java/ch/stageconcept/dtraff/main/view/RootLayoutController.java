@@ -2,7 +2,7 @@ package ch.stageconcept.dtraff.main.view;
 
 import ch.stageconcept.dtraff.main.MainApp;
 import ch.stageconcept.dtraff.connection.model.DbConnect;
-import javafx.collections.ListChangeListener;
+import ch.stageconcept.dtraff.main.util.SimpleConnectionTreeCell;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -24,12 +24,9 @@ public class RootLayoutController {
     private MainApp mainApp;
 
     @FXML
-    private TreeView<String> connectionTreeView;
+    private TreeView<DbConnect> connectionTreeView;
 
-    private TreeItem<String> rootNode;
-
-    private final Node rootIcon = new ImageView(new Image(getClass().getResourceAsStream("/network001.gif")));
-    private final Image serverOkIcon = new Image(getClass().getResourceAsStream("/serverDefault001.gif"));
+    private TreeItem<DbConnect> rootNode;
 
     /**
      * Initializes the controller class. This method is automatically called
@@ -38,10 +35,20 @@ public class RootLayoutController {
     @FXML
     private void initialize() {
 
+        // Connection tree view cell factory
+        connectionTreeView.setCellFactory(tv -> new SimpleConnectionTreeCell());
+
+        // Just for root
+        DbConnect rootDbConnect = new DbConnect();
+        rootDbConnect.setName("Network");
+        rootDbConnect.setIcon(new ImageView("/network001.gif"));
+
         // Connection tree view
-        rootNode = new TreeItem<String>("Network", rootIcon);
+        rootNode = new TreeItem<DbConnect>(rootDbConnect);
         connectionTreeView.setRoot(rootNode);
         rootNode.setExpanded(true);
+        // Hide the root Item.
+        //connectionTreeView.setShowRoot(false);
     }
 
     /**
@@ -64,11 +71,16 @@ public class RootLayoutController {
         if (okClicked) {
             mainApp.getDbConnects().add(tempDbConnect);
 
+            /*
             // Update connection tree view with the new entry
             TreeItem<String> serverNode = new TreeItem<String>(
                     tempDbConnect.getName(),
-                    new ImageView(serverOkIcon)
+                    new ImageView(serverDefaultIcon)
             );
+            */
+
+            // Update connection tree view with the new entry
+            TreeItem<DbConnect> serverNode = new TreeItem<>(tempDbConnect);
 
             rootNode.getChildren().add(serverNode);
         }

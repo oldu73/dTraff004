@@ -3,6 +3,7 @@ package ch.stageconcept.dtraff.connection.model;
 import ch.stageconcept.dtraff.connection.util.DbDescriptor;
 import ch.stageconcept.dtraff.connection.util.DbType;
 import javafx.beans.property.*;
+import javafx.scene.image.ImageView;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -35,6 +36,8 @@ public class DbConnect {
     private final ObjectProperty<Connection> connection;
     private final ObjectProperty<ResultSet> resultSet;
 
+    private final ObjectProperty<ImageView> icon;
+
     //TODO Save password option
     //TODO SSL
 
@@ -66,6 +69,8 @@ public class DbConnect {
 
         this.connection = new SimpleObjectProperty<>();
         this.resultSet = new SimpleObjectProperty<>();
+
+        this.icon = new SimpleObjectProperty<>(new ImageView(dbDescriptor.getIcon()));
     }
 
     /**
@@ -79,8 +84,9 @@ public class DbConnect {
      * @param user
      * @param password
      * @param driver
+     * @param icon
      */
-    public DbConnect(String key, String name, String denomination, String host, Integer port, String user, String password, String driver) {
+    public DbConnect(String key, String name, String denomination, String host, Integer port, String user, String password, String driver, String icon) {
         this.key = new SimpleStringProperty(key);
         this.name = new SimpleStringProperty(name);
         this.denomination = new SimpleStringProperty(denomination);
@@ -94,6 +100,8 @@ public class DbConnect {
 
         this.connection = new SimpleObjectProperty<>();
         this.resultSet = new SimpleObjectProperty<>();
+
+        this.icon = new SimpleObjectProperty<>(new ImageView(icon));
     }
 
     // Methods
@@ -127,6 +135,18 @@ public class DbConnect {
 
     // Getters and Setters
     // #####################################################################
+
+    public ImageView getIcon() {
+        return icon.get();
+    }
+
+    public ObjectProperty<ImageView> iconProperty() {
+        return icon;
+    }
+
+    public void setIcon(ImageView icon) {
+        this.icon.set(icon);
+    }
 
     public String getBaseUrl() {
         return baseUrl.get();

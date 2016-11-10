@@ -20,9 +20,10 @@ public class DbDescriptorPostgreSql extends DbDescriptor {
      * @param user
      * @param password
      * @param driver
+     * @param icon
      */
-    public DbDescriptorPostgreSql(String key, String name, String denomination, String host, int port, String user, String password, String driver) {
-        super(key, name, denomination, host, port, user, password, driver);
+    public DbDescriptorPostgreSql(String key, String name, String denomination, String host, int port, String user, String password, String driver, String icon) {
+        super(key, name, denomination, host, port, user, password, driver, icon);
     }
 
     // Method ###
