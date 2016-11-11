@@ -2,6 +2,7 @@ package ch.stageconcept.dtraff.connection.model;
 
 import ch.stageconcept.dtraff.connection.util.DbDescriptor;
 import ch.stageconcept.dtraff.connection.util.DbType;
+import ch.stageconcept.dtraff.main.MainApp;
 import javafx.beans.property.*;
 import javafx.scene.image.ImageView;
 
@@ -38,6 +39,8 @@ public class DbConnect {
 
     private final ObjectProperty<ImageView> icon;
 
+    private final ObjectProperty<MainApp> mainApp;
+
     //TODO Save password option
     //TODO SSL
 
@@ -47,7 +50,7 @@ public class DbConnect {
     /**
      * Default constructor.
      */
-    public DbConnect() {
+    public DbConnect(MainApp mainApp) {
 
         // Create object with default values chosen to be MySQL
 
@@ -71,6 +74,8 @@ public class DbConnect {
         this.resultSet = new SimpleObjectProperty<>();
 
         this.icon = new SimpleObjectProperty<>(new ImageView(dbDescriptor.getIcon()));
+
+        this.mainApp = new SimpleObjectProperty<>(mainApp);
     }
 
     /**
@@ -85,8 +90,9 @@ public class DbConnect {
      * @param password
      * @param driver
      * @param icon
+     * @param mainApp
      */
-    public DbConnect(String key, String name, String denomination, String host, Integer port, String user, String password, String driver, String icon) {
+    public DbConnect(String key, String name, String denomination, String host, Integer port, String user, String password, String driver, String icon, MainApp mainApp) {
         this.key = new SimpleStringProperty(key);
         this.name = new SimpleStringProperty(name);
         this.denomination = new SimpleStringProperty(denomination);
@@ -102,6 +108,8 @@ public class DbConnect {
         this.resultSet = new SimpleObjectProperty<>();
 
         this.icon = new SimpleObjectProperty<>(new ImageView(icon));
+
+        this.mainApp = new SimpleObjectProperty<>(mainApp);
     }
 
     // Methods
@@ -135,6 +143,18 @@ public class DbConnect {
 
     // Getters and Setters
     // #####################################################################
+
+    public MainApp getMainApp() {
+        return mainApp.get();
+    }
+
+    public ObjectProperty<MainApp> mainAppProperty() {
+        return mainApp;
+    }
+
+    public void setMainApp(MainApp mainApp) {
+        this.mainApp.set(mainApp);
+    }
 
     public ImageView getIcon() {
         return icon.get();

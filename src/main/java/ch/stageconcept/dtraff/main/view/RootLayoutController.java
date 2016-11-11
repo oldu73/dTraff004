@@ -3,13 +3,16 @@ package ch.stageconcept.dtraff.main.view;
 import ch.stageconcept.dtraff.main.MainApp;
 import ch.stageconcept.dtraff.connection.model.DbConnect;
 import ch.stageconcept.dtraff.main.util.SimpleConnectionTreeCell;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.stage.WindowEvent;
 
 /**
  * The controller for the root layout. The root layout provides the basic
@@ -39,7 +42,7 @@ public class RootLayoutController {
         connectionTreeView.setCellFactory(tv -> new SimpleConnectionTreeCell());
 
         // Just for root
-        DbConnect rootDbConnect = new DbConnect();
+        DbConnect rootDbConnect = new DbConnect(mainApp);
         rootDbConnect.setName("Network");
         rootDbConnect.setIcon(new ImageView("/network001.gif"));
 
@@ -48,7 +51,23 @@ public class RootLayoutController {
         connectionTreeView.setRoot(rootNode);
         rootNode.setExpanded(true);
         // Hide the root Item.
-        //connectionTreeView.setShowRoot(false);
+        connectionTreeView.setShowRoot(false);
+
+        /*
+        // Connection tree view, contextual menu
+        final ContextMenu contextMenu = new ContextMenu();
+
+        MenuItem item1 = new MenuItem("Edit");
+        item1.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
+                System.out.println("Edit");
+            }
+        });
+
+        contextMenu.getItems().addAll(item1);
+
+        connectionTreeView.setContextMenu(contextMenu);
+        */
     }
 
     /**
@@ -66,7 +85,7 @@ public class RootLayoutController {
      */
     @FXML
     private void handleNewConnection() {
-        DbConnect tempDbConnect = new DbConnect();
+        DbConnect tempDbConnect = new DbConnect(mainApp);
         boolean okClicked = mainApp.showConnectionEditDialog(tempDbConnect);
         if (okClicked) {
             mainApp.getDbConnects().add(tempDbConnect);
@@ -81,8 +100,13 @@ public class RootLayoutController {
 
             // Update connection tree view with the new entry
             TreeItem<DbConnect> serverNode = new TreeItem<>(tempDbConnect);
-
             rootNode.getChildren().add(serverNode);
+
+            // Maintain connection tree view displayed connection name up to date
+            tempDbConnect.nameProperty().addListener((o, oldVal, newVal) -> connectionTreeView.refresh());
+
+            //TODO Find a solution for the ConnectionEditDialogController Test Connection button side effect that update the edited connection:
+            //- pass a temporary copy of the edited connection for testing.
         }
     }
 
