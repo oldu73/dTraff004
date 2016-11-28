@@ -1,13 +1,8 @@
-package ch.stageconcept.dtraff.connection.view;
+package ch.stageconcept.dtraff.connection.unit.view;
 
-import ch.stageconcept.dtraff.connection.model.DbConnect;
-import ch.stageconcept.dtraff.connection.util.DbDescriptor;
-import ch.stageconcept.dtraff.connection.util.DbType;
-import javafx.application.Platform;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import ch.stageconcept.dtraff.connection.unit.model.DbConnect;
+import ch.stageconcept.dtraff.connection.unit.util.DbDescriptor;
+import ch.stageconcept.dtraff.connection.unit.util.DbType;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -20,12 +15,10 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Dialog to edit details of a dbConnect.

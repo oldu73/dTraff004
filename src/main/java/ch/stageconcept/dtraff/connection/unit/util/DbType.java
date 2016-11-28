@@ -1,6 +1,4 @@
-package ch.stageconcept.dtraff.connection.util;
-
-import javafx.scene.image.ImageView;
+package ch.stageconcept.dtraff.connection.unit.util;
 
 import java.util.*;
 

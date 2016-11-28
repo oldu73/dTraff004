@@ -1,8 +1,8 @@
 package ch.stageconcept.dtraff.main;
 
 import ch.stageconcept.dtraff.main.view.RootLayoutController;
-import ch.stageconcept.dtraff.connection.model.DbConnect;
-import ch.stageconcept.dtraff.connection.view.ConnectionEditDialogController;
+import ch.stageconcept.dtraff.connection.unit.model.DbConnect;
+import ch.stageconcept.dtraff.connection.unit.view.ConnectionEditDialogController;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -100,7 +100,7 @@ public class MainApp extends Application {
         try {
             // Load the fxml file and create a new stage for the popup dialog.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("../connection/view/ConnectionEditDialog.fxml"));
+            loader.setLocation(MainApp.class.getResource("../connection/unit/view/ConnectionEditDialog.fxml"));
             AnchorPane page = (AnchorPane) loader.load();
 
             // Create the dialog Stage.

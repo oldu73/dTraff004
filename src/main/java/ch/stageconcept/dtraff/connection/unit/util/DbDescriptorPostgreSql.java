@@ -1,6 +1,6 @@
-package ch.stageconcept.dtraff.connection.util;
+package ch.stageconcept.dtraff.connection.unit.util;
 
-import ch.stageconcept.dtraff.connection.model.DbConnect;
+import ch.stageconcept.dtraff.connection.unit.model.DbConnect;
 
 /**
  * PostgreSQL database description specificity.

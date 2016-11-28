@@ -1,7 +1,6 @@
-package ch.stageconcept.dtraff.connection.util;
+package ch.stageconcept.dtraff.connection.unit.util;
 
-import ch.stageconcept.dtraff.connection.model.DbConnect;
-import javafx.scene.image.ImageView;
+import ch.stageconcept.dtraff.connection.unit.model.DbConnect;
 
 /**
  * Database description fields.

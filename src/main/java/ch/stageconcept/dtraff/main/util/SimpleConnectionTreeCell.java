@@ -1,13 +1,8 @@
 package ch.stageconcept.dtraff.main.util;
 
-import ch.stageconcept.dtraff.connection.model.DbConnect;
-import javafx.beans.binding.Bindings;
+import ch.stageconcept.dtraff.connection.unit.model.DbConnect;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 /**
  * Created by oldu7 on 10.11.2016.

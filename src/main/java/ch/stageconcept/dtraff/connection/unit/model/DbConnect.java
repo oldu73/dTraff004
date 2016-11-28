@@ -1,7 +1,7 @@
-package ch.stageconcept.dtraff.connection.model;
+package ch.stageconcept.dtraff.connection.unit.model;
 
-import ch.stageconcept.dtraff.connection.util.DbDescriptor;
-import ch.stageconcept.dtraff.connection.util.DbType;
+import ch.stageconcept.dtraff.connection.unit.util.DbDescriptor;
+import ch.stageconcept.dtraff.connection.unit.util.DbType;
 import ch.stageconcept.dtraff.main.MainApp;
 import javafx.beans.property.*;
 import javafx.scene.image.ImageView;
