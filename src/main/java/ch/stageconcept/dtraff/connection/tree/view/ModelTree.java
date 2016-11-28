@@ -1,4 +1,4 @@
-package ch.stageconcept.dtraff.connection.tree.ui;
+package ch.stageconcept.dtraff.connection.tree.view;
 
 import static java.util.stream.Collectors.toList;
 
@@ -15,6 +15,8 @@ import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.ImageView;
+
+//TODO javadoc
 
 public class ModelTree<T> {
 
@@ -34,31 +36,30 @@ public class ModelTree<T> {
         
         treeView.setCellFactory(tv -> new TreeCell<T>() {
             
-            //private Set<PseudoClass> pseudoClassesSet = new HashSet<>();
+            private Set<PseudoClass> pseudoClassesSet = new HashSet<>();
             
             @Override
             protected void updateItem(T item, boolean empty) {
                 super.updateItem(item, empty);
                 textProperty().unbind();
-                //graphicProperty().unbind();
-                //contextMenuProperty().unbind();
+                graphicProperty().unbind();
+                contextMenuProperty().unbind();
                 
-                //pseudoClassesSet.forEach(pc -> pseudoClassStateChanged(pc, false));
+                pseudoClassesSet.forEach(pc -> pseudoClassStateChanged(pc, false));
                 if (empty) {
                     setText("");
-                    //setGraphic(null);
-                    //setContextMenu(null);
+                    setGraphic(null);
+                    setContextMenu(null);
                 } else {
                     textProperty().bind(text.apply(item));
-                    //graphicProperty().bind(icon.apply(item));
-                    //contextMenuProperty().bind(menu.apply(item));
-                    /*
+                    graphicProperty().bind(icon.apply(item));
+                    contextMenuProperty().bind(menu.apply(item));
+
                     PseudoClass itemPC = pseudoClassMap.apply(item);
                     if (itemPC != null) {
                         pseudoClassStateChanged(itemPC, true);
                         pseudoClassesSet.add(itemPC);
                     }
-                    */
                 }
             }
         });

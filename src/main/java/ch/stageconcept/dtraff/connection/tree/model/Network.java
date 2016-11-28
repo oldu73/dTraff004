@@ -5,14 +5,15 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.image.ImageView;
+
+//TODO javadoc
 
 public class Network extends ConnectionUnit<File> {
 
-    public Network(String name, ObservableList<File> subUnits) {
-        super(name, subUnits, File::new);
+    private static final String ICON_FILENAME = "network001.gif";
 
-        this.setIcon(new ImageView("network001.gif"));
+    public Network(String name, ObservableList<File> subUnits) {
+        super(name, subUnits, File::new, ICON_FILENAME);
 
         ContextMenu contextMenu = new ContextMenu();
         MenuItem newFileMenuItem = new MenuItem("New File");

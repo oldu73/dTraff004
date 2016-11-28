@@ -5,14 +5,15 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.image.ImageView;
+
+//TODO javadoc
 
 public class File extends ConnectionUnit<Connection> {
 
-   public File(String name, ObservableList<Connection> subUnits) {
-        super(name, subUnits, Connection::new);
+    private static final String ICON_FILENAME = "file001.png";
 
-       this.setIcon(new ImageView("file001.png"));
+   public File(String name, ObservableList<Connection> subUnits) {
+       super(name, subUnits, Connection::new, ICON_FILENAME);
 
        ContextMenu contextMenu = new ContextMenu();
        MenuItem newConnectionMenuItem = new MenuItem("New Connection");
@@ -21,10 +22,10 @@ public class File extends ConnectionUnit<Connection> {
        });
        contextMenu.getItems().add(newConnectionMenuItem);
        this.setMenu(contextMenu);
-    }
+   }
 
-    public File(String name) {
-        this(name, FXCollections.observableArrayList());
-    }
+   public File(String name) {
+       this(name, FXCollections.observableArrayList());
+   }
 
 }

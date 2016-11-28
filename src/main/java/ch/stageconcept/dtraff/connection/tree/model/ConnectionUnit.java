@@ -11,6 +11,8 @@ import javafx.scene.image.ImageView;
 
 import java.util.function.Function;
 
+//TODO javadoc
+
 public class ConnectionUnit<T extends ConnectionUnit<?>> {
     
     private final StringProperty name = new SimpleStringProperty();
@@ -21,25 +23,25 @@ public class ConnectionUnit<T extends ConnectionUnit<?>> {
     
     private final ObservableList<T> subUnits ;
 
-    public ConnectionUnit(String name, ObservableList<T> subUnits, Function<String, T> subUnitSupplier) {
+    public ConnectionUnit(String name, ObservableList<T> subUnits, Function<String, T> subUnitSupplier, String iconFileName) {
         this.subUnits = subUnits ;
         this.subUnitSupplier = subUnitSupplier ;
         setName(name);
 
-        this.icon = new SimpleObjectProperty<>();
+        this.icon = new SimpleObjectProperty<>(new ImageView(iconFileName));
         this.menu = new SimpleObjectProperty<>();
     }
 
-    public ConnectionUnit(String name, ObservableList<T> subUnits) {
-        this(name, subUnits, n -> null);
+    public ConnectionUnit(String name, ObservableList<T> subUnits, String iconFileName) {
+        this(name, subUnits, n -> null, iconFileName);
     }
     
     public ConnectionUnit(String name, Function<String, T> subUnitSupplier) {
-        this(name, FXCollections.observableArrayList(), subUnitSupplier);
+        this(name, FXCollections.observableArrayList(), subUnitSupplier, null);
     }
 
     public ConnectionUnit(String name) {
-        this(name, FXCollections.observableArrayList(), n -> null) ;
+        this(name, FXCollections.observableArrayList(), n -> null, null) ;
     }
 
     @Override

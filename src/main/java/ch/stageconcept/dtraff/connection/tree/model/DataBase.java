@@ -1,14 +1,15 @@
 package ch.stageconcept.dtraff.connection.tree.model;
 
 import javafx.collections.FXCollections;
-import javafx.scene.image.ImageView;
+
+//TODO javadoc
 
 public class DataBase extends ConnectionUnit<ConnectionUnit<?>> {
 
-    public DataBase(String name) {
-        super(name, FXCollections.emptyObservableList());
+    private static final String ICON_FILENAME = "database001.png";
 
-        this.setIcon(new ImageView("database001.png"));
+    public DataBase(String name) {
+        super(name, FXCollections.emptyObservableList(), ICON_FILENAME);
     }
 
     @Override

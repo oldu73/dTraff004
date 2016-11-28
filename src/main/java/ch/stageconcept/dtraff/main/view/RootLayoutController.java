@@ -1,14 +1,13 @@
 package ch.stageconcept.dtraff.main.view;
 
 import ch.stageconcept.dtraff.connection.tree.model.*;
-import ch.stageconcept.dtraff.connection.tree.ui.ModelTree;
+import ch.stageconcept.dtraff.connection.tree.view.ModelTree;
 import ch.stageconcept.dtraff.main.MainApp;
 import ch.stageconcept.dtraff.connection.unit.model.DbConnect;
-import ch.stageconcept.dtraff.main.util.SimpleConnectionTreeCell;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 
 /**
  * The controller for the root layout. The root layout provides the basic
@@ -23,8 +22,7 @@ public class RootLayoutController {
     private MainApp mainApp;
 
     @FXML
-    private TreeView<ConnectionUnit<?>> connectionTreeView;
-    //private TreeView<DbConnect> connectionTreeView;
+    private BorderPane rootBorderPane;
 
     private TreeItem<DbConnect> rootNode;
 
@@ -38,59 +36,29 @@ public class RootLayoutController {
     @FXML
     private void initialize() {
 
+        // JavaFX TreeView of multiple object types? (and more)
+        // SRC: http://stackoverflow.com/questions/35009982/javafx-treeview-of-multiple-object-types-and-more
+        // ANSWER FROM: James_D
+        // GITHUB: - heterogeneous-tree-example - https://github.com/james-d/heterogeneous-tree-example
         network = createNetwork();
 
-/*
         tree = new ModelTree<>(network,
                 ConnectionUnit::getSubUnits,
                 ConnectionUnit::nameProperty,
                 ConnectionUnit::iconProperty,
                 ConnectionUnit::menuProperty,
                 unit -> PseudoClass.getPseudoClass(unit.getClass().getSimpleName().toLowerCase()));
-                */
 
-        tree = new ModelTree<>(network,
-                ConnectionUnit::getSubUnits,
-                ConnectionUnit::nameProperty,
-                ConnectionUnit::iconProperty,
-                ConnectionUnit::menuProperty);
+        TreeView<ConnectionUnit<?>> connectionTreeView = tree.getTreeView();
 
-        connectionTreeView = tree.getTreeView();
+        // CSS pseudo class treeview style.
+        // !WARNING! In order to use file that reside in resources folder, don’t forget to add a slash before file name!
+        connectionTreeView.getStylesheets().add(getClass().getResource("/connectionTree.css").toExternalForm());
+
+        rootBorderPane.setLeft(connectionTreeView);
 
         // Debug mode
-        printChildren(connectionTreeView.getRoot());
-
-/*
-        // Connection tree view cell factory
-        connectionTreeView.setCellFactory(tv -> new SimpleConnectionTreeCell());
-
-        // Just for root
-        DbConnect rootDbConnect = new DbConnect(mainApp);
-        rootDbConnect.setName("Network");
-        rootDbConnect.setIcon(new ImageView("/network001.gif"));
-
-        // Connection tree view
-        rootNode = new TreeItem<DbConnect>(rootDbConnect);
-        connectionTreeView.setRoot(rootNode);
-        rootNode.setExpanded(true);
-        // Hide the root Item.
-        connectionTreeView.setShowRoot(false);
-
-
-        // Connection tree view, contextual menu
-        final ContextMenu contextMenu = new ContextMenu();
-
-        MenuItem item1 = new MenuItem("Edit");
-        item1.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent e) {
-                System.out.println("Edit");
-            }
-        });
-
-        contextMenu.getItems().addAll(item1);
-
-        connectionTreeView.setContextMenu(contextMenu);
-        */
+        //printChildren(connectionTreeView.getRoot());
     }
 
     /**
@@ -127,7 +95,7 @@ public class RootLayoutController {
             rootNode.getChildren().add(serverNode);
 
             // Maintain connection tree view displayed connection name up to date
-            tempDbConnect.nameProperty().addListener((o, oldVal, newVal) -> connectionTreeView.refresh());
+            //tempDbConnect.nameProperty().addListener((o, oldVal, newVal) -> connectionTreeView.refresh());
 
             //TODO Find a solution for the ConnectionEditDialogController Test Connection button side effect that update the edited connection:
             //- pass a temporary copy of the edited connection for testing.
@@ -162,37 +130,38 @@ public class RootLayoutController {
     private Network createNetwork() {
         Network network = new Network("Network");
 
-        // Some data
+        /*
+        // Some sample data, debug mode
 	    File file1 = new File("file1");
-	    //File file2 = new File("file2");
-	    //File file3 = new File("file3");
+	    File file2 = new File("file2");
+	    File file3 = new File("file3");
 
 	    Connection connection1 = new Connection("connection1");
-	    //Connection connection2 = new Connection("connection2");
-	    //Connection connection3 = new Connection("connection3");
-	    //Connection connection4 = new Connection("connection4");
-	    //Connection connection5 = new Connection("connection5");
+	    Connection connection2 = new Connection("connection2");
+	    Connection connection3 = new Connection("connection3");
+	    Connection connection4 = new Connection("connection4");
+	    Connection connection5 = new Connection("connection5");
 
 	    DataBase dataBase1 = new DataBase("dataBase1");
-	    //DataBase dataBase2 = new DataBase("dataBase2");
-	    //DataBase dataBase3 = new DataBase("dataBase3");
-	    //DataBase dataBase4 = new DataBase("dataBase4");
-	    //DataBase dataBase5 = new DataBase("dataBase5");
+	    DataBase dataBase2 = new DataBase("dataBase2");
+	    DataBase dataBase3 = new DataBase("dataBase3");
+	    DataBase dataBase4 = new DataBase("dataBase4");
+	    DataBase dataBase5 = new DataBase("dataBase5");
 
         connection1.getSubUnits().add(dataBase1);
 
-        //connection2.getSubUnits().addAll(dataBase2, dataBase3);
-        //connection3.getSubUnits().addAll(dataBase2, dataBase3);
+        connection2.getSubUnits().addAll(dataBase2, dataBase3);
+        connection3.getSubUnits().addAll(dataBase2, dataBase3);
 
-        //connection4.getSubUnits().addAll(dataBase4, dataBase5);
-        //connection5.getSubUnits().addAll(dataBase4, dataBase5);
+        connection4.getSubUnits().addAll(dataBase4, dataBase5);
+        connection5.getSubUnits().addAll(dataBase4, dataBase5);
 
         file1.getSubUnits().add(connection1);
-        //file2.getSubUnits().addAll(connection2, connection3);
-	    //file3.getSubUnits().addAll(connection4, connection5);
+        file2.getSubUnits().addAll(connection2, connection3);
+	    file3.getSubUnits().addAll(connection4, connection5);
 
-	    //network.getSubUnits().addAll(file1, file2, file3);
-        network.getSubUnits().addAll(file1);
+	    network.getSubUnits().addAll(file1, file2, file3);
+	    */
 
         return network ;
     }
