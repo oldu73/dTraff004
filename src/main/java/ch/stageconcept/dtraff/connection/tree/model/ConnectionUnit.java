@@ -1,5 +1,6 @@
 package ch.stageconcept.dtraff.connection.tree.model;
 
+import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -18,16 +19,13 @@ public class ConnectionUnit<T extends ConnectionUnit<?>> {
     private final StringProperty name = new SimpleStringProperty();
     private ObjectProperty<ImageView> icon;
     private ObjectProperty<ContextMenu> menu;
-    
     private final Function<String, T> subUnitSupplier ;
-    
     private final ObservableList<T> subUnits ;
 
     public ConnectionUnit(String name, ObservableList<T> subUnits, Function<String, T> subUnitSupplier, String iconFileName) {
         this.subUnits = subUnits ;
         this.subUnitSupplier = subUnitSupplier ;
         setName(name);
-
         this.icon = new SimpleObjectProperty<>(new ImageView(iconFileName));
         this.menu = new SimpleObjectProperty<>();
     }

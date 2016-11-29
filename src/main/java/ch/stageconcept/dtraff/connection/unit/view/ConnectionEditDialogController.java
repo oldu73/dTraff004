@@ -1,5 +1,6 @@
 package ch.stageconcept.dtraff.connection.unit.view;
 
+import ch.stageconcept.dtraff.connection.tree.model.Connection;
 import ch.stageconcept.dtraff.connection.unit.model.DbConnect;
 import ch.stageconcept.dtraff.connection.unit.util.DbDescriptor;
 import ch.stageconcept.dtraff.connection.unit.util.DbType;
@@ -60,7 +61,7 @@ public class ConnectionEditDialogController {
     private Button cancelButton;
 
     private Stage dialogStage;
-    private DbConnect dbConnect;
+    private Connection connection;
     private boolean okClicked = false;
 
     /**
@@ -129,19 +130,19 @@ public class ConnectionEditDialogController {
     }
 
     /**
-     * Sets the dbConnect to be edited in the dialog.
+     * Sets the Connection to be edited in the dialog.
      *
-     * @param dbConnect
+     * @param connection
      */
-    public void setDbConnect(DbConnect dbConnect) {
-        this.dbConnect = dbConnect;
+    public void setConnection(Connection connection) {
+        this.connection = connection;
 
-        nameField.setText(dbConnect.getName());
-        denominationField.getSelectionModel().select(DbType.INSTANCE.getDbDescriptorMap().get(dbConnect.getKey()));
-        hostField.setText(dbConnect.getHost());
-        portField.setText(Integer.toString(dbConnect.getPort()));
-        userField.setText(dbConnect.getUser());
-        passwordField.setText(dbConnect.getPassword());
+        nameField.setText(connection.getName());
+        denominationField.getSelectionModel().select(DbType.INSTANCE.getDbDescriptorMap().get(connection.getKey()));
+        hostField.setText(connection.getHost());
+        portField.setText(Integer.toString(connection.getPort()));
+        userField.setText(connection.getUser());
+        passwordField.setText(connection.getPassword());
     }
 
     /**
@@ -158,7 +159,7 @@ public class ConnectionEditDialogController {
      */
     @FXML
     private void handleTestConnection() {
-        if (setDbConnectValues()) {
+        if (setConnectionValues()) {
 
             Task<Boolean> task = new Task<Boolean>() {
                 @Override public Boolean call() throws SQLException {
@@ -172,9 +173,9 @@ public class ConnectionEditDialogController {
                         e.printStackTrace();
                     }
 
-                    if (dbConnect.doConnect()) {
+                    if (connection.doConnect()) {
                         // updateMessage("Connection successfully established..");
-                        dbConnect.undoConnect();
+                        connection.undoConnect();
                         return Boolean.TRUE;
                     } /* else {
                         updateMessage("Unable to establish connection!");
@@ -235,24 +236,24 @@ public class ConnectionEditDialogController {
     }
 
     /**
-     * Utility method to set attributes of dbConnect object
+     * Utility method to set attributes of Connection object
      * from edit dialog form if fields contain valid values.
      */
-    private boolean setDbConnectValues() {
+    private boolean setConnectionValues() {
         if (isInputValid()) {
 
             DbDescriptor dbDescriptor = denominationField.getSelectionModel().getSelectedItem();
 
-            dbConnect.setKey(dbDescriptor.getKey());
-            dbConnect.setName(nameField.getText());
-            dbConnect.setDenomination(dbDescriptor.getDenomination());
-            dbConnect.setHost(hostField.getText());
-            dbConnect.setPort(Integer.parseInt(portField.getText()));
-            dbConnect.setUser(userField.getText());
-            dbConnect.setPassword(passwordField.getText());
-            dbConnect.setDriver(dbDescriptor.getDriver());
+            connection.setKey(dbDescriptor.getKey());
+            connection.setName(nameField.getText());
+            connection.setDenomination(dbDescriptor.getDenomination());
+            connection.setHost(hostField.getText());
+            connection.setPort(Integer.parseInt(portField.getText()));
+            connection.setUser(userField.getText());
+            connection.setPassword(passwordField.getText());
+            connection.setDriver(dbDescriptor.getDriver());
 
-            dbConnect.setBaseUrl(dbDescriptor.getBaseUrl(dbConnect));
+            connection.setBaseUrl(dbDescriptor.getBaseUrl(connection));
 
             return true;
         }
@@ -264,7 +265,7 @@ public class ConnectionEditDialogController {
      */
     @FXML
     private void handleOk() {
-        if (setDbConnectValues()) {
+        if (setConnectionValues()) {
             okClicked = true;
             dialogStage.close();
         }

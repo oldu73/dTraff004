@@ -1,6 +1,6 @@
 package ch.stageconcept.dtraff.connection.unit.util;
 
-import ch.stageconcept.dtraff.connection.unit.model.DbConnect;
+import ch.stageconcept.dtraff.connection.tree.model.Connection;
 
 /**
  * Build default base URL in order to establish database
@@ -20,11 +20,11 @@ public enum BaseUrl {
     /**
      * Return default connection base URL
      *
-     * @param dbConnect
+     * @param connection
      */
-    public String getBaseUrl(DbConnect dbConnect) {
+    public String getBaseUrl(Connection connection) {
         // Key value is also used as seed string in base URL (c.f. DbType class)
-        return DRIVER_TYPE + ":" + dbConnect.getKey() + "://" + dbConnect.getHost() + ":" + dbConnect.getPort();
+        return DRIVER_TYPE + ":" + connection.getKey() + "://" + connection.getHost() + ":" + connection.getPort();
     }
 
 }

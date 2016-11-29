@@ -26,8 +26,8 @@ public class RootLayoutController {
 
     private TreeItem<DbConnect> rootNode;
 
-    private Network network;
-    private ModelTree<ConnectionUnit<?>> tree;
+    private Network network;    // Network description to be used in a treeView : Network (root node) - File - Connection - Database - (...)
+    private ModelTree<ConnectionUnit<?>> connectionTree;
 
     /**
      * Initializes the controller class. This method is automatically called
@@ -42,18 +42,18 @@ public class RootLayoutController {
         // GITHUB: - heterogeneous-tree-example - https://github.com/james-d/heterogeneous-tree-example
         network = createNetwork();
 
-        tree = new ModelTree<>(network,
+        connectionTree = new ModelTree<>(network,
                 ConnectionUnit::getSubUnits,
                 ConnectionUnit::nameProperty,
                 ConnectionUnit::iconProperty,
                 ConnectionUnit::menuProperty,
                 unit -> PseudoClass.getPseudoClass(unit.getClass().getSimpleName().toLowerCase()));
 
-        TreeView<ConnectionUnit<?>> connectionTreeView = tree.getTreeView();
+        TreeView<ConnectionUnit<?>> connectionTreeView = connectionTree.getTreeView();
 
-        // CSS pseudo class treeview style.
+        // CSS pseudo class treeView style.
         // !WARNING! In order to use file that reside in resources folder, don’t forget to add a slash before file name!
-        connectionTreeView.getStylesheets().add(getClass().getResource("/connectionTree.css").toExternalForm());
+        connectionTreeView.getStylesheets().add(getClass().getResource("/connectionTreeView.css").toExternalForm());
 
         rootBorderPane.setLeft(connectionTreeView);
 
@@ -125,12 +125,12 @@ public class RootLayoutController {
     }
 
     /**
-     * Create network tree.
+     * Create network description in a tree data structure,
+     * to be used in a treeView : Network (root node) - File - Connection - Database - (...)
      */
     private Network createNetwork() {
         Network network = new Network("Network");
 
-        /*
         // Some sample data, debug mode
 	    File file1 = new File("file1");
 	    File file2 = new File("file2");
@@ -161,7 +161,6 @@ public class RootLayoutController {
 	    file3.getSubUnits().addAll(connection4, connection5);
 
 	    network.getSubUnits().addAll(file1, file2, file3);
-	    */
 
         return network ;
     }

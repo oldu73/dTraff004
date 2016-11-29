@@ -1,5 +1,6 @@
 package ch.stageconcept.dtraff.connection.tree.model;
 
+import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;

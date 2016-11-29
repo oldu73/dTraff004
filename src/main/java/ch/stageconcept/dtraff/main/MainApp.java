@@ -22,7 +22,7 @@ import java.io.IOException;
  */
 public class MainApp extends Application {
 
-    private Stage primaryStage;
+    public static Stage primaryStage;
     private BorderPane rootLayout;
 
     // The server connections data as an observable list of DbConnect objects.
@@ -114,7 +114,7 @@ public class MainApp extends Application {
             // Set the dbConnect into the controller.
             ConnectionEditDialogController controller = loader.getController();
             controller.setDialogStage(dialogStage);
-            controller.setDbConnect(dbConnect);
+            //controller.setConnection(dbConnect);
 
             // Disable resize
             dialogStage.setResizable(false);

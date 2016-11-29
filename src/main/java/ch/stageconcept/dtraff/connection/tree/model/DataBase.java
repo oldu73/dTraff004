@@ -1,5 +1,6 @@
 package ch.stageconcept.dtraff.connection.tree.model;
 
+import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import javafx.collections.FXCollections;
 
 //TODO javadoc

@@ -1,5 +1,6 @@
 package ch.stageconcept.dtraff.connection.unit.util;
 
+import ch.stageconcept.dtraff.connection.tree.model.Connection;
 import ch.stageconcept.dtraff.connection.unit.model.DbConnect;
 
 /**
@@ -32,10 +33,10 @@ public class DbDescriptorPostgreSql extends DbDescriptor {
      * Build base URL in order to establish database
      * connection, PostgreSQL = "jdbc:postgresql://127.0.0.1:port/user"
      *
-     * @param dbConnect
+     * @param connection
      */
     @Override
-    public String getBaseUrl(DbConnect dbConnect) {
-        return BaseUrl.INSTANCE.getBaseUrl(dbConnect) + "/" + dbConnect.getUser();
+    public String getBaseUrl(Connection connection) {
+        return BaseUrl.INSTANCE.getBaseUrl(connection) + "/" + connection.getUser();
     }
 }

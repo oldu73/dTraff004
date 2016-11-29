@@ -1,5 +1,6 @@
 package ch.stageconcept.dtraff.connection.unit.util;
 
+import ch.stageconcept.dtraff.connection.tree.model.Connection;
 import ch.stageconcept.dtraff.connection.unit.model.DbConnect;
 
 /**
@@ -80,10 +81,10 @@ public class DbDescriptor {
      * Return base URL in order to establish database
      * connection (default pattern is MySQL (MariaDB), c.f. BaseUrl "enum" class)
      *
-     * @param dbConnect
+     * @param connection
      */
-    public String getBaseUrl(DbConnect dbConnect) {
-        return BaseUrl.INSTANCE.getBaseUrl(dbConnect);
+    public String getBaseUrl(Connection connection) {
+        return BaseUrl.INSTANCE.getBaseUrl(connection);
     }
 
     // Getter ###
