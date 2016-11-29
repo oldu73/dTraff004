@@ -1,6 +1,5 @@
 package ch.stageconcept.dtraff.connection.tree.model;
 
-import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;

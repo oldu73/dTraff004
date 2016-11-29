@@ -12,10 +12,16 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-                  <MenuItem mnemonicParsing="false" onAction="#handleNewConnection" text="New Server Connection">
-                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                     </accelerator></MenuItem>
+                  <Menu mnemonicParsing="false" text="Server Connection">
+                    <items>
+                        <MenuItem fx:id="newServerConnectionMenuItem" mnemonicParsing="false" onAction="#handleNewConnection" text="New">
+                           <accelerator>
+                              <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator>
+                        </MenuItem>
+                      <MenuItem fx:id="editServerConnectionMenuItem" mnemonicParsing="false" onAction="#handleEditConnection" text="Edit" />
+                    </items>
+                  </Menu>
               <MenuItem mnemonicParsing="false" onAction="#handleExit" text="Exit">
                      <accelerator>
                         <KeyCodeCombination alt="DOWN" code="X" control="UP" meta="UP" shift="UP" shortcut="UP" />

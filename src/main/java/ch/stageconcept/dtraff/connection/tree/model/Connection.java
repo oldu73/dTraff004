@@ -1,5 +1,6 @@
 package ch.stageconcept.dtraff.connection.tree.model;
 
+import ch.stageconcept.dtraff.connection.tree.util.ConnectionEditor;
 import ch.stageconcept.dtraff.connection.unit.util.DbDescriptor;
 import ch.stageconcept.dtraff.connection.unit.util.DbType;
 import javafx.beans.property.*;
@@ -58,10 +59,7 @@ public class Connection extends ConnectionUnit<DataBase> {
         // treeView context menu
         ContextMenu contextMenu = new ContextMenu();
         MenuItem editConnectionMenuItem = new MenuItem("Edit Connection");
-        editConnectionMenuItem.setOnAction((ActionEvent t) -> {
-            System.out.println("Edit Connection on:" + this.getName());
-            //System.out.println("Parent is:" + ???);
-        });
+        editConnectionMenuItem.setOnAction((ActionEvent t) -> {ConnectionEditor.INSTANCE.supply(this);});
         contextMenu.getItems().add(editConnectionMenuItem);
         this.setMenu(contextMenu);
 

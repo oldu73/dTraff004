@@ -22,7 +22,7 @@ import java.io.IOException;
  */
 public class MainApp extends Application {
 
-    public static Stage primaryStage;
+    public static Stage primaryStage;   // Static reference to primaryStage
     private BorderPane rootLayout;
 
     // The server connections data as an observable list of DbConnect objects.
