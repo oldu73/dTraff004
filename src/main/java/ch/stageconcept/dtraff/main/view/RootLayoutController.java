@@ -1,15 +1,17 @@
 package ch.stageconcept.dtraff.main.view;
 
-import ch.stageconcept.dtraff.connection.tree.model.*;
-import ch.stageconcept.dtraff.connection.tree.util.ConnectionEditor;
-import ch.stageconcept.dtraff.connection.tree.view.ModelTree;
-import ch.stageconcept.dtraff.connection.unit.util.DbType;
+import ch.stageconcept.dtraff.connection.model.*;
+import ch.stageconcept.dtraff.connection.util.ConnectionEditor;
+import ch.stageconcept.dtraff.connection.view.ModelTree;
+import ch.stageconcept.dtraff.connection.util.DbType;
 import ch.stageconcept.dtraff.main.MainApp;
-import ch.stageconcept.dtraff.connection.unit.model.DbConnect;
 import javafx.beans.binding.Bindings;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
 
 /**
@@ -32,8 +34,6 @@ public class RootLayoutController {
 
     @FXML
     private MenuItem editServerConnectionMenuItem;
-
-    private TreeItem<DbConnect> rootNode;
 
     private Network network;    // Network description to be used in a treeView : Network (root node) - File - Connection - Database - (...)
     private ModelTree<ConnectionUnit<?>> connectionTree;

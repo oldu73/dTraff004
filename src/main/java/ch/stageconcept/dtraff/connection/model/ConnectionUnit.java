@@ -1,4 +1,4 @@
-package ch.stageconcept.dtraff.connection.tree.model;
+package ch.stageconcept.dtraff.connection.model;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;

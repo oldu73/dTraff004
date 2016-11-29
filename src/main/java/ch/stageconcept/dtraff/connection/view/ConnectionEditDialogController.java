@@ -1,9 +1,8 @@
-package ch.stageconcept.dtraff.connection.unit.view;
+package ch.stageconcept.dtraff.connection.view;
 
-import ch.stageconcept.dtraff.connection.tree.model.Connection;
-import ch.stageconcept.dtraff.connection.unit.model.DbConnect;
-import ch.stageconcept.dtraff.connection.unit.util.DbDescriptor;
-import ch.stageconcept.dtraff.connection.unit.util.DbType;
+import ch.stageconcept.dtraff.connection.model.Connection;
+import ch.stageconcept.dtraff.connection.util.DbDescriptor;
+import ch.stageconcept.dtraff.connection.util.DbType;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -22,7 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Dialog to edit details of a dbConnect.
+ * Dialog to edit details of a Connection.
  *
  * @author Olivier Durand
  */

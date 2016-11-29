@@ -1,6 +1,6 @@
-package ch.stageconcept.dtraff.connection.unit.util;
+package ch.stageconcept.dtraff.connection.util;
 
-import ch.stageconcept.dtraff.connection.tree.model.Connection;
+import ch.stageconcept.dtraff.connection.model.Connection;
 
 /**
  * Build default base URL in order to establish database

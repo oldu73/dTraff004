@@ -1,4 +1,4 @@
-package ch.stageconcept.dtraff.connection.tree.view;
+package ch.stageconcept.dtraff.connection.view;
 
 import static java.util.stream.Collectors.toList;
 

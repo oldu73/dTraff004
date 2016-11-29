@@ -1,7 +1,7 @@
-package ch.stageconcept.dtraff.connection.tree.util;
+package ch.stageconcept.dtraff.connection.util;
 
-import ch.stageconcept.dtraff.connection.tree.model.Connection;
-import ch.stageconcept.dtraff.connection.unit.view.ConnectionEditDialogController;
+import ch.stageconcept.dtraff.connection.model.Connection;
+import ch.stageconcept.dtraff.connection.view.ConnectionEditDialogController;
 import ch.stageconcept.dtraff.main.MainApp;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -21,11 +21,19 @@ public enum ConnectionEditor {
 
     INSTANCE;
 
+    /**
+     * Opens a dialog to edit details for the specified Connection. If the user
+     * clicks OK, the changes are saved into the provided Connection object and true
+     * is returned.
+     *
+     * @param connection the Connection object to be edited
+     * @return true if the user clicked OK, false otherwise.
+     */
     public boolean supply(Connection connection) {
         try {
             // Load the fxml file and create a new stage for the popup dialog.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("../connection/unit/view/ConnectionEditDialog.fxml"));
+            loader.setLocation(MainApp.class.getResource("../connection/view/ConnectionEditDialog.fxml"));
             AnchorPane page = (AnchorPane) loader.load();
 
             // Create the dialog Stage.

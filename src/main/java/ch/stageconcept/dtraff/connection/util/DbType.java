@@ -1,4 +1,4 @@
-package ch.stageconcept.dtraff.connection.unit.util;
+package ch.stageconcept.dtraff.connection.util;
 
 import java.util.*;
 

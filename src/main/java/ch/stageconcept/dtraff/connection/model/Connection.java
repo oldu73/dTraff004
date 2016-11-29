@@ -1,8 +1,8 @@
-package ch.stageconcept.dtraff.connection.tree.model;
+package ch.stageconcept.dtraff.connection.model;
 
-import ch.stageconcept.dtraff.connection.tree.util.ConnectionEditor;
-import ch.stageconcept.dtraff.connection.unit.util.DbDescriptor;
-import ch.stageconcept.dtraff.connection.unit.util.DbType;
+import ch.stageconcept.dtraff.connection.util.ConnectionEditor;
+import ch.stageconcept.dtraff.connection.util.DbDescriptor;
+import ch.stageconcept.dtraff.connection.util.DbType;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

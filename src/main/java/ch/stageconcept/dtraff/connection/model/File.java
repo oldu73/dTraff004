@@ -1,21 +1,12 @@
-package ch.stageconcept.dtraff.connection.tree.model;
+package ch.stageconcept.dtraff.connection.model;
 
-import ch.stageconcept.dtraff.connection.tree.util.ConnectionEditor;
-import ch.stageconcept.dtraff.connection.unit.util.DbType;
-import ch.stageconcept.dtraff.connection.unit.view.ConnectionEditDialogController;
-import ch.stageconcept.dtraff.main.MainApp;
+import ch.stageconcept.dtraff.connection.util.ConnectionEditor;
+import ch.stageconcept.dtraff.connection.util.DbType;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.layout.AnchorPane;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-
-import java.io.IOException;
 
 //TODO javadoc
 
