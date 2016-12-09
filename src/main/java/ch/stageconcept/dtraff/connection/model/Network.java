@@ -1,5 +1,6 @@
 package ch.stageconcept.dtraff.connection.model;
 
+import ch.stageconcept.dtraff.connection.util.FileEditor;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -18,7 +19,10 @@ public class Network extends ConnectionUnit<File> {
         ContextMenu contextMenu = new ContextMenu();
         MenuItem newFileMenuItem = new MenuItem("New File");
         newFileMenuItem.setOnAction((ActionEvent t) -> {
-            System.out.println("New File");
+
+            File file = new File("Hello");
+            FileEditor.INSTANCE.supply(file);
+
         });
         contextMenu.getItems().add(newFileMenuItem);
         this.setMenu(contextMenu);
