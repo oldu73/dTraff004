@@ -1,17 +1,11 @@
 package ch.stageconcept.dtraff.connection.view;
 
-import ch.stageconcept.dtraff.connection.model.Connection;
 import ch.stageconcept.dtraff.connection.model.File;
-import ch.stageconcept.dtraff.connection.util.DbType;
-import ch.stageconcept.dtraff.main.MainApp;
+import ch.stageconcept.dtraff.connection.util.*;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
-import javafx.stage.FileChooser;
+import javafx.scene.control.*;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import sun.applet.Main;
 
 /**
  * Dialog to edit details of a File.
@@ -20,14 +14,25 @@ import sun.applet.Main;
  */
 public class FileEditDialogController {
 
+    private static final String FILE_EXT = ".xml";
+
     @FXML
-    private TextField nameField;
+    private TextField folderField;
+
+    @FXML
+    private TextField fileField;
 
     @FXML
     private CheckBox passwordCheckBox;
 
     @FXML
+    private Label passwordLabel;
+
+    @FXML
     private PasswordField passwordField;
+
+    @FXML
+    private Label repeatPasswordLabel;
 
     @FXML
     private PasswordField repeatPasswordField;
@@ -51,7 +56,10 @@ public class FileEditDialogController {
      */
     @FXML
     private void initialize() {
-
+        passwordLabel.disableProperty().bind(passwordCheckBox.selectedProperty().not());
+        passwordField.disableProperty().bind(passwordCheckBox.selectedProperty().not());
+        repeatPasswordLabel.disableProperty().bind(passwordCheckBox.selectedProperty().not());
+        repeatPasswordField.disableProperty().bind(passwordCheckBox.selectedProperty().not());
     }
 
     /**
@@ -70,15 +78,6 @@ public class FileEditDialogController {
      */
     public void setFile(File file) {
         this.file = file;
-
-        /*
-        nameField.setText(connection.getName());
-        denominationField.getSelectionModel().select(DbType.INSTANCE.getDbDescriptorMap().get(connection.getKey()));
-        hostField.setText(connection.getHost());
-        portField.setText(Integer.toString(connection.getPort()));
-        userField.setText(connection.getUser());
-        passwordField.setText(connection.getPassword());
-        */
     }
 
     /**
@@ -95,10 +94,10 @@ public class FileEditDialogController {
      */
     @FXML
     private void handleOk() {
-        //if (setConnectionValues()) {
+        if (setFileValues()) {
             okClicked = true;
             dialogStage.close();
-        //}
+        }
     }
 
     /**
@@ -114,13 +113,49 @@ public class FileEditDialogController {
      */
     @FXML
     private void handleBrowse() {
-        FileChooser fileChooser = new FileChooser();
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        folderField.setText(directoryChooser.showDialog(dialogStage).getAbsolutePath());
+    }
 
-        // Set extension filter
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
-                "XML files (*.xml)", "*.xml");
-        fileChooser.getExtensionFilters().add(extFilter);
+    /**
+     * Utility method to set attributes of File object
+     * from edit dialog form if fields contain valid values.
+     */
+    private boolean setFileValues() {
+        if (isInputValid()) {
+            file.setFileName(folderField.getText() + "\\" + fileField.getText() + FILE_EXT);
+            file.setName(fileField.getText());
+            return true;
+        }
+        return false;
+    }
 
-        java.io.File file = fileChooser.showOpenDialog(dialogStage);
+    /**
+     * Validates the user input in the fields.
+     *
+     * @return true if the input is valid
+     */
+    private boolean isInputValid() {
+        String errorMessage = "";
+
+        if (folderField.getText() == null || folderField.getText().length() == 0) {
+            errorMessage += "No valid folder!\n";
+        }
+
+        if (fileField.getText() == null || fileField.getText().length() == 0) {
+            errorMessage += "No valid file!\n";
+        }
+
+        if (passwordCheckBox.isSelected() && !passwordField.getText().equals(repeatPasswordField.getText())) {
+            errorMessage += "No valid password!\n";
+        }
+
+        if (errorMessage.length() == 0) {
+            return true;
+        } else {
+            // Show the error message.
+            ErrorAlert.INSTANCE.show(dialogStage, "Invalid Fields", "Please correct invalid fields", errorMessage);
+            return false;
+        }
     }
 }

@@ -7,22 +7,30 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 
+import java.util.prefs.Preferences;
+
 //TODO javadoc
 
 public class Network extends ConnectionUnit<File> {
 
     private static final String ICON_FILENAME = "network001.gif";
 
+    private Preferences preferences;
+    private static final String PREFS_PATH = "/ch/stageconcept/datatraffic/file";
+
     public Network(String name, ObservableList<File> subUnits) {
         super(name, subUnits, File::new, ICON_FILENAME);
+
+        Preferences preferences = Preferences.userRoot().node(PREFS_PATH);
 
         ContextMenu contextMenu = new ContextMenu();
         MenuItem newFileMenuItem = new MenuItem("New File");
         newFileMenuItem.setOnAction((ActionEvent t) -> {
-
-            File file = new File("Hello");
-            FileEditor.INSTANCE.supply(file);
-
+            File file = new File("default");
+            if (FileEditor.INSTANCE.supply(file)) {
+                subUnits.add(file);
+                preferences.put(file.getName(), file.getFileName());
+            }
         });
         contextMenu.getItems().add(newFileMenuItem);
         this.setMenu(contextMenu);

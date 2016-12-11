@@ -33,15 +33,17 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <TextField fx:id="nameField" GridPane.columnIndex="2" />
-            <Label text="Password" GridPane.rowIndex="2" />
-            <Label text="Repeat Password" GridPane.rowIndex="3" />
-            <Label text="File" />
+            <TextField fx:id="fileField" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <Label fx:id="passwordLabel" text="Password" GridPane.rowIndex="3" />
+            <Label fx:id="repeatPasswordLabel" text="Repeat Password" GridPane.rowIndex="4" />
+            <Label text="File" GridPane.rowIndex="1" />
             <Label fx:id="testConnectionLabel" GridPane.columnIndex="2" GridPane.rowIndex="9" />
-            <CheckBox fx:id="passwordCheckBox" mnemonicParsing="false" text="Password" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-            <PasswordField fx:id="passwordField" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-            <PasswordField fx:id="repeatPasswordField" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+            <CheckBox fx:id="passwordCheckBox" mnemonicParsing="false" text="Password" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <PasswordField fx:id="passwordField" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+            <PasswordField fx:id="repeatPasswordField" GridPane.columnIndex="2" GridPane.rowIndex="4" />
             <Button fx:id="browseButton" mnemonicParsing="false" onAction="#handleBrowse" text="Browse" GridPane.columnIndex="3" GridPane.halignment="RIGHT" />
+            <TextField fx:id="folderField" GridPane.columnIndex="2" />
+            <Label text="Folder" />
          </children>
       </GridPane>
       <ButtonBar layoutX="386.0" layoutY="346.0" prefHeight="40.0" prefWidth="353.0" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0">

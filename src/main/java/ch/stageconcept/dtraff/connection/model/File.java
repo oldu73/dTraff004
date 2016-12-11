@@ -14,6 +14,8 @@ public class File extends ConnectionUnit<Connection> {
 
     private static final String ICON_FILENAME = "file001.png";
 
+    private String fileName;
+
    public File(String name, ObservableList<Connection> subUnits) {
        super(name, subUnits, Connection::new, ICON_FILENAME);
 
@@ -38,4 +40,11 @@ public class File extends ConnectionUnit<Connection> {
        this(name, FXCollections.observableArrayList());
    }
 
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
 }
