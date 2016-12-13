@@ -1,7 +1,7 @@
 package ch.stageconcept.dtraff.main.view;
 
 import ch.stageconcept.dtraff.connection.model.*;
-import ch.stageconcept.dtraff.connection.util.ConnectionEditor;
+import ch.stageconcept.dtraff.connection.util.ConnEditor;
 import ch.stageconcept.dtraff.connection.view.ModelTree;
 import ch.stageconcept.dtraff.connection.util.DbType;
 import ch.stageconcept.dtraff.main.MainApp;
@@ -38,9 +38,9 @@ public class RootLayoutController {
     @FXML
     private MenuItem editServerConnectionMenuItem;
 
-    private Network network;    // Network description to be used in a treeView : Network (root node) - File - Connection - Database - (...)
-    private ModelTree<ConnectionUnit<?>> connectionTree;
-    private TreeView<ConnectionUnit<?>> connectionTreeView;
+    private Network network;    // Network description to be used in a treeView : Network (root node) - File - Conn - Database - (...)
+    private ModelTree<ConnUnit<?>> connectionTree;
+    private TreeView<ConnUnit<?>> connectionTreeView;
 
     /**
      * Initializes the controller class. This method is automatically called
@@ -56,10 +56,10 @@ public class RootLayoutController {
         network = createNetwork();
 
         connectionTree = new ModelTree<>(network,
-                ConnectionUnit::getSubUnits,
-                ConnectionUnit::nameProperty,
-                ConnectionUnit::iconProperty,
-                ConnectionUnit::menuProperty,
+                ConnUnit::getSubUnits,
+                ConnUnit::nameProperty,
+                ConnUnit::iconProperty,
+                ConnUnit::menuProperty,
                 unit -> PseudoClass.getPseudoClass(unit.getClass().getSimpleName().toLowerCase()));
 
         connectionTreeView = connectionTree.getTreeView();
@@ -73,16 +73,16 @@ public class RootLayoutController {
         // Debug mode
         //printChildren(connectionTreeView.getRoot());
 
-        // Disable tool bar menu New Server Connection if no item or not a File instance selected in Connections treeView
+        // Disable tool bar menu New Server Conn if no item or not a File instance selected in Connections treeView
         newServerConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
                         connectionTreeView.getSelectionModel().getSelectedItem() == null ||
                                 !(connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof File),
                 connectionTreeView.getSelectionModel().selectedItemProperty()));
 
-        // Disable tool bar menu Edit Server Connection if no item or not a Connection instance selected in Connections treeView
+        // Disable tool bar menu Edit Server Conn if no item or not a Conn instance selected in Connections treeView
         editServerConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
                         connectionTreeView.getSelectionModel().getSelectedItem() == null ||
-                                !(connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof Connection),
+                                !(connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof Conn),
                 connectionTreeView.getSelectionModel().selectedItemProperty()));
     }
 
@@ -96,39 +96,39 @@ public class RootLayoutController {
     }
 
     /**
-     * Called when the user selects the File - New Server Connection menu. Opens a dialog to edit
+     * Called when the user selects the File - New Server Conn menu. Opens a dialog to edit
      * details for a new connection.
      */
     @FXML
     private void handleNewConnection() {
-        // new Connection instance with default name value
-        Connection connection = new Connection(DbType.INSTANCE.getDbDescriptorMap().get(DbType.MYSQL_KEY).getName());
+        // new Conn instance with default name value
+        Conn conn = new Conn(DbType.INSTANCE.getDbDescriptorMap().get(DbType.MYSQL_KEY).getName());
 
-        if (ConnectionEditor.INSTANCE.supply(connection)) {
-            // The tool bar menu is disabled if none or not a File is selected in Connection treeView,
+        if (ConnEditor.INSTANCE.supply(conn)) {
+            // The tool bar menu is disabled if none or not a File is selected in Conn treeView,
             // so the item could only be a File -> (cast)
             File file = (File) connectionTreeView.getSelectionModel().getSelectedItem().getValue();
-            file.getSubUnits().add(connection);
+            file.getSubUnits().add(conn);
         }
 
-        //TODO Find a solution for the ConnectionEditDialogController Test Connection button side effect that update the edited connection:
-        //- pass a temporary copy of the edited connection for testing.
+        //TODO Find a solution for the ConnEditDialogController Test Conn button side effect that update the edited conn:
+        //- pass a temporary copy of the edited conn for testing.
     }
 
     /**
-     * Called when the user selects the File - Edit Server Connection menu. Opens a dialog to edit
+     * Called when the user selects the File - Edit Server Conn menu. Opens a dialog to edit
      * details for the existing connection.
      */
     @FXML
     private void handleEditConnection() {
-        // The tool bar menu is disabled if none or not a Connection is selected in Connection treeView,
-        // so the item could only be a Connection -> (cast)
-        Connection connection = (Connection) connectionTreeView.getSelectionModel().getSelectedItem().getValue();
+        // The tool bar menu is disabled if none or not a Conn is selected in Conn treeView,
+        // so the item could only be a Conn -> (cast)
+        Conn conn = (Conn) connectionTreeView.getSelectionModel().getSelectedItem().getValue();
 
-        ConnectionEditor.INSTANCE.supply(connection);
+        ConnEditor.INSTANCE.supply(conn);
 
-        //TODO Find a solution for the ConnectionEditDialogController Test Connection button side effect that update the edited connection:
-        //- pass a temporary copy of the edited connection for testing.
+        //TODO Find a solution for the ConnEditDialogController Test Conn button side effect that update the edited conn:
+        //- pass a temporary copy of the edited conn for testing.
     }
 
     /**
@@ -154,7 +154,7 @@ public class RootLayoutController {
 
     /**
      * Create network description in a tree data structure,
-     * to be used in a treeView : Network (root node) - File - Connection - Database - (...)
+     * to be used in a treeView : Network (root node) - File - Conn - Database - (...)
      */
     private Network createNetwork() {
         Network network = new Network("Network");
@@ -197,11 +197,11 @@ public class RootLayoutController {
 	    File file2 = new File("file2");
 	    File file3 = new File("file3");
 
-	    Connection connection1 = new Connection("connection1");
-	    Connection connection2 = new Connection("connection2");
-	    Connection connection3 = new Connection("connection3");
-	    Connection connection4 = new Connection("connection4");
-	    Connection connection5 = new Connection("connection5");
+	    Conn connection1 = new Conn("connection1");
+	    Conn connection2 = new Conn("connection2");
+	    Conn connection3 = new Conn("connection3");
+	    Conn connection4 = new Conn("connection4");
+	    Conn connection5 = new Conn("connection5");
 
 	    DataBase dataBase1 = new DataBase("dataBase1");
 	    DataBase dataBase2 = new DataBase("dataBase2");

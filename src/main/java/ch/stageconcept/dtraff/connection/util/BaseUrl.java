@@ -1,6 +1,6 @@
 package ch.stageconcept.dtraff.connection.util;
 
-import ch.stageconcept.dtraff.connection.model.Connection;
+import ch.stageconcept.dtraff.connection.model.Conn;
 
 /**
  * Build default base URL in order to establish database
@@ -18,13 +18,13 @@ public enum BaseUrl {
     private static final String DRIVER_TYPE = "jdbc";
 
     /**
-     * Return default connection base URL
+     * Return default conn base URL
      *
-     * @param connection
+     * @param conn
      */
-    public String getBaseUrl(Connection connection) {
+    public String getBaseUrl(Conn conn) {
         // Key value is also used as seed string in base URL (c.f. DbType class)
-        return DRIVER_TYPE + ":" + connection.getKey() + "://" + connection.getHost() + ":" + connection.getPort();
+        return DRIVER_TYPE + ":" + conn.getKey() + "://" + conn.getHost() + ":" + conn.getPort();
     }
 
 }

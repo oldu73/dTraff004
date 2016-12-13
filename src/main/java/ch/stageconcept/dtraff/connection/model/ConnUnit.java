@@ -13,7 +13,7 @@ import java.util.function.Function;
 
 //TODO javadoc
 
-public class ConnectionUnit<T extends ConnectionUnit<?>> {
+public class ConnUnit<T extends ConnUnit<?>> {
     
     private final StringProperty name = new SimpleStringProperty();
     private ObjectProperty<ImageView> icon;
@@ -21,7 +21,7 @@ public class ConnectionUnit<T extends ConnectionUnit<?>> {
     private final Function<String, T> subUnitSupplier ;
     private final ObservableList<T> subUnits ;
 
-    public ConnectionUnit(String name, ObservableList<T> subUnits, Function<String, T> subUnitSupplier, String iconFileName) {
+    public ConnUnit(String name, ObservableList<T> subUnits, Function<String, T> subUnitSupplier, String iconFileName) {
         this.subUnits = subUnits ;
         this.subUnitSupplier = subUnitSupplier ;
         setName(name);
@@ -29,21 +29,21 @@ public class ConnectionUnit<T extends ConnectionUnit<?>> {
         this.menu = new SimpleObjectProperty<>();
     }
 
-    public ConnectionUnit(String name, ObservableList<T> subUnits, String iconFileName) {
+    public ConnUnit(String name, ObservableList<T> subUnits, String iconFileName) {
         this(name, subUnits, n -> null, iconFileName);
     }
     
-    public ConnectionUnit(String name, Function<String, T> subUnitSupplier) {
+    public ConnUnit(String name, Function<String, T> subUnitSupplier) {
         this(name, FXCollections.observableArrayList(), subUnitSupplier, null);
     }
 
-    public ConnectionUnit(String name) {
+    public ConnUnit(String name) {
         this(name, FXCollections.observableArrayList(), n -> null, null) ;
     }
 
     @Override
     public String toString() {
-        return "ConnectionUnit{" +
+        return "ConnUnit{" +
                 "name=" + name +
                 '}';
     }

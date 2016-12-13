@@ -11,7 +11,7 @@ import java.util.prefs.Preferences;
 
 //TODO javadoc
 
-public class Network extends ConnectionUnit<File> {
+public class Network extends ConnUnit<File> {
 
     private static final String ICON_FILENAME = "network001.gif";
 

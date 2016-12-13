@@ -1,6 +1,6 @@
 package ch.stageconcept.dtraff.connection.util;
 
-import ch.stageconcept.dtraff.connection.model.Connection;
+import ch.stageconcept.dtraff.connection.model.Conn;
 
 /**
  * Database description fields.
@@ -10,7 +10,7 @@ import ch.stageconcept.dtraff.connection.model.Connection;
 public class DbDescriptor {
 
     private final String key;
-    private final String name;  // Connection name
+    private final String name;  // Conn name
     private final String denomination;  // End user representation, MySQL instead of key value, mysql
     private final String host;
     private final int port;
@@ -78,12 +78,12 @@ public class DbDescriptor {
 
     /**
      * Return base URL in order to establish database
-     * connection (default pattern is MySQL (MariaDB), c.f. BaseUrl "enum" class)
+     * conn (default pattern is MySQL (MariaDB), c.f. BaseUrl "enum" class)
      *
-     * @param connection
+     * @param conn
      */
-    public String getBaseUrl(Connection connection) {
-        return BaseUrl.INSTANCE.getBaseUrl(connection);
+    public String getBaseUrl(Conn conn) {
+        return BaseUrl.INSTANCE.getBaseUrl(conn);
     }
 
     // Getter ###

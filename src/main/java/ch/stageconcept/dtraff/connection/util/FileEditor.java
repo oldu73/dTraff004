@@ -1,8 +1,6 @@
 package ch.stageconcept.dtraff.connection.util;
 
-import ch.stageconcept.dtraff.connection.model.Connection;
 import ch.stageconcept.dtraff.connection.model.File;
-import ch.stageconcept.dtraff.connection.view.ConnectionEditDialogController;
 import ch.stageconcept.dtraff.connection.view.FileEditDialogController;
 import ch.stageconcept.dtraff.main.MainApp;
 import javafx.fxml.FXMLLoader;

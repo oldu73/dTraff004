@@ -1,6 +1,6 @@
 package ch.stageconcept.dtraff.connection.model;
 
-import ch.stageconcept.dtraff.connection.util.ConnectionEditor;
+import ch.stageconcept.dtraff.connection.util.ConnEditor;
 import ch.stageconcept.dtraff.connection.util.DbDescriptor;
 import ch.stageconcept.dtraff.connection.util.DbType;
 import javafx.beans.property.*;
@@ -19,7 +19,7 @@ import java.sql.SQLException;
  *
  * @author Olivier Durand
  */
-public class Connection extends ConnectionUnit<DataBase> {
+public class Conn extends ConnUnit<DataBase> {
 
     // Attributes
     // #####################################################################
@@ -50,7 +50,7 @@ public class Connection extends ConnectionUnit<DataBase> {
      * @param name
      * @param subUnits
      */
-    public Connection(String name, ObservableList<DataBase> subUnits) {
+    public Conn(String name, ObservableList<DataBase> subUnits) {
 
         //#####
         super(name, subUnits, DataBase::new, ICON_FILENAME);
@@ -58,8 +58,9 @@ public class Connection extends ConnectionUnit<DataBase> {
         //#####
         // treeView context menu
         ContextMenu contextMenu = new ContextMenu();
-        MenuItem editConnectionMenuItem = new MenuItem("Edit Connection");
-        editConnectionMenuItem.setOnAction((ActionEvent t) -> {ConnectionEditor.INSTANCE.supply(this);});
+        MenuItem editConnectionMenuItem = new MenuItem("Edit Conn");
+        editConnectionMenuItem.setOnAction((ActionEvent t) -> {
+            ConnEditor.INSTANCE.supply(this);});
         contextMenu.getItems().add(editConnectionMenuItem);
         this.setMenu(contextMenu);
 
@@ -90,7 +91,7 @@ public class Connection extends ConnectionUnit<DataBase> {
      *
      * @param name
      */
-   public Connection(String name) {
+   public Conn(String name) {
         this(name, FXCollections.observableArrayList());
     }
 
@@ -119,7 +120,7 @@ public class Connection extends ConnectionUnit<DataBase> {
     public void undoConnect() throws SQLException {
         if (getConnection() != null && !getConnection().isClosed()) {
             getConnection().close();
-            //System.out.println("Connection closed!");
+            //System.out.println("Conn closed!");
         }
     }
 

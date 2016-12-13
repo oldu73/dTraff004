@@ -4,7 +4,7 @@ import javafx.collections.FXCollections;
 
 //TODO javadoc
 
-public class DataBase extends ConnectionUnit<ConnectionUnit<?>> {
+public class DataBase extends ConnUnit<ConnUnit<?>> {
 
     private static final String ICON_FILENAME = "database001.png";
 

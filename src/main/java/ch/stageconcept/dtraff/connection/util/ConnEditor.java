@@ -1,7 +1,7 @@
 package ch.stageconcept.dtraff.connection.util;
 
-import ch.stageconcept.dtraff.connection.model.Connection;
-import ch.stageconcept.dtraff.connection.view.ConnectionEditDialogController;
+import ch.stageconcept.dtraff.connection.model.Conn;
+import ch.stageconcept.dtraff.connection.view.ConnEditDialogController;
 import ch.stageconcept.dtraff.main.MainApp;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -17,23 +17,23 @@ import java.io.IOException;
  *
  * @author Olivier Durand
  */
-public enum ConnectionEditor {
+public enum ConnEditor {
 
     INSTANCE;
 
     /**
-     * Opens a dialog to edit details for the specified Connection. If the user
-     * clicks OK, the changes are saved into the provided Connection object and true
+     * Opens a dialog to edit details for the specified Conn. If the user
+     * clicks OK, the changes are saved into the provided Conn object and true
      * is returned.
      *
-     * @param connection the Connection object to be edited
+     * @param conn the Conn object to be edited
      * @return true if the user clicked OK, false otherwise.
      */
-    public boolean supply(Connection connection) {
+    public boolean supply(Conn conn) {
         try {
             // Load the fxml file and create a new stage for the popup dialog.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("../connection/view/ConnectionEditDialog.fxml"));
+            loader.setLocation(MainApp.class.getResource("../connection/view/ConnEditDialog.fxml"));
             AnchorPane page = (AnchorPane) loader.load();
 
             // Create the dialog Stage.
@@ -45,9 +45,9 @@ public enum ConnectionEditor {
             dialogStage.setScene(scene);
 
             // Set the dbConnect into the controller.
-            ConnectionEditDialogController controller = loader.getController();
+            ConnEditDialogController controller = loader.getController();
             controller.setDialogStage(dialogStage);
-            controller.setConnection(connection);
+            controller.setConn(conn);
 
             // Disable resize
             dialogStage.setResizable(false);

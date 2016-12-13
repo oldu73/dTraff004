@@ -1,6 +1,6 @@
 package ch.stageconcept.dtraff.connection.view;
 
-import ch.stageconcept.dtraff.connection.model.Connection;
+import ch.stageconcept.dtraff.connection.model.Conn;
 import ch.stageconcept.dtraff.connection.util.DbDescriptor;
 import ch.stageconcept.dtraff.connection.util.DbType;
 import ch.stageconcept.dtraff.connection.util.ErrorAlert;
@@ -22,11 +22,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Dialog to edit details of a Connection.
+ * Dialog to edit details of a Conn.
  *
  * @author Olivier Durand
  */
-public class ConnectionEditDialogController {
+public class ConnEditDialogController {
 
     @FXML
     private TextField nameField;
@@ -61,7 +61,7 @@ public class ConnectionEditDialogController {
     private Button cancelButton;
 
     private Stage dialogStage;
-    private Connection connection;
+    private Conn conn;
     private boolean okClicked = false;
 
     /**
@@ -89,7 +89,7 @@ public class ConnectionEditDialogController {
             portField.setText(Integer.toString(dbDescriptor.getPort()));
         });
 
-        // Test Connection button, Enter key pressed event handler
+        // Test Conn button, Enter key pressed event handler
         testConnectionButton.addEventHandler(KeyEvent.KEY_PRESSED, ev -> {
             if (ev.getCode() == KeyCode.ENTER) {
                 testConnectionButton.fire();
@@ -130,19 +130,19 @@ public class ConnectionEditDialogController {
     }
 
     /**
-     * Sets the Connection to be edited in the dialog.
+     * Sets the Conn to be edited in the dialog.
      *
-     * @param connection
+     * @param conn
      */
-    public void setConnection(Connection connection) {
-        this.connection = connection;
+    public void setConn(Conn conn) {
+        this.conn = conn;
 
-        nameField.setText(connection.getName());
-        denominationField.getSelectionModel().select(DbType.INSTANCE.getDbDescriptorMap().get(connection.getKey()));
-        hostField.setText(connection.getHost());
-        portField.setText(Integer.toString(connection.getPort()));
-        userField.setText(connection.getUser());
-        passwordField.setText(connection.getPassword());
+        nameField.setText(conn.getName());
+        denominationField.getSelectionModel().select(DbType.INSTANCE.getDbDescriptorMap().get(conn.getKey()));
+        hostField.setText(conn.getHost());
+        portField.setText(Integer.toString(conn.getPort()));
+        userField.setText(conn.getUser());
+        passwordField.setText(conn.getPassword());
     }
 
     /**
@@ -155,7 +155,7 @@ public class ConnectionEditDialogController {
     }
 
     /**
-     * Called when the user clicks test connection.
+     * Called when the user clicks test conn.
      */
     @FXML
     private void handleTestConnection() {
@@ -173,25 +173,25 @@ public class ConnectionEditDialogController {
                         e.printStackTrace();
                     }
 
-                    if (connection.doConnect()) {
-                        // updateMessage("Connection successfully established..");
-                        connection.undoConnect();
+                    if (conn.doConnect()) {
+                        // updateMessage("Conn successfully established..");
+                        conn.undoConnect();
                         return Boolean.TRUE;
                     } /* else {
-                        updateMessage("Unable to establish connection!");
+                        updateMessage("Unable to establish conn!");
                     } */
 
                     return Boolean.FALSE;
                 }
             };
 
-            // Bind Test Connection button enable/disable and progress indicator visibility
+            // Bind Test Conn button enable/disable and progress indicator visibility
             // with above task running property
             testConnectionButton.disableProperty().bind(task.runningProperty());
             testConnectionProgressIndicator.visibleProperty().bind(task.runningProperty());
 
             // If above commented updateMessage in task is used,
-            // bind Test Connection label with message property
+            // bind Test Conn label with message property
             //testConnectionLabel.textProperty().bind(task.messageProperty());
 
             task.setOnRunning(t -> {
@@ -212,7 +212,7 @@ public class ConnectionEditDialogController {
                 } /* Unnecessary because exception thrown in case of bad parameters -> task.setOnFailed
                 else {
                     // Unsuccessful login
-                    testConnectionLabel.setText("Unable to establish connection!");
+                    testConnectionLabel.setText("Unable to establish conn!");
                     testConnectionLabel.setTextFill(Color.RED);
                 }
                 */
@@ -222,7 +222,7 @@ public class ConnectionEditDialogController {
                 @Override
                 public void handle(WorkerStateEvent t) {
                     // This handler will be called if exception occurred during your task execution
-                    // E.g. network or db connection exceptions
+                    // E.g. network or db conn exceptions
                     testConnectionLabel.setText("Unable to establish connection!");
                     testConnectionLabel.setTextFill(Color.RED);
                 }
@@ -236,7 +236,7 @@ public class ConnectionEditDialogController {
     }
 
     /**
-     * Utility method to set attributes of Connection object
+     * Utility method to set attributes of Conn object
      * from edit dialog form if fields contain valid values.
      */
     private boolean setConnectionValues() {
@@ -244,16 +244,16 @@ public class ConnectionEditDialogController {
 
             DbDescriptor dbDescriptor = denominationField.getSelectionModel().getSelectedItem();
 
-            connection.setKey(dbDescriptor.getKey());
-            connection.setName(nameField.getText());
-            connection.setDenomination(dbDescriptor.getDenomination());
-            connection.setHost(hostField.getText());
-            connection.setPort(Integer.parseInt(portField.getText()));
-            connection.setUser(userField.getText());
-            connection.setPassword(passwordField.getText());
-            connection.setDriver(dbDescriptor.getDriver());
+            conn.setKey(dbDescriptor.getKey());
+            conn.setName(nameField.getText());
+            conn.setDenomination(dbDescriptor.getDenomination());
+            conn.setHost(hostField.getText());
+            conn.setPort(Integer.parseInt(portField.getText()));
+            conn.setUser(userField.getText());
+            conn.setPassword(passwordField.getText());
+            conn.setDriver(dbDescriptor.getDriver());
 
-            connection.setBaseUrl(dbDescriptor.getBaseUrl(connection));
+            conn.setBaseUrl(dbDescriptor.getBaseUrl(conn));
 
             return true;
         }

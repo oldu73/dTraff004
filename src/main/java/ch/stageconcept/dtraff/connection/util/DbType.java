@@ -11,7 +11,7 @@ public enum DbType {
 
     INSTANCE;
 
-    // Connection and DB Keys - Values ###
+    // Conn and DB Keys - Values ###
 
     // Default values
     private static final String DEFAULT_NAM = "default";
