@@ -16,12 +16,10 @@ public class Network extends ConnectionUnit<File> {
     private static final String ICON_FILENAME = "network001.gif";
 
     private Preferences preferences;
-    private static final String PREFS_PATH = "/ch/stageconcept/datatraffic/file";
+    public static final String PREFS_PATH = "/ch/stageconcept/datatraffic/file";
 
     public Network(String name, ObservableList<File> subUnits) {
         super(name, subUnits, File::new, ICON_FILENAME);
-
-        Preferences preferences = Preferences.userRoot().node(PREFS_PATH);
 
         ContextMenu contextMenu = new ContextMenu();
         MenuItem newFileMenuItem = new MenuItem("New File");
@@ -29,6 +27,7 @@ public class Network extends ConnectionUnit<File> {
             File file = new File("default");
             if (FileEditor.INSTANCE.supply(file)) {
                 subUnits.add(file);
+                Preferences preferences = Preferences.userRoot().node(PREFS_PATH);
                 preferences.put(file.getName(), file.getFileName());
             }
         });

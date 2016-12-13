@@ -14,6 +14,9 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
 
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
+
 /**
  * The controller for the root layout. The root layout provides the basic
  * application layout containing a menu bar and space where other JavaFX
@@ -156,6 +159,39 @@ public class RootLayoutController {
     private Network createNetwork() {
         Network network = new Network("Network");
 
+        boolean exists = false;
+
+        try {
+            exists = Preferences.userRoot().nodeExists(Network.PREFS_PATH);
+        } catch (BackingStoreException e) {
+            //e.printStackTrace();
+        }
+
+        if (exists) {
+            Preferences preferences = Preferences.userRoot().node(Network.PREFS_PATH);
+
+            String[] keys = new String[0];
+
+            try {
+                keys = preferences.keys();
+
+                for (String key : keys) {
+                    File file = new File(key);
+                    file.setFileName(preferences.get(key, null));
+                    network.getSubUnits().add(file);
+                    //System.out.println(key + " = " + preferences.get(key, null));
+                }
+
+            } catch (BackingStoreException e) {
+                //System.err.println("createNetwork() method, unable to read backing store: " + e);
+                //e.printStackTrace();
+            } catch (IllegalStateException e) {
+                //System.err.println("createNetwork() method, " + e);
+                //System.out.println("createNetwork() method, node has been removed!");
+            }
+        }
+
+        /*
         // Some sample data, debug mode
 	    File file1 = new File("file1");
 	    File file2 = new File("file2");
@@ -186,6 +222,7 @@ public class RootLayoutController {
 	    file3.getSubUnits().addAll(connection4, connection5);
 
 	    network.getSubUnits().addAll(file1, file2, file3);
+        */
 
         return network ;
     }
