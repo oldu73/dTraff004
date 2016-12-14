@@ -9,16 +9,28 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.image.ImageView;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlTransient;
 import java.util.function.Function;
 
 //TODO javadoc
 
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ConnUnit<T extends ConnUnit<?>> {
-    
+
     private final StringProperty name = new SimpleStringProperty();
+
+    @XmlTransient
     private ObjectProperty<ImageView> icon;
+
+    @XmlTransient
     private ObjectProperty<ContextMenu> menu;
+
+    @XmlTransient
     private final Function<String, T> subUnitSupplier ;
+
+    @XmlTransient
     private final ObservableList<T> subUnits ;
 
     public ConnUnit(String name, ObservableList<T> subUnits, Function<String, T> subUnitSupplier, String iconFileName) {
@@ -51,7 +63,7 @@ public class ConnUnit<T extends ConnUnit<?>> {
     public final StringProperty nameProperty() {
         return this.name;
     }
-    
+
     public final String getName() {
         return this.nameProperty().get();
     }

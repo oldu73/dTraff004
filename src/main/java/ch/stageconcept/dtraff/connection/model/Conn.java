@@ -10,6 +10,9 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlTransient;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,6 +22,7 @@ import java.sql.SQLException;
  *
  * @author Olivier Durand
  */
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Conn extends ConnUnit<DataBase> {
 
     // Attributes
@@ -36,7 +40,10 @@ public class Conn extends ConnUnit<DataBase> {
 
     private final StringProperty baseUrl;
 
+    @XmlTransient
     private final ObjectProperty<java.sql.Connection> connection;
+
+    @XmlTransient
     private final ObjectProperty<ResultSet> resultSet;
 
     private static final String ICON_FILENAME = "serverDefault001.gif";
@@ -122,6 +129,22 @@ public class Conn extends ConnUnit<DataBase> {
             getConnection().close();
             //System.out.println("Conn closed!");
         }
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("nam: " + this.getName()
+                + "\nkey: " + this.getKey()
+                + "\nden: " + this.getDenomination()
+                + "\nhst: " + this.getHost()
+                + "\nprt: " + this.getPort()
+                + "\nusr: " + this.getUser()
+                + "\npwd: " + this.getPassword()
+                + "\ndrv: " + this.getDriver()
+                + "\nurl: " + this.getBaseUrl()
+                + "\n_____________________________________"
+                + "\n");
+        return sb.toString();
     }
 
     // Getters and Setters

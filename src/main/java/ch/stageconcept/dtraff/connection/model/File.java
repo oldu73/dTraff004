@@ -81,6 +81,10 @@ public class File extends ConnUnit<Conn> {
             ConnListWrapper wrapper = new ConnListWrapper();
             wrapper.setConns(this.getSubUnits());
 
+            for (Conn conn: wrapper.getConns()) {
+                System.out.println(conn);
+            }
+
             // Marshalling and saving XML to the file.
             m.marshal(wrapper, file);
 
