@@ -12,17 +12,18 @@ import javafx.scene.control.MenuItem;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
+import java.io.File;
 import java.io.IOException;
 
 //TODO javadoc
 
-public class File extends ConnUnit<Conn> {
+public class ConnFile extends ConnUnit<Conn> {
 
     private static final String ICON_FILENAME = "file001.png";
 
     private String fileName;
 
-   public File(String name, ObservableList<Conn> subUnits) {
+   public ConnFile(String name, ObservableList<Conn> subUnits) {
        super(name, subUnits, Conn::new, ICON_FILENAME);
 
        // treeView context menu
@@ -38,7 +39,7 @@ public class File extends ConnUnit<Conn> {
                 subUnits.add(conn);
                 //this.createAndAddSubUnit("Hello, world!");
 
-                saveConnectionDataToFile();
+                saveConnDataToFile();
            }
 
        });
@@ -46,7 +47,7 @@ public class File extends ConnUnit<Conn> {
        this.setMenu(contextMenu);
    }
 
-   public File(String name) {
+   public ConnFile(String name) {
        this(name, FXCollections.observableArrayList());
    }
 
@@ -62,9 +63,11 @@ public class File extends ConnUnit<Conn> {
      * Saves the current connection data to file.
      *
      */
-    private void saveConnectionDataToFile() {
+    private void saveConnDataToFile() {
 
-        java.io.File file = new java.io.File(this.fileName);
+        //TODO update file when conn object has been edited
+
+        File file = new java.io.File(this.fileName);
 
         try {
             file.createNewFile();
@@ -81,9 +84,12 @@ public class File extends ConnUnit<Conn> {
             ConnListWrapper wrapper = new ConnListWrapper();
             wrapper.setConns(this.getSubUnits());
 
+            // debug mode
+            /*
             for (Conn conn: wrapper.getConns()) {
                 System.out.println(conn);
             }
+            */
 
             // Marshalling and saving XML to the file.
             m.marshal(wrapper, file);

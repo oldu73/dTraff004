@@ -1,6 +1,6 @@
 package ch.stageconcept.dtraff.connection.model;
 
-import ch.stageconcept.dtraff.connection.util.FileEditor;
+import ch.stageconcept.dtraff.connection.util.ConnFileEditor;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -11,21 +11,21 @@ import java.util.prefs.Preferences;
 
 //TODO javadoc
 
-public class Network extends ConnUnit<File> {
+public class Network extends ConnUnit<ConnFile> {
 
     private static final String ICON_FILENAME = "network001.gif";
 
     private Preferences preferences;
     public static final String PREFS_PATH = "/ch/stageconcept/datatraffic/file";
 
-    public Network(String name, ObservableList<File> subUnits) {
-        super(name, subUnits, File::new, ICON_FILENAME);
+    public Network(String name, ObservableList<ConnFile> subUnits) {
+        super(name, subUnits, ConnFile::new, ICON_FILENAME);
 
         ContextMenu contextMenu = new ContextMenu();
         MenuItem newFileMenuItem = new MenuItem("New File");
         newFileMenuItem.setOnAction((ActionEvent t) -> {
-            File file = new File("default");
-            if (FileEditor.INSTANCE.supply(file)) {
+            ConnFile file = new ConnFile("default");
+            if (ConnFileEditor.INSTANCE.supply(file)) {
                 subUnits.add(file);
                 Preferences preferences = Preferences.userRoot().node(PREFS_PATH);
                 preferences.put(file.getName(), file.getFileName());

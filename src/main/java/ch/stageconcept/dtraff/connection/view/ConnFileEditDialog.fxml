@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ch.stageconcept.dtraff.connection.view.FileEditDialogController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ch.stageconcept.dtraff.connection.view.ConnFileEditDialogController">
    <children>
       <GridPane AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
         <columnConstraints>
@@ -33,6 +33,7 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
+            <TextField fx:id="folderField" GridPane.columnIndex="2" />
             <TextField fx:id="fileField" GridPane.columnIndex="2" GridPane.rowIndex="1" />
             <Label fx:id="passwordLabel" text="Password" GridPane.rowIndex="3" />
             <Label fx:id="repeatPasswordLabel" text="Repeat Password" GridPane.rowIndex="4" />
@@ -42,7 +43,6 @@
             <PasswordField fx:id="passwordField" GridPane.columnIndex="2" GridPane.rowIndex="3" />
             <PasswordField fx:id="repeatPasswordField" GridPane.columnIndex="2" GridPane.rowIndex="4" />
             <Button fx:id="browseButton" mnemonicParsing="false" onAction="#handleBrowse" text="Browse" GridPane.columnIndex="3" GridPane.halignment="RIGHT" />
-            <TextField fx:id="folderField" GridPane.columnIndex="2" />
             <Label text="Folder" />
          </children>
       </GridPane>

@@ -1,6 +1,6 @@
 package ch.stageconcept.dtraff.connection.view;
 
-import ch.stageconcept.dtraff.connection.model.File;
+import ch.stageconcept.dtraff.connection.model.ConnFile;
 import ch.stageconcept.dtraff.connection.util.*;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -8,11 +8,11 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 /**
- * Dialog to edit details of a File.
+ * Dialog to edit details of a ConnFile.
  *
  * @author Olivier Durand
  */
-public class FileEditDialogController {
+public class ConnFileEditDialogController {
 
     private static final String FILE_EXT = ".xml";
 
@@ -47,7 +47,7 @@ public class FileEditDialogController {
     private Button cancelButton;
 
     private Stage dialogStage;
-    private File file;
+    private ConnFile file;
     private boolean okClicked = false;
 
     /**
@@ -72,11 +72,11 @@ public class FileEditDialogController {
     }
 
     /**
-     * Sets the File to be edited in the dialog.
+     * Sets the ConnFile to be edited in the dialog.
      *
      * @param file
      */
-    public void setFile(File file) {
+    public void setFile(ConnFile file) {
         this.file = file;
     }
 
@@ -118,7 +118,7 @@ public class FileEditDialogController {
     }
 
     /**
-     * Utility method to set attributes of File object
+     * Utility method to set attributes of ConnFile object
      * from edit dialog form if fields contain valid values.
      */
     private boolean setFileValues() {

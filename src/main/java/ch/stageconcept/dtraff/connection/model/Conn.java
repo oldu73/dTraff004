@@ -12,6 +12,7 @@ import javafx.scene.control.MenuItem;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -22,7 +23,11 @@ import java.sql.SQLException;
  *
  * @author Olivier Durand
  */
-@XmlAccessorType(XmlAccessType.FIELD)
+
+// SRC: http://stackoverflow.com/questions/10012542/moxy-jaxb-how-to-exclude-elements-from-marshalling
+// SRC: http://stackoverflow.com/questions/15415136/jaxb-xmlattribute-xmlvalue-real-example
+
+@XmlAccessorType(XmlAccessType.NONE)
 public class Conn extends ConnUnit<DataBase> {
 
     // Attributes
@@ -37,19 +42,33 @@ public class Conn extends ConnUnit<DataBase> {
     private final StringProperty user;
     private final StringProperty password;
     private final StringProperty driver;
-
     private final StringProperty baseUrl;
 
-    @XmlTransient
     private final ObjectProperty<java.sql.Connection> connection;
-
-    @XmlTransient
     private final ObjectProperty<ResultSet> resultSet;
 
     private static final String ICON_FILENAME = "serverDefault001.gif";
 
     // Constructors
     // #####################################################################
+
+    /**
+     * Default Constructor.
+     *
+     */
+    public Conn() {
+        key = null;
+        denomination = null;
+        host = null;
+        port = null;
+        user = null;
+        password = null;
+        driver = null;
+        baseUrl = null;
+
+        connection = null;
+        resultSet = null;
+    }
 
     /**
      * Constructor.
@@ -65,7 +84,7 @@ public class Conn extends ConnUnit<DataBase> {
         //#####
         // treeView context menu
         ContextMenu contextMenu = new ContextMenu();
-        MenuItem editConnectionMenuItem = new MenuItem("Edit Conn");
+        MenuItem editConnectionMenuItem = new MenuItem("Edit Connection");
         editConnectionMenuItem.setOnAction((ActionEvent t) -> {
             ConnEditor.INSTANCE.supply(this);});
         contextMenu.getItems().add(editConnectionMenuItem);
@@ -150,6 +169,7 @@ public class Conn extends ConnUnit<DataBase> {
     // Getters and Setters
     // #####################################################################
 
+    @XmlElement
     public String getBaseUrl() {
         return baseUrl.get();
     }
@@ -162,6 +182,7 @@ public class Conn extends ConnUnit<DataBase> {
         this.baseUrl.set(baseUrl);
     }
 
+    @XmlElement
     public String getKey() {
         return key.get();
     }
@@ -174,6 +195,7 @@ public class Conn extends ConnUnit<DataBase> {
         this.key.set(key);
     }
 
+    @XmlElement
     public String getDenomination() {
         return denomination.get();
     }
@@ -210,6 +232,7 @@ public class Conn extends ConnUnit<DataBase> {
         this.resultSet.set(resultSet);
     }
 
+    @XmlElement
     public String getDriver() {
         return driver.get();
     }
@@ -222,6 +245,7 @@ public class Conn extends ConnUnit<DataBase> {
         this.driver.set(driver);
     }
 
+    @XmlElement
     public String getHost() {
         return host.get();
     }
@@ -234,6 +258,7 @@ public class Conn extends ConnUnit<DataBase> {
         this.host.set(host);
     }
 
+    @XmlElement
     public int getPort() {
         return port.get();
     }
@@ -246,6 +271,7 @@ public class Conn extends ConnUnit<DataBase> {
         this.port.set(port);
     }
 
+    @XmlElement
     public String getUser() {
         return user.get();
     }
@@ -258,6 +284,7 @@ public class Conn extends ConnUnit<DataBase> {
         this.user.set(user);
     }
 
+    @XmlElement
     public String getPassword() {
         return password.get();
     }

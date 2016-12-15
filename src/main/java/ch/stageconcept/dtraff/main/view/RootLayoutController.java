@@ -2,6 +2,7 @@ package ch.stageconcept.dtraff.main.view;
 
 import ch.stageconcept.dtraff.connection.model.*;
 import ch.stageconcept.dtraff.connection.util.ConnEditor;
+import ch.stageconcept.dtraff.connection.util.ConnListWrapper;
 import ch.stageconcept.dtraff.connection.view.ModelTree;
 import ch.stageconcept.dtraff.connection.util.DbType;
 import ch.stageconcept.dtraff.main.MainApp;
@@ -14,6 +15,11 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -38,7 +44,7 @@ public class RootLayoutController {
     @FXML
     private MenuItem editServerConnectionMenuItem;
 
-    private Network network;    // Network description to be used in a treeView : Network (root node) - File - Conn - Database - (...)
+    private Network network;    // Network description to be used in a treeView : Network (root node) - ConnFile - Conn - Database - (...)
     private ModelTree<ConnUnit<?>> connectionTree;
     private TreeView<ConnUnit<?>> connectionTreeView;
 
@@ -73,10 +79,10 @@ public class RootLayoutController {
         // Debug mode
         //printChildren(connectionTreeView.getRoot());
 
-        // Disable tool bar menu New Server Conn if no item or not a File instance selected in Connections treeView
+        // Disable tool bar menu New Server Conn if no item or not a ConnFile instance selected in Connections treeView
         newServerConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
                         connectionTreeView.getSelectionModel().getSelectedItem() == null ||
-                                !(connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof File),
+                                !(connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile),
                 connectionTreeView.getSelectionModel().selectedItemProperty()));
 
         // Disable tool bar menu Edit Server Conn if no item or not a Conn instance selected in Connections treeView
@@ -96,7 +102,7 @@ public class RootLayoutController {
     }
 
     /**
-     * Called when the user selects the File - New Server Conn menu. Opens a dialog to edit
+     * Called when the user selects the ConnFile - New Server Conn menu. Opens a dialog to edit
      * details for a new connection.
      */
     @FXML
@@ -105,9 +111,9 @@ public class RootLayoutController {
         Conn conn = new Conn(DbType.INSTANCE.getDbDescriptorMap().get(DbType.MYSQL_KEY).getName());
 
         if (ConnEditor.INSTANCE.supply(conn)) {
-            // The tool bar menu is disabled if none or not a File is selected in Conn treeView,
-            // so the item could only be a File -> (cast)
-            File file = (File) connectionTreeView.getSelectionModel().getSelectedItem().getValue();
+            // The tool bar menu is disabled if none or not a ConnFile is selected in Conn treeView,
+            // so the item could only be a ConnFile -> (cast)
+            ConnFile file = (ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue();
             file.getSubUnits().add(conn);
         }
 
@@ -116,7 +122,7 @@ public class RootLayoutController {
     }
 
     /**
-     * Called when the user selects the File - Edit Server Conn menu. Opens a dialog to edit
+     * Called when the user selects the ConnFile - Edit Server Conn menu. Opens a dialog to edit
      * details for the existing connection.
      */
     @FXML
@@ -154,7 +160,7 @@ public class RootLayoutController {
 
     /**
      * Create network description in a tree data structure,
-     * to be used in a treeView : Network (root node) - File - Conn - Database - (...)
+     * to be used in a treeView : Network (root node) - ConnFile - Conn - Database - (...)
      */
     private Network createNetwork() {
         Network network = new Network("Network");
@@ -176,10 +182,29 @@ public class RootLayoutController {
                 keys = preferences.keys();
 
                 for (String key : keys) {
-                    File file = new File(key);
-                    file.setFileName(preferences.get(key, null));
-                    network.getSubUnits().add(file);
-                    //System.out.println(key + " = " + preferences.get(key, null));
+                    ConnFile connFile = new ConnFile(key);
+
+                    String fileName = preferences.get(key, null);
+
+                    if (fileName != null) {
+                        connFile.setFileName(fileName);
+
+                        List<Conn> listConn = loadConnDataFromFile(fileName);
+
+                        if (listConn != null) {
+                            //connFile.getSubUnits().addAll(listConn);
+
+                            // debug mode
+
+                            for (Conn conn: listConn) {
+                                System.out.println(conn);
+                            }
+
+                        }
+
+                        network.getSubUnits().add(connFile);
+                        //System.out.println(key + " = " + preferences.get(key, null));
+                    }
                 }
 
             } catch (BackingStoreException e) {
@@ -193,9 +218,9 @@ public class RootLayoutController {
 
         /*
         // Some sample data, debug mode
-	    File file1 = new File("file1");
-	    File file2 = new File("file2");
-	    File file3 = new File("file3");
+	    ConnFile file1 = new ConnFile("file1");
+	    ConnFile file2 = new ConnFile("file2");
+	    ConnFile file3 = new ConnFile("file3");
 
 	    Conn connection1 = new Conn("connection1");
 	    Conn connection2 = new Conn("connection2");
@@ -240,6 +265,41 @@ public class RootLayoutController {
                 printChildren(child);
             }
         }
+    }
+
+/**
+ * Loads connection data from the specified file.
+ *
+ * @param fileName
+ */
+    private List<Conn> loadConnDataFromFile(String fileName) {
+        File file = new java.io.File(fileName);
+
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            JAXBContext context = JAXBContext.newInstance(ConnListWrapper.class);
+            Unmarshaller um = context.createUnmarshaller();
+
+            // Reading XML from the file and unmarshalling.
+            ConnListWrapper wrapper = (ConnListWrapper) um.unmarshal(file);
+
+            return wrapper.getConns();
+
+        } catch (Exception e) { // catches ANY exception
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Could not load data");
+            alert.setContentText("Could not load data from file:\n" + file.getPath());
+
+            alert.showAndWait();
+        }
+
+        return null;
     }
 
 }
