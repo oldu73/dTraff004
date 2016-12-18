@@ -9,10 +9,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.image.ImageView;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.*;
 import java.util.function.Function;
 
 //TODO javadoc
@@ -34,11 +31,6 @@ public class ConnUnit<T extends ConnUnit<?>> {
         this.menu = new SimpleObjectProperty<>();
     }
 
-    public ConnUnit() {
-        subUnitSupplier = null;
-        subUnits = null;
-    }
-
     public ConnUnit(String name, ObservableList<T> subUnits, String iconFileName) {
         this(name, subUnits, n -> null, iconFileName);
     }
@@ -49,6 +41,14 @@ public class ConnUnit<T extends ConnUnit<?>> {
 
     public ConnUnit(String name) {
         this(name, FXCollections.observableArrayList(), n -> null, null) ;
+    }
+
+    /**
+     * Default Constructor (for JAXB).
+     *
+     */
+    public ConnUnit() {
+        this(null, FXCollections.observableArrayList(), n -> null, null) ;
     }
 
     @Override

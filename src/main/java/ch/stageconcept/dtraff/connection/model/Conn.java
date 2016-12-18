@@ -13,7 +13,6 @@ import javafx.scene.control.MenuItem;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -51,24 +50,6 @@ public class Conn extends ConnUnit<DataBase> {
 
     // Constructors
     // #####################################################################
-
-    /**
-     * Default Constructor.
-     *
-     */
-    public Conn() {
-        key = null;
-        denomination = null;
-        host = null;
-        port = null;
-        user = null;
-        password = null;
-        driver = null;
-        baseUrl = null;
-
-        connection = null;
-        resultSet = null;
-    }
 
     /**
      * Constructor.
@@ -121,6 +102,14 @@ public class Conn extends ConnUnit<DataBase> {
         this(name, FXCollections.observableArrayList());
     }
 
+    /**
+     * Default Constructor (for JAXB).
+     *
+     */
+    public Conn() {
+        this(null, FXCollections.observableArrayList());
+    }
+
     // Methods
     // #####################################################################
 
@@ -171,8 +160,8 @@ public class Conn extends ConnUnit<DataBase> {
 
     @XmlElement
     public String getBaseUrl() {
-        return baseUrl.get();
-    }
+            return baseUrl.get();
+        }
 
     public StringProperty baseUrlProperty() {
         return baseUrl;

@@ -192,14 +192,14 @@ public class RootLayoutController {
                         List<Conn> listConn = loadConnDataFromFile(fileName);
 
                         if (listConn != null) {
-                            //connFile.getSubUnits().addAll(listConn);
+                            connFile.getSubUnits().addAll(listConn);
 
                             // debug mode
-
+                            /*
                             for (Conn conn: listConn) {
                                 System.out.println(conn);
                             }
-
+                            */
                         }
 
                         network.getSubUnits().add(connFile);
@@ -275,18 +275,26 @@ public class RootLayoutController {
     private List<Conn> loadConnDataFromFile(String fileName) {
         File file = new java.io.File(fileName);
 
-        try {
-            file.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // debug mode
+        //System.out.println(file.toString());
 
         try {
             JAXBContext context = JAXBContext.newInstance(ConnListWrapper.class);
+
+            // debug mode
+            //System.out.println(context.toString());
+
             Unmarshaller um = context.createUnmarshaller();
 
             // Reading XML from the file and unmarshalling.
             ConnListWrapper wrapper = (ConnListWrapper) um.unmarshal(file);
+
+            // debug mode
+            /*
+            for (Conn conn: wrapper.getConns()) {
+                System.out.println(conn);
+            }
+            */
 
             return wrapper.getConns();
 
