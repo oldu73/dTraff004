@@ -1,9 +1,6 @@
 package ch.stageconcept.dtraff.main.view;
 
-import ch.stageconcept.dtraff.connection.model.Conn;
-import ch.stageconcept.dtraff.connection.model.ConnFile;
-import ch.stageconcept.dtraff.connection.model.ConnUnit;
-import ch.stageconcept.dtraff.connection.model.Network;
+import ch.stageconcept.dtraff.connection.model.*;
 import ch.stageconcept.dtraff.connection.util.*;
 import ch.stageconcept.dtraff.connection.view.ModelTree;
 import ch.stageconcept.dtraff.main.MainApp;
@@ -188,70 +185,30 @@ public class RootLayoutController {
                     String fileName = preferences.get(key, null);
 
                     if (fileName != null) {
-
-                        boolean passwordOk = false;
-
                         connFile.setFileName(fileName);
                         List<Conn> listConn = loadConnDataFromFile(fileName);
 
-                        if (listConn.get(0).isPasswordEncrypted() && connFile.getPassword() == null) {
-                            boolean tryAgain = false;
+                        //System.out.println("String to decrypt: " + listConn.get(0).getPassword());
 
-                            do {
-                                PasswordDialog pd = new PasswordDialog(fileName);
-                                Optional<String> passwordDialogResult = pd.showAndWait();
-                                //result.ifPresent(password -> System.out.println(password));
+                        // If first element (Conn) of the list is encrypted, also all others are (with same password)
+                        boolean isPasswordEncrypted = listConn.get(0).isPasswordEncrypted();
 
-                                if (passwordDialogResult.isPresent()) {
-                                    String password = passwordDialogResult.get();
+                        String password = null;
 
-                                    try {
-                                        Crypto crypto = new Crypto(password);
-                                        // If no exception thrown by line below, means that password is correct
-                                        crypto.getDecrypted(listConn.get(0).getPassword());
+                        if (isPasswordEncrypted) {
+                            password = getConnFilePassword(listConn.get(0), fileName);
 
-                                        connFile.setPasswordProtected(true);
-                                        connFile.setPassword(password);
-
-                                        passwordOk = true;
-                                        tryAgain = false;
-
-                                    } catch (Exception e) {
-
-                                        //e.printStackTrace();
-
-                                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                                        alert.setTitle("Password Dialog");
-                                        alert.setHeaderText("Bad password!");
-                                        alert.setContentText("Try again?");
-
-                                        Optional<ButtonType> badPasswordDialogResult = alert.showAndWait();
-                                        if (badPasswordDialogResult.get() == ButtonType.OK) {
-                                            // ... user chose OK
-                                            tryAgain = true;
-
-                                        } else {
-                                            // ... user chose CANCEL or closed the dialog
-                                            tryAgain = false;
-                                        }
-                                    }
-                                } else {
-                                    tryAgain = false;
-                                }
-
-                            } while (tryAgain);
-
-                            //System.out.println("String to decrypt: " + listConn.get(0).getPassword());
-
+                            if (password != null) {
+                                connFile.setPasswordProtected(true);
+                                connFile.setPassword(password);
+                            }
                         }
 
-                        if (listConn != null && passwordOk) {
+                        if (listConn != null) {
 
                             for (Conn conn: listConn) {
                                 conn.setParent(connFile);
                             }
-
-                            connFile.getSubUnits().addAll(listConn);
 
                             // debug mode
                             /*
@@ -259,8 +216,13 @@ public class RootLayoutController {
                                 System.out.println(conn);
                             }
                             */
-                        } else {
-                            connFile.setIcon(new ImageView("fileNotOk001.png"));
+
+                            if (!isPasswordEncrypted || (isPasswordEncrypted && password != null)) {
+                                connFile.getSubUnits().addAll(listConn);
+                            } else {
+                                // Do not populate subunits and set broken file icon
+                                connFile.setIcon(new ImageView("fileNotOk001.png"));
+                            }
                         }
 
                         network.getSubUnits().add(connFile);
@@ -277,23 +239,35 @@ public class RootLayoutController {
             }
         }
 
-        /*
         // Some sample data, debug mode
-	    ConnFile file1 = new ConnFile("file1");
-	    ConnFile file2 = new ConnFile("file2");
-	    ConnFile file3 = new ConnFile("file3");
+        //buildSampleData(network);
 
-	    Conn connection1 = new Conn("connection1");
-	    Conn connection2 = new Conn("connection2");
-	    Conn connection3 = new Conn("connection3");
-	    Conn connection4 = new Conn("connection4");
-	    Conn connection5 = new Conn("connection5");
+        return network ;
+    }
 
-	    DataBase dataBase1 = new DataBase("dataBase1");
-	    DataBase dataBase2 = new DataBase("dataBase2");
-	    DataBase dataBase3 = new DataBase("dataBase3");
-	    DataBase dataBase4 = new DataBase("dataBase4");
-	    DataBase dataBase5 = new DataBase("dataBase5");
+    /**
+     * Populate tree with sample data,
+     * for testing purpose.
+     *
+     * @param network
+     */
+    private void buildSampleData(Network network) {
+        // Some sample data, debug mode
+        ConnFile file1 = new ConnFile("file1");
+        ConnFile file2 = new ConnFile("file2");
+        ConnFile file3 = new ConnFile("file3");
+
+        Conn connection1 = new Conn("connection1");
+        Conn connection2 = new Conn("connection2");
+        Conn connection3 = new Conn("connection3");
+        Conn connection4 = new Conn("connection4");
+        Conn connection5 = new Conn("connection5");
+
+        DataBase dataBase1 = new DataBase("dataBase1");
+        DataBase dataBase2 = new DataBase("dataBase2");
+        DataBase dataBase3 = new DataBase("dataBase3");
+        DataBase dataBase4 = new DataBase("dataBase4");
+        DataBase dataBase5 = new DataBase("dataBase5");
 
         connection1.getSubUnits().add(dataBase1);
 
@@ -305,17 +279,16 @@ public class RootLayoutController {
 
         file1.getSubUnits().add(connection1);
         file2.getSubUnits().addAll(connection2, connection3);
-	    file3.getSubUnits().addAll(connection4, connection5);
+        file3.getSubUnits().addAll(connection4, connection5);
 
-	    network.getSubUnits().addAll(file1, file2, file3);
-        */
-
-        return network ;
+        network.getSubUnits().addAll(file1, file2, file3);
     }
 
     /**
      * Iterate TreeView nodes to print items (debug mode).
      * SRC: http://stackoverflow.com/questions/28342309/iterate-treeview-nodes
+     *
+     * @param root tree root
      */
     private void printChildren(TreeItem<?> root){
         System.out.println("Current Parent: " + root.getValue());
@@ -329,7 +302,8 @@ public class RootLayoutController {
     }
 
 /**
- * Loads connection data from the specified file.
+ * Loads connection data from the specified file,
+ * unmarshaled with JAXB.
  *
  * @param fileName
  */
@@ -370,6 +344,61 @@ public class RootLayoutController {
 
             alert.showAndWait();
         }
+
+        return null;
+    }
+
+    /**
+     * Ask user for password in a dialog.
+     * This password is used at ConnFile level
+     * to encrypt/decrypt Conn password
+     *
+     * @param conn
+     * @return password if correct, null otherwise
+     */
+    private String getConnFilePassword(Conn conn, String fileName) {
+
+        boolean tryAgain = false;
+
+        do {
+            PasswordDialog pd = new PasswordDialog(fileName);
+            Optional<String> passwordDialogResult = pd.showAndWait();
+            //result.ifPresent(password -> System.out.println(password));
+
+            if (passwordDialogResult.isPresent()) {
+                String password = passwordDialogResult.get();
+
+                try {
+                    Crypto crypto = new Crypto(password);
+                    // If no exception thrown by line below, means that password is correct
+                    crypto.getDecrypted(conn.getPassword());
+
+                    return password;
+
+                } catch (Exception e) {
+
+                    //e.printStackTrace();
+
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setTitle("Password Dialog");
+                    alert.setHeaderText("Bad password!");
+                    alert.setContentText("Try again?");
+
+                    Optional<ButtonType> badPasswordDialogResult = alert.showAndWait();
+                    if (badPasswordDialogResult.get() == ButtonType.OK) {
+                        // ... user chose OK
+                        tryAgain = true;
+
+                    } else {
+                        // ... user chose CANCEL or closed the dialog
+                        tryAgain = false;
+                    }
+                }
+            } else {
+                tryAgain = false;
+            }
+
+        } while (tryAgain);
 
         return null;
     }

@@ -2,6 +2,7 @@ package ch.stageconcept.dtraff.connection.model;
 
 import ch.stageconcept.dtraff.connection.util.ConnEditor;
 import ch.stageconcept.dtraff.connection.util.ConnListWrapper;
+import ch.stageconcept.dtraff.connection.util.Crypto;
 import ch.stageconcept.dtraff.connection.util.DbType;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -47,6 +48,13 @@ public class ConnFile extends ConnUnit<Conn> {
            // new Conn instance with default name value
            Conn conn = new Conn(DbType.INSTANCE.getDbDescriptorMap().get(DbType.MYSQL_KEY).getName());
            conn.setParent(this);
+
+           // If ConnFile is password protected,
+           // encrypt Conn password default value (root) with ConnFile password
+           if (conn.getParent().isPasswordProtected()) {
+               Crypto crypto = new Crypto(conn.getParent().getPassword());
+               conn.setPassword(crypto.getEncrypted(conn.getPassword()));
+           }
 
            if (ConnEditor.INSTANCE.supply(conn)) {
                 subUnits.add(conn);
