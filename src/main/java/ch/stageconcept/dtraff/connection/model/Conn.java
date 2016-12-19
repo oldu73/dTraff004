@@ -320,7 +320,7 @@ public class Conn extends ConnUnit<DataBase> {
     }
 
     public void setPassword(String password) {
-
+        /*
         if (this.getParent().isPasswordProtected()) {
             this.setPasswordEncrypted(true);
             strongTextEncryptor.setPassword(this.getParent().getPassword());
@@ -328,6 +328,9 @@ public class Conn extends ConnUnit<DataBase> {
         } else {
             this.password.set(password);
         }
+        */
+
+        this.password.set(password);
 
     }
 

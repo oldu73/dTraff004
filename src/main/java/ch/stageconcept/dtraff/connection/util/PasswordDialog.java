@@ -20,7 +20,7 @@ public class PasswordDialog extends Dialog<String> {
     private PasswordField passwordField;
 
     public PasswordDialog(String fileName) {
-        setTitle("Password");
+        setTitle("Password Dialog");
         setHeaderText("Please enter password for: \n" + fileName);
 
         ButtonType okButton = new ButtonType("OK", ButtonData.OK_DONE);

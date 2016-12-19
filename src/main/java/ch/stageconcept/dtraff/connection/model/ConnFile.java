@@ -21,7 +21,7 @@ public class ConnFile extends ConnUnit<Conn> {
 
     // ### Attributes #####################################################################
 
-    private static final String ICON_FILENAME = "file001.png";
+    private static final String ICON_FILENAME = "fileOk001.png";
 
     private String fileName;
     private boolean isPasswordProtected = false;

@@ -134,9 +134,9 @@ public class ConnFileEditDialogController {
                 file.setPassword(null);
             }
 
-            System.out.println(file.isPasswordProtected());
-            System.out.println(file.getPassword());
-            System.out.println();
+            //System.out.println(file.isPasswordProtected());
+            //System.out.println(file.getPassword());
+            //System.out.println();
 
             return true;
         }

@@ -1,6 +1,7 @@
 package ch.stageconcept.dtraff.connection.view;
 
 import ch.stageconcept.dtraff.connection.model.Conn;
+import ch.stageconcept.dtraff.connection.util.Crypto;
 import ch.stageconcept.dtraff.connection.util.DbDescriptor;
 import ch.stageconcept.dtraff.connection.util.DbType;
 import ch.stageconcept.dtraff.connection.util.ErrorAlert;
@@ -142,7 +143,13 @@ public class ConnEditDialogController {
         hostField.setText(conn.getHost());
         portField.setText(Integer.toString(conn.getPort()));
         userField.setText(conn.getUser());
-        passwordField.setText(conn.getPassword());
+
+        if (conn.getParent().isPasswordProtected()) {
+            Crypto crypto = new Crypto(conn.getParent().getPassword());
+            passwordField.setText(crypto.getDecrypted(conn.getPassword()));
+        } else {
+            passwordField.setText(conn.getPassword());
+        }
     }
 
     /**
@@ -250,9 +257,16 @@ public class ConnEditDialogController {
             conn.setHost(hostField.getText());
             conn.setPort(Integer.parseInt(portField.getText()));
             conn.setUser(userField.getText());
-            conn.setPassword(passwordField.getText());
-            conn.setDriver(dbDescriptor.getDriver());
 
+            if (conn.getParent().isPasswordProtected()) {
+                conn.setPasswordEncrypted(true);
+                Crypto crypto = new Crypto(conn.getParent().getPassword());
+                conn.setPassword(crypto.getEncrypted(passwordField.getText()));
+            } else {
+                conn.setPassword(passwordField.getText());
+            }
+
+            conn.setDriver(dbDescriptor.getDriver());
             conn.setBaseUrl(dbDescriptor.getBaseUrl(conn));
 
             return true;

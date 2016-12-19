@@ -1,22 +1,24 @@
 package ch.stageconcept.dtraff.main.view;
 
-import ch.stageconcept.dtraff.connection.model.*;
-import ch.stageconcept.dtraff.connection.util.ConnEditor;
-import ch.stageconcept.dtraff.connection.util.ConnListWrapper;
-import ch.stageconcept.dtraff.connection.util.PasswordDialog;
+import ch.stageconcept.dtraff.connection.model.Conn;
+import ch.stageconcept.dtraff.connection.model.ConnFile;
+import ch.stageconcept.dtraff.connection.model.ConnUnit;
+import ch.stageconcept.dtraff.connection.model.Network;
+import ch.stageconcept.dtraff.connection.util.*;
 import ch.stageconcept.dtraff.connection.view.ModelTree;
-import ch.stageconcept.dtraff.connection.util.DbType;
 import ch.stageconcept.dtraff.main.MainApp;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import org.jasypt.util.text.StrongTextEncryptor;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.prefs.BackingStoreException;
@@ -186,20 +188,64 @@ public class RootLayoutController {
                     String fileName = preferences.get(key, null);
 
                     if (fileName != null) {
-                        connFile.setFileName(fileName);
 
+                        boolean passwordOk = false;
+
+                        connFile.setFileName(fileName);
                         List<Conn> listConn = loadConnDataFromFile(fileName);
 
                         if (listConn.get(0).isPasswordEncrypted() && connFile.getPassword() == null) {
+                            boolean tryAgain = false;
 
-                            PasswordDialog pd = new PasswordDialog(fileName);
-                            Optional<String> result = pd.showAndWait();
-                            result.ifPresent(password -> System.out.println(password));
+                            do {
+                                PasswordDialog pd = new PasswordDialog(fileName);
+                                Optional<String> passwordDialogResult = pd.showAndWait();
+                                //result.ifPresent(password -> System.out.println(password));
 
-                            //connFile.setPasswordProtected(true);
+                                if (passwordDialogResult.isPresent()) {
+                                    String password = passwordDialogResult.get();
+
+                                    try {
+                                        Crypto crypto = new Crypto(password);
+                                        // If no exception thrown by line below, means that password is correct
+                                        crypto.getDecrypted(listConn.get(0).getPassword());
+
+                                        connFile.setPasswordProtected(true);
+                                        connFile.setPassword(password);
+
+                                        passwordOk = true;
+                                        tryAgain = false;
+
+                                    } catch (Exception e) {
+
+                                        //e.printStackTrace();
+
+                                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                                        alert.setTitle("Password Dialog");
+                                        alert.setHeaderText("Bad password!");
+                                        alert.setContentText("Try again?");
+
+                                        Optional<ButtonType> badPasswordDialogResult = alert.showAndWait();
+                                        if (badPasswordDialogResult.get() == ButtonType.OK) {
+                                            // ... user chose OK
+                                            tryAgain = true;
+
+                                        } else {
+                                            // ... user chose CANCEL or closed the dialog
+                                            tryAgain = false;
+                                        }
+                                    }
+                                } else {
+                                    tryAgain = false;
+                                }
+
+                            } while (tryAgain);
+
+                            //System.out.println("String to decrypt: " + listConn.get(0).getPassword());
+
                         }
 
-                        if (listConn != null) {
+                        if (listConn != null && passwordOk) {
 
                             for (Conn conn: listConn) {
                                 conn.setParent(connFile);
@@ -213,6 +259,8 @@ public class RootLayoutController {
                                 System.out.println(conn);
                             }
                             */
+                        } else {
+                            connFile.setIcon(new ImageView("fileNotOk001.png"));
                         }
 
                         network.getSubUnits().add(connFile);
