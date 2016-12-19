@@ -19,10 +19,22 @@ import java.io.IOException;
 
 public class ConnFile extends ConnUnit<Conn> {
 
+    // ### Attributes #####################################################################
+
     private static final String ICON_FILENAME = "file001.png";
 
     private String fileName;
+    private boolean isPasswordProtected = false;
+    private String password;
 
+    // ### Constructors #####################################################################
+
+    /**
+     * Constructor.
+     *
+     * @param name
+     * @param subUnits
+     */
    public ConnFile(String name, ObservableList<Conn> subUnits) {
        super(name, subUnits, Conn::new, ICON_FILENAME);
 
@@ -34,11 +46,11 @@ public class ConnFile extends ConnUnit<Conn> {
 
            // new Conn instance with default name value
            Conn conn = new Conn(DbType.INSTANCE.getDbDescriptorMap().get(DbType.MYSQL_KEY).getName());
+           conn.setParent(this);
 
            if (ConnEditor.INSTANCE.supply(conn)) {
                 subUnits.add(conn);
                 //this.createAndAddSubUnit("Hello, world!");
-
                 saveConnDataToFile();
            }
 
@@ -47,17 +59,42 @@ public class ConnFile extends ConnUnit<Conn> {
        this.setMenu(contextMenu);
    }
 
+    /**
+     * Constructor.
+     *
+     * @param name
+     */
    public ConnFile(String name) {
        this(name, FXCollections.observableArrayList());
    }
 
-    public String getFileName() {
+    // ### Getters and Setters #####################################################################
+
+   public String getFileName() {
         return fileName;
     }
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
+
+    public boolean isPasswordProtected() {
+        return isPasswordProtected;
+    }
+
+    public void setPasswordProtected(boolean passwordProtected) {
+        isPasswordProtected = passwordProtected;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    // ### Methods #####################################################################
 
     /**
      * Saves the current connection data to file.

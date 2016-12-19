@@ -9,10 +9,12 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import org.jasypt.util.text.StrongTextEncryptor;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,7 +34,17 @@ public class Conn extends ConnUnit<DataBase> {
     // Attributes
     // #####################################################################
 
+    private static final String ICON_FILENAME = "serverDefault001.gif";
     private static final int VALID_CONNECTION_CHECK_TIMEOUT_SECONDS = 5;
+
+    // Reference to parent object
+    private final ObjectProperty<ConnFile> parent;
+
+    /**
+     * Instance of StrongTextEncryptor which is a utility class for easily performing high-strength encryption of texts
+     */
+    private static final StrongTextEncryptor strongTextEncryptor = new StrongTextEncryptor();
+    private final BooleanProperty passwordEncrypted;
 
     private final StringProperty key;   // Key value to retrieve corresponding DbDescriptor object in DbType HashMap
     private final StringProperty denomination;  // End user representation, MySQL instead of key value, mysql
@@ -43,10 +55,8 @@ public class Conn extends ConnUnit<DataBase> {
     private final StringProperty driver;
     private final StringProperty baseUrl;
 
-    private final ObjectProperty<java.sql.Connection> connection;
+    private final ObjectProperty<Connection> connection;
     private final ObjectProperty<ResultSet> resultSet;
-
-    private static final String ICON_FILENAME = "serverDefault001.gif";
 
     // Constructors
     // #####################################################################
@@ -91,6 +101,8 @@ public class Conn extends ConnUnit<DataBase> {
 
         this.connection = new SimpleObjectProperty<>();
         this.resultSet = new SimpleObjectProperty<>();
+        this.parent = new SimpleObjectProperty<>();
+        this.passwordEncrypted = new SimpleBooleanProperty(false);
     }
 
     /**
@@ -157,6 +169,31 @@ public class Conn extends ConnUnit<DataBase> {
 
     // Getters and Setters
     // #####################################################################
+
+    @XmlElement
+    public boolean isPasswordEncrypted() {
+        return passwordEncrypted.get();
+    }
+
+    public BooleanProperty passwordEncryptedProperty() {
+        return passwordEncrypted;
+    }
+
+    public void setPasswordEncrypted(boolean passwordEncrypted) {
+        this.passwordEncrypted.set(passwordEncrypted);
+    }
+
+    public ConnFile getParent() {
+        return parent.get();
+    }
+
+    public ObjectProperty<ConnFile> parentProperty() {
+        return parent;
+    }
+
+    public void setParent(ConnFile parent) {
+        this.parent.set(parent);
+    }
 
     @XmlElement
     public String getBaseUrl() {
@@ -283,7 +320,15 @@ public class Conn extends ConnUnit<DataBase> {
     }
 
     public void setPassword(String password) {
-        this.password.set(password);
+
+        if (this.getParent().isPasswordProtected()) {
+            this.setPasswordEncrypted(true);
+            strongTextEncryptor.setPassword(this.getParent().getPassword());
+            this.password.set(strongTextEncryptor.encrypt(password));
+        } else {
+            this.password.set(password);
+        }
+
     }
 
 }

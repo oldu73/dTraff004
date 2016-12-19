@@ -125,6 +125,19 @@ public class ConnFileEditDialogController {
         if (isInputValid()) {
             file.setFileName(folderField.getText() + "\\" + fileField.getText() + FILE_EXT);
             file.setName(fileField.getText());
+
+            boolean isSafe = passwordCheckBox.isSelected();
+            file.setPasswordProtected(isSafe);
+            if (isSafe) {
+                file.setPassword(passwordField.getText());
+            } else {
+                file.setPassword(null);
+            }
+
+            System.out.println(file.isPasswordProtected());
+            System.out.println(file.getPassword());
+            System.out.println();
+
             return true;
         }
         return false;
@@ -146,7 +159,10 @@ public class ConnFileEditDialogController {
             errorMessage += "No valid file!\n";
         }
 
-        if (passwordCheckBox.isSelected() && !passwordField.getText().equals(repeatPasswordField.getText())) {
+        if (passwordCheckBox.isSelected() && (passwordField.getText() == null
+                || passwordField.getText().length() == 0
+                || !passwordField.getText().equals(repeatPasswordField.getText()))) {
+
             errorMessage += "No valid password!\n";
         }
 

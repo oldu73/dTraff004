@@ -3,16 +3,14 @@ package ch.stageconcept.dtraff.main.view;
 import ch.stageconcept.dtraff.connection.model.*;
 import ch.stageconcept.dtraff.connection.util.ConnEditor;
 import ch.stageconcept.dtraff.connection.util.ConnListWrapper;
+import ch.stageconcept.dtraff.connection.util.PasswordDialog;
 import ch.stageconcept.dtraff.connection.view.ModelTree;
 import ch.stageconcept.dtraff.connection.util.DbType;
 import ch.stageconcept.dtraff.main.MainApp;
 import javafx.beans.binding.Bindings;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 
 import javax.xml.bind.JAXBContext;
@@ -20,6 +18,7 @@ import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -191,7 +190,21 @@ public class RootLayoutController {
 
                         List<Conn> listConn = loadConnDataFromFile(fileName);
 
+                        if (listConn.get(0).isPasswordEncrypted() && connFile.getPassword() == null) {
+
+                            PasswordDialog pd = new PasswordDialog(fileName);
+                            Optional<String> result = pd.showAndWait();
+                            result.ifPresent(password -> System.out.println(password));
+
+                            //connFile.setPasswordProtected(true);
+                        }
+
                         if (listConn != null) {
+
+                            for (Conn conn: listConn) {
+                                conn.setParent(connFile);
+                            }
+
                             connFile.getSubUnits().addAll(listConn);
 
                             // debug mode
@@ -299,6 +312,9 @@ public class RootLayoutController {
             return wrapper.getConns();
 
         } catch (Exception e) { // catches ANY exception
+
+            //TODO Manage case where file is in preferences but doesn't exist
+
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");
             alert.setHeaderText("Could not load data");
