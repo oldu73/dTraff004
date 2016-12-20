@@ -3,11 +3,11 @@
 	-fx-background: paleturquoise ;
 }
 
-.tree-cell:file {
+.tree-cell:connfile {
 	-fx-background: honeydew ;
 }
 
-.tree-cell:connection {
+.tree-cell:conn {
 	-fx-background: powderblue ;
 }
 

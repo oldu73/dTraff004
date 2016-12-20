@@ -229,13 +229,13 @@ public class RootLayoutController {
 
                                 // Set icon
                                 if (isPasswordEncrypted && password != null) {
-                                    connFile.setIcon(new ImageView("fileUnLock004.png"));
+                                    connFile.setIcon(new ImageView("fileUnLock001.png"));
                                 } else if (isPasswordEncrypted && password == null) {
-                                    connFile.setIcon(new ImageView("fileLock004.png"));
+                                    connFile.setIcon(new ImageView("fileLock001.png"));
                                 }
                             }
                         } else {
-                            connFile.setIcon(new ImageView("fileBroken004.png"));
+                            connFile.setIcon(new ImageView("fileBroken001.png"));
                         }
 
                         connFile.setParent(network);

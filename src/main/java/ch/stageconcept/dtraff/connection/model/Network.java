@@ -14,7 +14,7 @@ import java.util.prefs.Preferences;
 
 public class Network extends ConnUnit<ConnFile> {
 
-    private static final String ICON_FILENAME = "network004.png";
+    private static final String ICON_FILENAME = "network001.png";
 
     public static final String PREFS_PATH = "/ch/stageconcept/datatraffic/file";
 
@@ -27,7 +27,7 @@ public class Network extends ConnUnit<ConnFile> {
             ConnFile file = new ConnFile("default");
             if (ConnFileEditor.INSTANCE.supply(file)) {
                 if (file.isPasswordProtected()) {
-                    file.setIcon(new ImageView("fileUnLock004.png"));
+                    file.setIcon(new ImageView("fileUnLock001.png"));
                 }
                 file.setParent(this);
                 subUnits.add(file);
