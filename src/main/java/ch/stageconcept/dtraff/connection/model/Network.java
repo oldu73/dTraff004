@@ -6,6 +6,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.image.ImageView;
 
 import java.util.prefs.Preferences;
 
@@ -13,9 +14,8 @@ import java.util.prefs.Preferences;
 
 public class Network extends ConnUnit<ConnFile> {
 
-    private static final String ICON_FILENAME = "network001.gif";
+    private static final String ICON_FILENAME = "network004.png";
 
-    private Preferences preferences;
     public static final String PREFS_PATH = "/ch/stageconcept/datatraffic/file";
 
     public Network(String name, ObservableList<ConnFile> subUnits) {
@@ -26,6 +26,10 @@ public class Network extends ConnUnit<ConnFile> {
         newFileMenuItem.setOnAction((ActionEvent t) -> {
             ConnFile file = new ConnFile("default");
             if (ConnFileEditor.INSTANCE.supply(file)) {
+                if (file.isPasswordProtected()) {
+                    file.setIcon(new ImageView("fileUnLock004.png"));
+                }
+                file.setParent(this);
                 subUnits.add(file);
                 Preferences preferences = Preferences.userRoot().node(PREFS_PATH);
                 preferences.put(file.getName(), file.getFileName());
@@ -37,6 +41,12 @@ public class Network extends ConnUnit<ConnFile> {
 
     public Network(String name) {
         this(name, FXCollections.observableArrayList());
+    }
+
+    public void closeFile(ConnFile connFile) {
+        Preferences preferences = Preferences.userRoot().node(PREFS_PATH);
+        preferences.remove(connFile.getName());
+        this.getSubUnits().remove(connFile);
     }
 
 }

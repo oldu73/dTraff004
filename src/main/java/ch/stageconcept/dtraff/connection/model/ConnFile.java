@@ -4,6 +4,8 @@ import ch.stageconcept.dtraff.connection.util.ConnEditor;
 import ch.stageconcept.dtraff.connection.util.ConnListWrapper;
 import ch.stageconcept.dtraff.connection.util.Crypto;
 import ch.stageconcept.dtraff.connection.util.DbType;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -22,7 +24,11 @@ public class ConnFile extends ConnUnit<Conn> {
 
     // ### Attributes #####################################################################
 
-    private static final String ICON_FILENAME = "fileOk001.png";
+    //private static final String ICON_FILENAME = "fileOk001.png";
+    private static final String ICON_FILENAME = "file004.png";
+
+    // Reference to parent object
+    private final ObjectProperty<Network> parent;
 
     private String fileName;
     private boolean isPasswordProtected = false;
@@ -39,11 +45,13 @@ public class ConnFile extends ConnUnit<Conn> {
    public ConnFile(String name, ObservableList<Conn> subUnits) {
        super(name, subUnits, Conn::new, ICON_FILENAME);
 
+       this.parent = new SimpleObjectProperty<>();
+
        // treeView context menu
        ContextMenu contextMenu = new ContextMenu();
        MenuItem newConnectionMenuItem = new MenuItem("New Connection");
        newConnectionMenuItem.setOnAction((ActionEvent t) -> {
-           //System.out.println("New Conn on:" + this.getName());
+           //System.out.println("New Connection on:" + this.getName());
 
            // new Conn instance with default name value
            Conn conn = new Conn(DbType.INSTANCE.getDbDescriptorMap().get(DbType.MYSQL_KEY).getName());
@@ -63,7 +71,15 @@ public class ConnFile extends ConnUnit<Conn> {
            }
 
        });
-       contextMenu.getItems().add(newConnectionMenuItem);
+
+       MenuItem closeFileMenuItem = new MenuItem("Close File");
+
+       closeFileMenuItem.setOnAction((ActionEvent t) -> {
+            //System.out.println("Close file on:" + this.getName());
+            this.getParent().closeFile(this);
+       });
+
+       contextMenu.getItems().addAll(closeFileMenuItem, newConnectionMenuItem);
        this.setMenu(contextMenu);
    }
 
@@ -78,7 +94,19 @@ public class ConnFile extends ConnUnit<Conn> {
 
     // ### Getters and Setters #####################################################################
 
-   public String getFileName() {
+    public Network getParent() {
+        return parent.get();
+    }
+
+    public ObjectProperty<Network> parentProperty() {
+        return parent;
+    }
+
+    public void setParent(Network parent) {
+        this.parent.set(parent);
+    }
+
+    public String getFileName() {
         return fileName;
     }
 

@@ -174,7 +174,7 @@ public class RootLayoutController {
         if (exists) {
             Preferences preferences = Preferences.userRoot().node(Network.PREFS_PATH);
 
-            String[] keys = new String[0];
+            String[] keys;
 
             try {
                 keys = preferences.keys();
@@ -186,45 +186,59 @@ public class RootLayoutController {
 
                     if (fileName != null) {
                         connFile.setFileName(fileName);
-                        List<Conn> listConn = loadConnDataFromFile(fileName);
 
-                        //System.out.println("String to decrypt: " + listConn.get(0).getPassword());
+                        File f = new File(fileName);
 
-                        // If first element (Conn) of the list is encrypted, also all others are (with same password)
-                        boolean isPasswordEncrypted = listConn.get(0).isPasswordEncrypted();
+                        if(f.exists() && !f.isDirectory()) {
 
-                        String password = null;
+                            List<Conn> listConn = loadConnDataFromFile(fileName);
 
-                        if (isPasswordEncrypted) {
-                            password = getConnFilePassword(listConn.get(0), fileName);
+                            //System.out.println("String to decrypt: " + listConn.get(0).getPassword());
 
-                            if (password != null) {
-                                connFile.setPasswordProtected(true);
-                                connFile.setPassword(password);
+                            // If first element (Conn) of the list is encrypted, also all others are (with same password)
+                            boolean isPasswordEncrypted = listConn.get(0).isPasswordEncrypted();
+
+                            String password = null;
+
+                            if (isPasswordEncrypted) {
+                                password = getConnFilePassword(listConn.get(0), fileName);
+
+                                if (password != null) {
+                                    connFile.setPasswordProtected(true);
+                                    connFile.setPassword(password);
+                                }
                             }
+
+                            if (listConn != null) {
+
+                                for (Conn conn : listConn) {
+                                    conn.setParent(connFile);
+                                }
+
+                                // debug mode
+                                /*
+                                for (Conn conn: listConn) {
+                                    System.out.println(conn);
+                                }
+                                */
+
+                                // Populate subunits
+                                if (!isPasswordEncrypted || (isPasswordEncrypted && password != null)) {
+                                    connFile.getSubUnits().addAll(listConn);
+                                }
+
+                                // Set icon
+                                if (isPasswordEncrypted && password != null) {
+                                    connFile.setIcon(new ImageView("fileUnLock004.png"));
+                                } else if (isPasswordEncrypted && password == null) {
+                                    connFile.setIcon(new ImageView("fileLock004.png"));
+                                }
+                            }
+                        } else {
+                            connFile.setIcon(new ImageView("fileBroken004.png"));
                         }
 
-                        if (listConn != null) {
-
-                            for (Conn conn: listConn) {
-                                conn.setParent(connFile);
-                            }
-
-                            // debug mode
-                            /*
-                            for (Conn conn: listConn) {
-                                System.out.println(conn);
-                            }
-                            */
-
-                            if (!isPasswordEncrypted || (isPasswordEncrypted && password != null)) {
-                                connFile.getSubUnits().addAll(listConn);
-                            } else {
-                                // Do not populate subunits and set broken file icon
-                                connFile.setIcon(new ImageView("fileNotOk001.png"));
-                            }
-                        }
-
+                        connFile.setParent(network);
                         network.getSubUnits().add(connFile);
                         //System.out.println(key + " = " + preferences.get(key, null));
                     }
@@ -334,8 +348,6 @@ public class RootLayoutController {
             return wrapper.getConns();
 
         } catch (Exception e) { // catches ANY exception
-
-            //TODO Manage case where file is in preferences but doesn't exist
 
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");
