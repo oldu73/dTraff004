@@ -5,13 +5,11 @@ import ch.stageconcept.dtraff.connection.util.*;
 import ch.stageconcept.dtraff.connection.view.ModelTree;
 import ch.stageconcept.dtraff.main.MainApp;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
-import org.jasypt.util.text.StrongTextEncryptor;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -29,6 +27,8 @@ import java.util.prefs.Preferences;
  * @author Olivier Durand
  */
 public class RootLayoutController {
+
+    private static final String NETWORK = "Network";
 
     // Reference to the main application
     private MainApp mainApp;
@@ -57,7 +57,7 @@ public class RootLayoutController {
         // SRC: http://stackoverflow.com/questions/35009982/javafx-treeview-of-multiple-object-types-and-more
         // ANSWER FROM: James_D
         // GITHUB: - heterogeneous-tree-example - https://github.com/james-d/heterogeneous-tree-example
-        network = createNetwork();
+        network = createNetwork2();
 
         connectionTree = new ModelTree<>(network,
                 ConnUnit::getSubUnits,
@@ -160,18 +160,58 @@ public class RootLayoutController {
      * Create network description in a tree data structure,
      * to be used in a treeView : Network (root node) - ConnFile - Conn - Database - (...)
      */
-    private Network createNetwork() {
-        Network network = new Network("Network");
-
-        boolean exists = false;
+    private Network createNetwork2() {
+        Network network = new Network(NETWORK);
+        boolean prefNodeExist = false;
+        String netPrefPath = Network.PREFS_PATH;
+        Preferences pref = null;
+        String[] prefKeys = null;
 
         try {
-            exists = Preferences.userRoot().nodeExists(Network.PREFS_PATH);
+            prefNodeExist = Preferences.userRoot().nodeExists(netPrefPath);
         } catch (BackingStoreException e) {
             //e.printStackTrace();
         }
 
-        if (exists) {
+       if (prefNodeExist) {
+           pref = Preferences.userRoot().node(netPrefPath);
+       }
+
+       if (pref != null) {
+           try {
+               prefKeys = pref.keys();
+           } catch (BackingStoreException e) {
+               //System.err.println("createNetwork() method, unable to read backing store: " + e);
+               //e.printStackTrace();
+           } catch (IllegalStateException e) {
+               //System.err.println("createNetwork() method, " + e);
+               //System.out.println("createNetwork() method, node has been removed!");
+           }
+       }
+
+       if (prefKeys != null) {
+
+       }
+
+       return network;
+    }
+
+    /**
+     * Create network description in a tree data structure,
+     * to be used in a treeView : Network (root node) - ConnFile - Conn - Database - (...)
+     */
+    private Network createNetwork() {
+        Network network = new Network(NETWORK);
+
+        boolean preferencesExists = false;
+
+        try {
+            preferencesExists = Preferences.userRoot().nodeExists(Network.PREFS_PATH);
+        } catch (BackingStoreException e) {
+            //e.printStackTrace();
+        }
+
+        if (preferencesExists) {
             Preferences preferences = Preferences.userRoot().node(Network.PREFS_PATH);
 
             String[] keys;
