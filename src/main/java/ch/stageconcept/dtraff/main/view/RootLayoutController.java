@@ -6,9 +6,11 @@ import ch.stageconcept.dtraff.connection.view.ModelTree;
 import ch.stageconcept.dtraff.main.MainApp;
 import javafx.beans.binding.Bindings;
 import javafx.css.PseudoClass;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 
 import javax.xml.bind.JAXBContext;
@@ -80,6 +82,24 @@ public class RootLayoutController {
         // Debug mode
         //printChildren(connectionTreeView.getRoot());
 
+        // Double click on Connections treeView
+        connectionTreeView.setOnMouseClicked((event) ->
+        {
+            if(event.getClickCount() == 2 &&
+                    connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile) {
+
+                ConnFile connFile = (ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue();
+
+                if (connFile.getState().equals(ConnFileState.ENCRYPTED)) {
+                    decryptConnFile(connFile);
+                }
+
+                //TreeItem<?> item = connectionTreeView.getSelectionModel().getSelectedItem();
+            }
+        });
+
+        // ### Tool bar menu ############################################################
+
         // New Server Connection Menu initial state is set to disable
         newServerConnectionMenuItem.setDisable(true);
 
@@ -106,6 +126,39 @@ public class RootLayoutController {
                         newServerConnectionMenuItem.isDisable() && editServerConnectionMenuItem.isDisable(),
                 newServerConnectionMenuItem.disableProperty(),
                 editServerConnectionMenuItem.disableProperty()));
+
+        // ##############################################################################
+
+    }
+
+    //TODO move this method at the end of file, just above getConnFilePassword
+    //TODO refactor createNetwork by using below method(s)
+    /**
+     * Decrypt ConnFile object
+     *
+     * @param connFile
+     */
+    private void decryptConnFile(ConnFile connFile) {
+        String fileName = connFile.getFileName();
+        List<Conn> listConn = loadConnDataFromFile(fileName);
+
+        // debug mode
+        //System.out.println("String to decrypt: " + listConn.get(0).getPassword());
+
+        // If first element (Conn) of the list is encrypted, also all others are (with same password)
+        boolean isPasswordEncrypted = listConn.get(0).isPasswordEncrypted();
+
+        if (isPasswordEncrypted) {
+            String password = getConnFilePassword(listConn.get(0), fileName);
+
+            if (password != null) {
+                connFile.setPasswordProtected(true);
+                connFile.setPassword(password);
+                connFile.setState(ConnFileState.DECRYPTED);
+            } else {
+                connFile.setState(ConnFileState.ENCRYPTED);
+            }
+        }
     }
 
     /**
