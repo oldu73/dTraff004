@@ -12,7 +12,7 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-                  <Menu mnemonicParsing="false" text="Server Connection">
+                  <Menu fx:id="serverConnectionMenuItem" mnemonicParsing="false" text="Server Connection">
                     <items>
                         <MenuItem fx:id="newServerConnectionMenuItem" mnemonicParsing="false" onAction="#handleNewConnection" text="New">
                            <accelerator>

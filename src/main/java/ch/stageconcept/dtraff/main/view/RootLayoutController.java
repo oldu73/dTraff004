@@ -37,6 +37,9 @@ public class RootLayoutController {
     private BorderPane rootBorderPane;
 
     @FXML
+    private MenuItem serverConnectionMenuItem;
+
+    @FXML
     private MenuItem newServerConnectionMenuItem;
 
     @FXML
@@ -77,17 +80,23 @@ public class RootLayoutController {
         // Debug mode
         //printChildren(connectionTreeView.getRoot());
 
-        // Disable tool bar menu New Server Conn if no item or not a ConnFile instance selected in Connections treeView
+        // Disable tool bar menu New Server Connection if no item or not a ConnFile instance selected in Connections treeView
         newServerConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
                         connectionTreeView.getSelectionModel().getSelectedItem() == null ||
                                 !(connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile),
                 connectionTreeView.getSelectionModel().selectedItemProperty()));
 
-        // Disable tool bar menu Edit Server Conn if no item or not a Conn instance selected in Connections treeView
+        // Disable tool bar menu Edit Server Connection if no item or not a Conn instance selected in Connections treeView
         editServerConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
                         connectionTreeView.getSelectionModel().getSelectedItem() == null ||
                                 !(connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof Conn),
                 connectionTreeView.getSelectionModel().selectedItemProperty()));
+
+        // Disable tool bar menu Server Connection if New and Edit Server Connection menus are disabled
+        serverConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
+                        newServerConnectionMenuItem.isDisable() && editServerConnectionMenuItem.isDisable(),
+                newServerConnectionMenuItem.disableProperty(),
+                editServerConnectionMenuItem.disableProperty()));
     }
 
     /**
@@ -141,6 +150,7 @@ public class RootLayoutController {
     @FXML
     private void handleAbout() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        //TODO put text in static String
         alert.setTitle("Data Traffic");
         alert.setHeaderText("About");
         alert.setContentText("Author: Olivier Durand\nWebsite: http://www.stageconcept.ch");
