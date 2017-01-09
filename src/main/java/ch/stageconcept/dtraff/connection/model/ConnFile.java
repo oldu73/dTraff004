@@ -1,17 +1,17 @@
 package ch.stageconcept.dtraff.connection.model;
 
-import ch.stageconcept.dtraff.connection.util.ConnEditor;
-import ch.stageconcept.dtraff.connection.util.ConnListWrapper;
-import ch.stageconcept.dtraff.connection.util.Crypto;
-import ch.stageconcept.dtraff.connection.util.DbType;
+import ch.stageconcept.dtraff.connection.util.*;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.image.ImageView;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -24,7 +24,14 @@ public class ConnFile extends ConnUnit<Conn> {
 
     // ### Attributes #####################################################################
 
-    private static final String ICON_FILENAME = "file001.png";
+    private static final String ICON_FILENAME = ConnFileState.CLEAR.getIconFileName();
+
+    private static final String MENU_NEW_CONNECTION = "New Connection";
+    private static final String MENU_CLOSE_FILE = "Close File";
+
+    private static final String ALERT_SAVE_DATA_TITLE = "Error";
+    private static final String ALERT_SAVE_DATA_HEADER = "Could not save data";
+    private static final String ALERT_SAVE_DATA_CONTENT = "Could not save data to file:\n";
 
     // Reference to parent object
     private final ObjectProperty<Network> parent;
@@ -32,6 +39,7 @@ public class ConnFile extends ConnUnit<Conn> {
     private String fileName;
     private boolean isPasswordProtected = false;
     private String password;
+    private final ObjectProperty<ConnFileState> state;
 
     // ### Constructors #####################################################################
 
@@ -48,7 +56,7 @@ public class ConnFile extends ConnUnit<Conn> {
 
        // treeView context menu
        ContextMenu contextMenu = new ContextMenu();
-       MenuItem newConnectionMenuItem = new MenuItem("New Connection");
+       MenuItem newConnectionMenuItem = new MenuItem(MENU_NEW_CONNECTION);
        newConnectionMenuItem.setOnAction((ActionEvent t) -> {
            //System.out.println("New Connection on:" + this.getName());
 
@@ -71,7 +79,7 @@ public class ConnFile extends ConnUnit<Conn> {
 
        });
 
-       MenuItem closeFileMenuItem = new MenuItem("Close File");
+       MenuItem closeFileMenuItem = new MenuItem(MENU_CLOSE_FILE);
 
        closeFileMenuItem.setOnAction((ActionEvent t) -> {
             //System.out.println("Close file on:" + this.getName());
@@ -80,6 +88,14 @@ public class ConnFile extends ConnUnit<Conn> {
 
        contextMenu.getItems().addAll(closeFileMenuItem, newConnectionMenuItem);
        this.setMenu(contextMenu);
+
+       state = new SimpleObjectProperty<>(ConnFileState.CLEAR);
+
+       // Update icon when state change
+       stateProperty().addListener((observable, oldvalue, newvalue) -> {
+           setIcon(new ImageView(newvalue.getIconFileName()));
+       });
+
    }
 
     /**
@@ -129,6 +145,18 @@ public class ConnFile extends ConnUnit<Conn> {
         this.password = password;
     }
 
+    public ConnFileState getState() {
+        return state.get();
+    }
+
+    public ObjectProperty<ConnFileState> stateProperty() {
+        return state;
+    }
+
+    public void setState(ConnFileState state) {
+        this.state.set(state);
+    }
+
     // ### Methods #####################################################################
 
     /**
@@ -168,14 +196,15 @@ public class ConnFile extends ConnUnit<Conn> {
 
         } catch (Exception e) { // catches ANY exception
 
-            e.printStackTrace();
+            //e.printStackTrace();
 
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Could not save data");
-            alert.setContentText("Could not save data to file:\n" + file.getPath());
+            alert.setTitle(ALERT_SAVE_DATA_TITLE);
+            alert.setHeaderText(ALERT_SAVE_DATA_HEADER);
+            alert.setContentText(ALERT_SAVE_DATA_CONTENT + file.getPath());
 
             alert.showAndWait();
         }
     }
+
 }

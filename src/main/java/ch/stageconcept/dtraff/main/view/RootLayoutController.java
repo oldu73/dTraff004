@@ -57,7 +57,7 @@ public class RootLayoutController {
         // SRC: http://stackoverflow.com/questions/35009982/javafx-treeview-of-multiple-object-types-and-more
         // ANSWER FROM: James_D
         // GITHUB: - heterogeneous-tree-example - https://github.com/james-d/heterogeneous-tree-example
-        network = createNetwork2();
+        network = createNetwork();
 
         connectionTree = new ModelTree<>(network,
                 ConnUnit::getSubUnits,
@@ -160,23 +160,28 @@ public class RootLayoutController {
      * Create network description in a tree data structure,
      * to be used in a treeView : Network (root node) - ConnFile - Conn - Database - (...)
      */
-    private Network createNetwork2() {
+    private Network createNetwork() {
         Network network = new Network(NETWORK);
         boolean prefNodeExist = false;
         String netPrefPath = Network.PREFS_PATH;
         Preferences pref = null;
         String[] prefKeys = null;
 
+        // ### 1. Check if preference node exist.
         try {
             prefNodeExist = Preferences.userRoot().nodeExists(netPrefPath);
         } catch (BackingStoreException e) {
             //e.printStackTrace();
         }
+        // #########################################################################
 
+       // ### 2. Set preference node.
        if (prefNodeExist) {
            pref = Preferences.userRoot().node(netPrefPath);
        }
+       // #########################################################################
 
+       // ### 3. Get preference keys.
        if (pref != null) {
            try {
                prefKeys = pref.keys();
@@ -188,115 +193,91 @@ public class RootLayoutController {
                //System.out.println("createNetwork() method, node has been removed!");
            }
        }
+       // #########################################################################
 
+       // ### 4. Iterate through preference keys to create ConnFile object
+       // and check if corresponding file exist.
        if (prefKeys != null) {
 
+           for (String prefKey : prefKeys) {
+               ConnFile connFile = new ConnFile(prefKey);
+
+               String fileName = pref.get(prefKey, null);
+
+               if (fileName != null) {
+                   connFile.setFileName(fileName);
+
+                   File file = new File(fileName);
+
+                   if(!file.exists() || file.isDirectory()) {
+                       connFile.setState(ConnFileState.BROKEN);
+                   }
+
+                   connFile.setParent(network);
+                   network.getSubUnits().add(connFile);
+               }
+           }
+
        }
+       // #########################################################################
+
+       // ### 5. Iterate through network subunits (ConnFile objects)
+       // If ConnFile object is encrypted -> ask for password
+       // If not password protected or password OK, populate
+       // ConnFile object subunits with Conn objects.
+       if (!network.getSubUnits().isEmpty()) {
+           network.getSubUnits().forEach((subUnit) -> {
+               if (!subUnit.getState().equals(ConnFileState.BROKEN)) {
+
+                   String fileName = subUnit.getFileName();
+                   List<Conn> listConn = loadConnDataFromFile(fileName);
+
+                   // debug mode
+                   //System.out.println("String to decrypt: " + listConn.get(0).getPassword());
+
+                   // If first element (Conn) of the list is encrypted, also all others are (with same password)
+                   boolean isPasswordEncrypted = listConn.get(0).isPasswordEncrypted();
+
+                   String password = null;
+
+                   if (isPasswordEncrypted) {
+                       password = getConnFilePassword(listConn.get(0), fileName);
+
+                       if (password != null) {
+                           subUnit.setPasswordProtected(true);
+                           subUnit.setPassword(password);
+                           subUnit.setState(ConnFileState.DECRYPTED);
+                       } else {
+                           subUnit.setState(ConnFileState.ENCRYPTED);
+                       }
+                   }
+
+                   // Set Conn object reference to his ConnFile parent object
+                   for (Conn conn : listConn) {
+                       conn.setParent(subUnit);
+                   }
+
+                   // debug mode
+                            /*
+                            for (Conn conn: listConn) {
+                                System.out.println(conn);
+                            }
+                            */
+
+                   // Populate subunits
+                   if (!isPasswordEncrypted || (isPasswordEncrypted && password != null)) {
+                       subUnit.getSubUnits().addAll(listConn);
+                   }
+
+               }
+           });
+       }
+       // #########################################################################
+
+       // Some sample data, debug mode
+       //buildSampleData(network);
 
        return network;
-    }
-
-    /**
-     * Create network description in a tree data structure,
-     * to be used in a treeView : Network (root node) - ConnFile - Conn - Database - (...)
-     */
-    private Network createNetwork() {
-        Network network = new Network(NETWORK);
-
-        boolean preferencesExists = false;
-
-        try {
-            preferencesExists = Preferences.userRoot().nodeExists(Network.PREFS_PATH);
-        } catch (BackingStoreException e) {
-            //e.printStackTrace();
-        }
-
-        if (preferencesExists) {
-            Preferences preferences = Preferences.userRoot().node(Network.PREFS_PATH);
-
-            String[] keys;
-
-            try {
-                keys = preferences.keys();
-
-                for (String key : keys) {
-                    ConnFile connFile = new ConnFile(key);
-
-                    String fileName = preferences.get(key, null);
-
-                    if (fileName != null) {
-                        connFile.setFileName(fileName);
-
-                        File f = new File(fileName);
-
-                        if(f.exists() && !f.isDirectory()) {
-
-                            List<Conn> listConn = loadConnDataFromFile(fileName);
-
-                            //System.out.println("String to decrypt: " + listConn.get(0).getPassword());
-
-                            // If first element (Conn) of the list is encrypted, also all others are (with same password)
-                            boolean isPasswordEncrypted = listConn.get(0).isPasswordEncrypted();
-
-                            String password = null;
-
-                            if (isPasswordEncrypted) {
-                                password = getConnFilePassword(listConn.get(0), fileName);
-
-                                if (password != null) {
-                                    connFile.setPasswordProtected(true);
-                                    connFile.setPassword(password);
-                                }
-                            }
-
-                            if (listConn != null) {
-
-                                for (Conn conn : listConn) {
-                                    conn.setParent(connFile);
-                                }
-
-                                // debug mode
-                                /*
-                                for (Conn conn: listConn) {
-                                    System.out.println(conn);
-                                }
-                                */
-
-                                // Populate subunits
-                                if (!isPasswordEncrypted || (isPasswordEncrypted && password != null)) {
-                                    connFile.getSubUnits().addAll(listConn);
-                                }
-
-                                // Set icon
-                                if (isPasswordEncrypted && password != null) {
-                                    connFile.setIcon(new ImageView("fileUnLock001.png"));
-                                } else if (isPasswordEncrypted && password == null) {
-                                    connFile.setIcon(new ImageView("fileLock001.png"));
-                                }
-                            }
-                        } else {
-                            connFile.setIcon(new ImageView("fileBroken001.png"));
-                        }
-
-                        connFile.setParent(network);
-                        network.getSubUnits().add(connFile);
-                        //System.out.println(key + " = " + preferences.get(key, null));
-                    }
-                }
-
-            } catch (BackingStoreException e) {
-                //System.err.println("createNetwork() method, unable to read backing store: " + e);
-                //e.printStackTrace();
-            } catch (IllegalStateException e) {
-                //System.err.println("createNetwork() method, " + e);
-                //System.out.println("createNetwork() method, node has been removed!");
-            }
-        }
-
-        // Some sample data, debug mode
-        //buildSampleData(network);
-
-        return network ;
     }
 
     /**
@@ -410,6 +391,9 @@ public class RootLayoutController {
      */
     private String getConnFilePassword(Conn conn, String fileName) {
 
+        //TODO When TAB key is pressed to change focus on Cancel button and hit ENTER key
+        //Bad password popup is displayed even if password field was let empty (OK button (which is highlighted) like behavior)
+        //Also Bad Password dialog has an "Annuler" button who should be a "Cancel" button!
         boolean tryAgain = false;
 
         do {
@@ -432,6 +416,7 @@ public class RootLayoutController {
                     //e.printStackTrace();
 
                     Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    //TODO put text in static String
                     alert.setTitle("Password Dialog");
                     alert.setHeaderText("Bad password!");
                     alert.setContentText("Try again?");

@@ -16,20 +16,21 @@ import java.io.IOException;
  */
 public class MainApp extends Application {
 
+    private static final String APP_TITLE = "Data Traffic";
+    private static final String ROOT_LAYOUT = "view/RootLayout.fxml";
+
     public static Stage primaryStage;   // Static reference to primaryStage
     private BorderPane rootLayout;
 
     /**
      * Constructor
      */
-    public MainApp() {
-        //TODO load connections data from preference file
-    }
+    public MainApp() {}
 
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        this.primaryStage.setTitle("Data Traffic");
+        this.primaryStage.setTitle(APP_TITLE);
 
         initRootLayout();
     }
@@ -41,8 +42,7 @@ public class MainApp extends Application {
         try {
             // Load root layout from fxml file.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class
-                    .getResource("view/RootLayout.fxml"));
+            loader.setLocation(MainApp.class.getResource(ROOT_LAYOUT));
             rootLayout = (BorderPane) loader.load();
 
             // Show the scene containing the root layout.

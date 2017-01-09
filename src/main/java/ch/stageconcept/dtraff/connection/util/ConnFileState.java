@@ -1,0 +1,22 @@
+package ch.stageconcept.dtraff.connection.util;
+
+/**
+ * ConnFile object state with corresponding icon.
+ *
+ * @author Olivier Durand
+ */
+public enum ConnFileState {
+
+    BROKEN("fileBroken001.png"), CLEAR("file001.png"), ENCRYPTED("fileLock001.png"), DECRYPTED("fileUnLock001.png") ;
+
+    private String iconFileName ;
+
+    ConnFileState(String iconFileName) {
+        this.iconFileName = iconFileName ;
+    }
+
+    public String getIconFileName() {
+        return  this.iconFileName ;
+    }
+
+}

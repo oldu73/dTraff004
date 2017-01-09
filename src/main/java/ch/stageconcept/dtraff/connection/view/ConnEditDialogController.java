@@ -29,6 +29,20 @@ import java.util.Set;
  */
 public class ConnEditDialogController {
 
+    private static final String CONNECTION_TRY = "Try to connect..";
+    private static final String CONNECTION_SUCCESSFUL = "Connection successfully established..";
+    private static final String CONNECTION_FAIL = "Unable to establish connection!";
+
+    private static final String ALERT_INVALID_NAME = "No valid name!\n";
+    private static final String ALERT_INVALID_DATABASE = "No valid database!\n";
+    private static final String ALERT_INVALID_HOST = "No valid host!\n";
+    private static final String ALERT_INVALID_PORT = "No valid port!\n";
+    private static final String ALERT_INVALID_PORT_NUMBER = "No valid port (must be an integer)!\n";
+    private static final String ALERT_INVALID_USER = "No valid user!\n";
+    private static final String ALERT_INVALID_PASSWORD = "No valid password!\n";
+    private static final String ALERT_INVALID_TITLE = "Invalid Fields";
+    private static final String ALERT_INVALID_HEADER = "Please correct invalid fields";
+
     @FXML
     private TextField nameField;
 
@@ -202,7 +216,7 @@ public class ConnEditDialogController {
             //testConnectionLabel.textProperty().bind(task.messageProperty());
 
             task.setOnRunning(t -> {
-                testConnectionLabel.setText("Try to connect..");
+                testConnectionLabel.setText(CONNECTION_TRY);
                 testConnectionLabel.setTextFill(Color.BLACK);
             });
 
@@ -214,7 +228,7 @@ public class ConnEditDialogController {
                 // and here we act according to result of code
                 if (task.getValue()) {
                     // Successful login
-                    testConnectionLabel.setText("Connection successfully established..");
+                    testConnectionLabel.setText(CONNECTION_SUCCESSFUL);
                     testConnectionLabel.setTextFill(Color.GREEN);
                 } /* Unnecessary because exception thrown in case of bad parameters -> task.setOnFailed
                 else {
@@ -225,14 +239,11 @@ public class ConnEditDialogController {
                 */
             });
 
-            task.setOnFailed(new EventHandler<WorkerStateEvent>() {
-                @Override
-                public void handle(WorkerStateEvent t) {
+            task.setOnFailed(t -> {
                     // This handler will be called if exception occurred during your task execution
                     // E.g. network or db conn exceptions
-                    testConnectionLabel.setText("Unable to establish connection!");
+                    testConnectionLabel.setText(CONNECTION_FAIL);
                     testConnectionLabel.setTextFill(Color.RED);
-                }
             });
 
             // Launch task..
@@ -302,45 +313,46 @@ public class ConnEditDialogController {
         String errorMessage = "";
 
         if (nameField.getText() == null || nameField.getText().length() == 0) {
-            errorMessage += "No valid name!\n";
+            errorMessage += ALERT_INVALID_NAME;
         }
 
         if (denominationField.getSelectionModel().getSelectedItem() == null ||
                 denominationField.getSelectionModel().getSelectedItem().toString().length() == 0) {
-            errorMessage += "No valid database!\n";
+            errorMessage += ALERT_INVALID_DATABASE;
         }
 
         if (hostField.getText() == null || hostField.getText().length() == 0) {
-            errorMessage += "No valid host!\n";
+            errorMessage += ALERT_INVALID_HOST;
         } else {
             //TODO Check that hostField contain valid URL or IP address
         }
 
         if (portField.getText() == null || portField.getText().length() == 0) {
-            errorMessage += "No valid port!\n";
+            errorMessage += ALERT_INVALID_PORT;
         } else {
             // try to parse the port into an int.
             try {
                 Integer.parseInt(portField.getText());
             } catch (NumberFormatException e) {
-                errorMessage += "No valid port (must be an integer)!\n";
+                errorMessage += ALERT_INVALID_PORT_NUMBER;
             }
         }
 
         if (userField.getText() == null || userField.getText().length() == 0) {
-            errorMessage += "No valid user!\n";
+            errorMessage += ALERT_INVALID_USER;
         }
 
         if (passwordField.getText() == null || passwordField.getText().length() == 0) {
-            errorMessage += "No valid password!\n";
+            errorMessage += ALERT_INVALID_PASSWORD;
         }
 
         if (errorMessage.length() == 0) {
             return true;
         } else {
             // Show the error message.
-            ErrorAlert.INSTANCE.show(dialogStage, "Invalid Fields", "Please correct invalid fields", errorMessage);
+            ErrorAlert.INSTANCE.show(dialogStage, ALERT_INVALID_TITLE, ALERT_INVALID_HEADER, errorMessage);
             return false;
         }
     }
+
 }
