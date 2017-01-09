@@ -88,13 +88,12 @@ public class RootLayoutController {
             if(event.getClickCount() == 2 &&
                     connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile) {
 
+                //TreeItem<?> item = connectionTreeView.getSelectionModel().getSelectedItem();
                 ConnFile connFile = (ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue();
 
-                if (connFile.getState().equals(ConnFileState.ENCRYPTED)) {
-                    decryptConnFile(connFile);
+                if (connFile.getState().equals(ConnFileState.ENCRYPTED) && decryptConnFile(connFile)) {
+                    populateSubunit(connFile, loadConnDataFromFile(connFile));
                 }
-
-                //TreeItem<?> item = connectionTreeView.getSelectionModel().getSelectedItem();
             }
         });
 
@@ -129,36 +128,6 @@ public class RootLayoutController {
 
         // ##############################################################################
 
-    }
-
-    //TODO move this method at the end of file, just above getConnFilePassword
-    //TODO refactor createNetwork by using below method(s)
-    /**
-     * Decrypt ConnFile object
-     *
-     * @param connFile
-     */
-    private void decryptConnFile(ConnFile connFile) {
-        String fileName = connFile.getFileName();
-        List<Conn> listConn = loadConnDataFromFile(fileName);
-
-        // debug mode
-        //System.out.println("String to decrypt: " + listConn.get(0).getPassword());
-
-        // If first element (Conn) of the list is encrypted, also all others are (with same password)
-        boolean isPasswordEncrypted = listConn.get(0).isPasswordEncrypted();
-
-        if (isPasswordEncrypted) {
-            String password = getConnFilePassword(listConn.get(0), fileName);
-
-            if (password != null) {
-                connFile.setPasswordProtected(true);
-                connFile.setPassword(password);
-                connFile.setState(ConnFileState.DECRYPTED);
-            } else {
-                connFile.setState(ConnFileState.ENCRYPTED);
-            }
-        }
     }
 
     /**
@@ -301,32 +270,15 @@ public class RootLayoutController {
            network.getSubUnits().forEach((subUnit) -> {
                if (!subUnit.getState().equals(ConnFileState.BROKEN)) {
 
-                   String fileName = subUnit.getFileName();
-                   List<Conn> listConn = loadConnDataFromFile(fileName);
+                   List<Conn> listConn = loadConnDataFromFile(subUnit);
 
                    // debug mode
                    //System.out.println("String to decrypt: " + listConn.get(0).getPassword());
 
                    // If first element (Conn) of the list is encrypted, also all others are (with same password)
-                   boolean isPasswordEncrypted = listConn.get(0).isPasswordEncrypted();
-
-                   String password = null;
-
-                   if (isPasswordEncrypted) {
-                       password = getConnFilePassword(listConn.get(0), fileName);
-
-                       if (password != null) {
-                           subUnit.setPasswordProtected(true);
-                           subUnit.setPassword(password);
-                           subUnit.setState(ConnFileState.DECRYPTED);
-                       } else {
-                           subUnit.setState(ConnFileState.ENCRYPTED);
-                       }
-                   }
-
-                   // Set Conn object reference to his ConnFile parent object
-                   for (Conn conn : listConn) {
-                       conn.setParent(subUnit);
+                   if (listConn.get(0).isPasswordEncrypted()) {
+                       subUnit.setState(ConnFileState.ENCRYPTED);
+                       decryptConnFile(subUnit);
                    }
 
                    // debug mode
@@ -336,9 +288,8 @@ public class RootLayoutController {
                             }
                             */
 
-                   // Populate subunits
-                   if (!isPasswordEncrypted || (isPasswordEncrypted && password != null)) {
-                       subUnit.getSubUnits().addAll(listConn);
+                   if (subUnit.getState().equals(ConnFileState.CLEAR) || subUnit.getState().equals(ConnFileState.DECRYPTED)) {
+                       populateSubunit(subUnit, listConn);
                    }
 
                }
@@ -350,6 +301,22 @@ public class RootLayoutController {
        //buildSampleData(network);
 
        return network;
+    }
+
+    /**
+     * Populate subUnit (ConnFile object)
+     *
+     * @param subUnit
+     * @param listConn
+     */
+    private void populateSubunit(ConnFile subUnit, List<Conn> listConn) {
+
+        // Set Conn object reference to his ConnFile parent object
+        for (Conn conn : listConn) {
+            conn.setParent(subUnit);
+        }
+
+        subUnit.getSubUnits().addAll(listConn);
     }
 
     /**
@@ -412,10 +379,10 @@ public class RootLayoutController {
  * Loads connection data from the specified file,
  * unmarshaled with JAXB.
  *
- * @param fileName
+ * @param connFile
  */
-    private List<Conn> loadConnDataFromFile(String fileName) {
-        File file = new java.io.File(fileName);
+    private List<Conn> loadConnDataFromFile(ConnFile connFile) {
+        File file = new java.io.File(connFile.getFileName());
 
         // debug mode
         //System.out.println(file.toString());
@@ -443,6 +410,7 @@ public class RootLayoutController {
         } catch (Exception e) { // catches ANY exception
 
             Alert alert = new Alert(Alert.AlertType.ERROR);
+            //TODO put text in static String
             alert.setTitle("Error");
             alert.setHeaderText("Could not load data");
             alert.setContentText("Could not load data from file:\n" + file.getPath());
@@ -454,22 +422,42 @@ public class RootLayoutController {
     }
 
     /**
+     * Decrypt ConnFile object
+     *
+     * @param connFile
+     */
+    private boolean decryptConnFile(ConnFile connFile) {
+
+        String password = getConnFilePassword(connFile);
+
+        if (password != null) {
+            connFile.setPasswordProtected(true);
+            connFile.setPassword(password);
+            connFile.setState(ConnFileState.DECRYPTED);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Ask user for password in a dialog.
      * This password is used at ConnFile level
      * to encrypt/decrypt Conn password
      *
-     * @param conn
+     * @param connFile
      * @return password if correct, null otherwise
      */
-    private String getConnFilePassword(Conn conn, String fileName) {
+    private String getConnFilePassword(ConnFile connFile) {
 
         //TODO When TAB key is pressed to change focus on Cancel button and hit ENTER key
         //Bad password popup is displayed even if password field was let empty (OK button (which is highlighted) like behavior)
         //Also Bad Password dialog has an "Annuler" button who should be a "Cancel" button!
-        boolean tryAgain = false;
+
+        boolean tryAgain;
 
         do {
-            PasswordDialog pd = new PasswordDialog(fileName);
+            PasswordDialog pd = new PasswordDialog(connFile.getFileName());
             Optional<String> passwordDialogResult = pd.showAndWait();
             //result.ifPresent(password -> System.out.println(password));
 
@@ -479,7 +467,9 @@ public class RootLayoutController {
                 try {
                     Crypto crypto = new Crypto(password);
                     // If no exception thrown by line below, means that password is correct
-                    crypto.getDecrypted(conn.getPassword());
+                    // If first element (Conn (get(0))) of the list returned by loadConnDataFromFile method is encrypted,
+                    // also all others are (with same password)
+                    crypto.getDecrypted(loadConnDataFromFile(connFile).get(0).getPassword());
 
                     return password;
 
