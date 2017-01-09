@@ -1,6 +1,7 @@
 package ch.stageconcept.dtraff.connection.model;
 
 import ch.stageconcept.dtraff.connection.util.*;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -11,6 +12,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.image.ImageView;
 
 import javax.xml.bind.JAXBContext;
@@ -54,9 +56,20 @@ public class ConnFile extends ConnUnit<Conn> {
 
        this.parent = new SimpleObjectProperty<>();
 
+       // State
+       state = new SimpleObjectProperty<>(ConnFileState.CLEAR);
+
+       // Update icon when state change
+       stateProperty().addListener((observable, oldvalue, newvalue) -> {
+           setIcon(new ImageView(newvalue.getIconFileName()));
+       });
+
        // treeView context menu
        ContextMenu contextMenu = new ContextMenu();
+
+       // ### New Connection Menu
        MenuItem newConnectionMenuItem = new MenuItem(MENU_NEW_CONNECTION);
+
        newConnectionMenuItem.setOnAction((ActionEvent t) -> {
            //System.out.println("New Connection on:" + this.getName());
 
@@ -79,22 +92,24 @@ public class ConnFile extends ConnUnit<Conn> {
 
        });
 
+       // Disable context menu New Connection if file state is broken or encrypted
+       newConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
+               getState().equals(ConnFileState.BROKEN) || getState().equals(ConnFileState.ENCRYPTED), state));
+       // ###################################################################
+
+       // ### Close File Menu
        MenuItem closeFileMenuItem = new MenuItem(MENU_CLOSE_FILE);
 
        closeFileMenuItem.setOnAction((ActionEvent t) -> {
             //System.out.println("Close file on:" + this.getName());
             this.getParent().closeFile(this);
        });
+       // ###################################################################
 
-       contextMenu.getItems().addAll(closeFileMenuItem, newConnectionMenuItem);
+       SeparatorMenuItem separatorMenuItem = new SeparatorMenuItem();
+
+       contextMenu.getItems().addAll(newConnectionMenuItem, separatorMenuItem, closeFileMenuItem);
        this.setMenu(contextMenu);
-
-       state = new SimpleObjectProperty<>(ConnFileState.CLEAR);
-
-       // Update icon when state change
-       stateProperty().addListener((observable, oldvalue, newvalue) -> {
-           setIcon(new ImageView(newvalue.getIconFileName()));
-       });
 
    }
 

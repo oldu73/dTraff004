@@ -80,11 +80,20 @@ public class RootLayoutController {
         // Debug mode
         //printChildren(connectionTreeView.getRoot());
 
-        // Disable tool bar menu New Server Connection if no item or not a ConnFile instance selected in Connections treeView
-        newServerConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
-                        connectionTreeView.getSelectionModel().getSelectedItem() == null ||
-                                !(connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile),
-                connectionTreeView.getSelectionModel().selectedItemProperty()));
+        // New Server Connection Menu initial state is set to disable
+        newServerConnectionMenuItem.setDisable(true);
+
+        // Disable tool bar menu New Server Connection if the Connections treeView
+        // selected item is not a clear or decrypted ConnFile object
+        connectionTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.getValue() instanceof ConnFile &&
+                    (((ConnFile) newValue.getValue()).getState().equals(ConnFileState.CLEAR) ||
+                            ((ConnFile) newValue.getValue()).getState().equals(ConnFileState.DECRYPTED))) {
+                newServerConnectionMenuItem.setDisable(false);
+            } else {
+                newServerConnectionMenuItem.setDisable(true);
+            }
+        });
 
         // Disable tool bar menu Edit Server Connection if no item or not a Conn instance selected in Connections treeView
         editServerConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
