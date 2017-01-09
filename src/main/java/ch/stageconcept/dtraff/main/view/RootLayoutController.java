@@ -99,6 +99,9 @@ public class RootLayoutController {
 
         // ### Tool bar menu ############################################################
 
+        //TODO When file state change from encrypted to decrypted and selection in treeview hasn't changed,
+        //the serverConnectionMenuItem remain disabled until treeview selection changed!
+
         // New Server Connection Menu initial state is set to disable
         newServerConnectionMenuItem.setDisable(true);
 
