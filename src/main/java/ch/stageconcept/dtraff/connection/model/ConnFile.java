@@ -1,6 +1,7 @@
 package ch.stageconcept.dtraff.connection.model;
 
 import ch.stageconcept.dtraff.connection.util.*;
+import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -45,6 +46,7 @@ public class ConnFile extends ConnUnit<Conn> {
     private boolean isPasswordProtected = false;
     private String password;
     private final ObjectProperty<ConnFileState> state;
+    private RootLayoutController rootLayoutController;
 
     // ### Constructors #####################################################################
 
@@ -83,7 +85,11 @@ public class ConnFile extends ConnUnit<Conn> {
        // ### Enter password Menu
        MenuItem enterPasswordMenuItem = new MenuItem(MENU_ENTER_PASSWORD);
 
-       enterPasswordMenuItem.setOnAction((ActionEvent t) -> System.out.println("Enter password Menu"));
+       enterPasswordMenuItem.setOnAction((ActionEvent t) -> {
+           if (getRootLayoutController().decryptConnFile(this)) {
+               getRootLayoutController().populateSubunit(this, getRootLayoutController().loadConnDataFromFile(this));
+           }
+       });
 
        // Disable context menu New Connection if file state is broken or encrypted
        enterPasswordMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
@@ -167,6 +173,14 @@ public class ConnFile extends ConnUnit<Conn> {
 
     public void setState(ConnFileState state) {
         this.state.set(state);
+    }
+
+    public RootLayoutController getRootLayoutController() {
+        return rootLayoutController;
+    }
+
+    public void setRootLayoutController(RootLayoutController rootLayoutController) {
+        this.rootLayoutController = rootLayoutController;
     }
 
     // ### Methods #####################################################################

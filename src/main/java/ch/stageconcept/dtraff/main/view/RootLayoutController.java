@@ -55,6 +55,15 @@ public class RootLayoutController {
     private BorderPane rootBorderPane;
 
     @FXML
+    private MenuItem fileNewMenuItem;
+
+    @FXML
+    private MenuItem fileOpenMenuItem;
+
+    @FXML
+    private MenuItem fileCloseMenuItem;
+
+    @FXML
     private MenuItem serverConnectionMenuItem;
 
     @FXML
@@ -203,8 +212,32 @@ public class RootLayoutController {
     }
 
     /**
-     * Called when the user selects the File - New Server Connexion menu. Opens a dialog to edit
-     * details for a new connection.
+     * Called when the user selects the tool bar File - New menu.
+     */
+    @FXML
+    private void handleFileNew() {
+        System.out.println("New File..");
+    }
+
+    /**
+     * Called when the user selects the tool bar File - Open menu.
+     */
+    @FXML
+    private void handleFileOpen() {
+        System.out.println("Open File..");
+    }
+
+    /**
+     * Called when the user selects the tool bar File - Close menu.
+     */
+    @FXML
+    private void handleFileClose() {
+        System.out.println("Close File..");
+    }
+
+    /**
+     * Called when the user selects the tool bar File - New Server Connection menu.
+     * Opens a dialog to edit details for a new connection.
      */
     @FXML
     private void handleNewConnection() {
@@ -219,8 +252,8 @@ public class RootLayoutController {
     }
 
     /**
-     * Called when the user selects the ConnFile - Edit Server Conn menu. Opens a dialog to edit
-     * details for the existing connection.
+     * Called when the user selects the tool bar File - Edit Server Connection menu.
+     * Opens a dialog to edit details for the existing connection.
      */
     @FXML
     private void handleEditConnection() {
@@ -310,6 +343,7 @@ public class RootLayoutController {
                    }
 
                    connFile.setParent(network);
+                   connFile.setRootLayoutController(this);
                    network.getSubUnits().add(connFile);
                }
            }
@@ -368,7 +402,7 @@ public class RootLayoutController {
      * @param subUnit
      * @param listConn
      */
-    private void populateSubunit(ConnFile subUnit, List<Conn> listConn) {
+    public void populateSubunit(ConnFile subUnit, List<Conn> listConn) {
 
         // Set Conn object reference to his ConnFile parent object
         for (Conn conn : listConn) {
@@ -440,7 +474,7 @@ public class RootLayoutController {
  *
  * @param connFile
  */
-    private List<Conn> loadConnDataFromFile(ConnFile connFile) {
+    public List<Conn> loadConnDataFromFile(ConnFile connFile) {
         File file = new java.io.File(connFile.getFileName());
 
         // debug mode
@@ -483,7 +517,7 @@ public class RootLayoutController {
      *
      * @param connFile
      */
-    private boolean decryptConnFile(ConnFile connFile) {
+    public boolean decryptConnFile(ConnFile connFile) {
 
         String password = getConnFilePassword(connFile);
 
