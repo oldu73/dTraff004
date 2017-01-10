@@ -35,6 +35,8 @@ public class ConnFile extends ConnUnit<Conn> {
     private static final String ALERT_SAVE_DATA_HEADER = "Could not save data";
     private static final String ALERT_SAVE_DATA_CONTENT = "Could not save data to file:\n";
 
+    private static final String DIALOG_NEW_CONNECTION_TITLE = MENU_NEW_CONNECTION;
+
     // Reference to parent object
     private final ObjectProperty<Network> parent;
 
@@ -70,27 +72,7 @@ public class ConnFile extends ConnUnit<Conn> {
        // ### New Connection Menu
        MenuItem newConnectionMenuItem = new MenuItem(MENU_NEW_CONNECTION);
 
-       newConnectionMenuItem.setOnAction((ActionEvent t) -> {
-           //System.out.println("New Connection on:" + this.getName());
-
-           // new Conn instance with default name value
-           Conn conn = new Conn(DbType.INSTANCE.getDbDescriptorMap().get(DbType.MYSQL_KEY).getName());
-           conn.setParent(this);
-
-           // If ConnFile is password protected,
-           // encrypt Conn password default value (root) with ConnFile password
-           if (conn.getParent().isPasswordProtected()) {
-               Crypto crypto = new Crypto(conn.getParent().getPassword());
-               conn.setPassword(crypto.getEncrypted(conn.getPassword()));
-           }
-
-           if (ConnEditor.INSTANCE.supply(conn)) {
-                subUnits.add(conn);
-                //this.createAndAddSubUnit("Hello, world!");
-                saveConnDataToFile();
-           }
-
-       });
+       newConnectionMenuItem.setOnAction((ActionEvent t) -> newConnection());
 
        // Disable context menu New Connection if file state is broken or encrypted
        newConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
@@ -175,12 +157,34 @@ public class ConnFile extends ConnUnit<Conn> {
     // ### Methods #####################################################################
 
     /**
+     * Create new connection
+     */
+    public void newConnection() {
+        //System.out.println("New Connection on:" + this.getName());
+
+        // new Conn instance with default name value
+        Conn conn = new Conn(DbType.INSTANCE.getDbDescriptorMap().get(DbType.MYSQL_KEY).getName());
+        conn.setParent(this);
+
+        // If ConnFile is password protected,
+        // encrypt Conn password default value (root) with ConnFile password
+        if (conn.getParent().isPasswordProtected()) {
+            Crypto crypto = new Crypto(conn.getParent().getPassword());
+            conn.setPassword(crypto.getEncrypted(conn.getPassword()));
+        }
+
+        if (ConnEditor.INSTANCE.supply(conn, DIALOG_NEW_CONNECTION_TITLE)) {
+            getSubUnits().add(conn);
+            //this.createAndAddSubUnit("Hello, world!");
+            saveConnDataToFile();
+        }
+    }
+
+    /**
      * Saves the current connection data to file.
      *
      */
-    private void saveConnDataToFile() {
-
-        //TODO update file when conn object has been edited
+    public void saveConnDataToFile() {
 
         File file = new java.io.File(this.fileName);
 

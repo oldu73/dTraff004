@@ -37,6 +37,7 @@ public class Conn extends ConnUnit<DataBase> {
     private static final String ICON_FILENAME = "serverDefault001.gif";
     private static final int VALID_CONNECTION_CHECK_TIMEOUT_SECONDS = 5;
     private static final String MENU_EDIT_CONNECTION = "Edit Connection";
+    private static final String DIALOG_EDIT_CONNECTION_TITLE = MENU_EDIT_CONNECTION;
 
     // Reference to parent object
     private final ObjectProperty<ConnFile> parent;
@@ -77,8 +78,7 @@ public class Conn extends ConnUnit<DataBase> {
         // treeView context menu
         ContextMenu contextMenu = new ContextMenu();
         MenuItem editConnectionMenuItem = new MenuItem(MENU_EDIT_CONNECTION);
-        editConnectionMenuItem.setOnAction((ActionEvent t) -> {
-            ConnEditor.INSTANCE.supply(this);});
+        editConnectionMenuItem.setOnAction((ActionEvent t) -> editConnection());
         contextMenu.getItems().add(editConnectionMenuItem);
         this.setMenu(contextMenu);
 
@@ -125,6 +125,14 @@ public class Conn extends ConnUnit<DataBase> {
 
     // Methods
     // #####################################################################
+
+    /**
+     * Edit connection
+     */
+    public void editConnection() {
+        ConnEditor.INSTANCE.supply(this, DIALOG_EDIT_CONNECTION_TITLE);
+        this.getParent().saveConnDataToFile();
+    }
 
     /**
      * Establish database connection.
@@ -332,7 +340,6 @@ public class Conn extends ConnUnit<DataBase> {
         */
 
         this.password.set(password);
-
     }
 
 }

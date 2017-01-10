@@ -21,6 +21,9 @@ public enum ConnEditor {
 
     INSTANCE;
 
+    // Fxml resource
+    private static final String CONN_EDIT_DIALOG_FXML = "../connection/view/ConnEditDialog.fxml";
+
     /**
      * Opens a dialog to edit details for the specified Conn. If the user
      * clicks OK, the changes are saved into the provided Conn object and true
@@ -29,16 +32,16 @@ public enum ConnEditor {
      * @param conn the Conn object to be edited
      * @return true if the user clicked OK, false otherwise.
      */
-    public boolean supply(Conn conn) {
+    public boolean supply(Conn conn, String title) {
         try {
             // Load the fxml file and create a new stage for the popup dialog.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("../connection/view/ConnEditDialog.fxml"));
+            loader.setLocation(MainApp.class.getResource(CONN_EDIT_DIALOG_FXML));
             AnchorPane page = (AnchorPane) loader.load();
 
             // Create the dialog Stage.
             Stage dialogStage = new Stage();
-            dialogStage.setTitle("Edit Connection");
+            dialogStage.setTitle(title);
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.initOwner(MainApp.primaryStage);
             Scene scene = new Scene(page);

@@ -5,17 +5,11 @@ import ch.stageconcept.dtraff.connection.util.*;
 import ch.stageconcept.dtraff.connection.view.ModelTree;
 import ch.stageconcept.dtraff.main.MainApp;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.css.PseudoClass;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 
 import javax.xml.bind.JAXBContext;
@@ -35,7 +29,24 @@ import java.util.prefs.Preferences;
  */
 public class RootLayoutController {
 
+    // Connections treeView root denomination
     private static final String NETWORK = "Network";
+
+    // Connections treeView CSS resource
+    private static final String CONNECTION_TREEVIEW_CSS = "/connectionTreeView.css";
+
+    // Alerts statics texts
+    private static final String ALINF_ABOUT_TITLE = "Data Traffic";
+    private static final String ALINF_ABOUT_HEADER = "About";
+    private static final String ALINF_ABOUT_CONTENT = "Author: Olivier Durand\nWebsite: http://www.stageconcept.ch";
+
+    private static final String ALERR_LOAD_DATA_TITLE = "Error";
+    private static final String ALERR_LOAD_DATA_HEADER = "Could not load data";
+    private static final String ALERR_LOAD_DATA_CONTENT = "Could not load data from file:\n";
+
+    private static final String ALCNF_BAD_PASSWORD_TITLE = "Password Dialog";
+    private static final String ALCNF_BAD_PASSWORD_HEADER = "Bad password!";
+    private static final String ALCNF_BAD_PASSWORD_CONTENT = "Try again?";
 
     // Reference to the main application
     private MainApp mainApp;
@@ -82,7 +93,7 @@ public class RootLayoutController {
 
         // CSS pseudo class treeView style.
         // !WARNING! In order to use file that reside in resources folder, don’t forget to add a slash before file name!
-        connectionTreeView.getStylesheets().add(getClass().getResource("/connectionTreeView.css").toExternalForm());
+        connectionTreeView.getStylesheets().add(getClass().getResource(CONNECTION_TREEVIEW_CSS).toExternalForm());
 
         rootBorderPane.setLeft(connectionTreeView);
 
@@ -118,9 +129,9 @@ public class RootLayoutController {
                 if (((ConnFile) newValue.getValue()).getState().equals(ConnFileState.CLEAR) ||
                         ((ConnFile) newValue.getValue()).getState().equals(ConnFileState.DECRYPTED)) {
                     newServerConnectionMenuItem.setDisable(false);
-                } else {
-                    newServerConnectionMenuItem.setDisable(true);
                 }
+            } else {
+                newServerConnectionMenuItem.setDisable(true);
             }
         });
 
@@ -176,19 +187,11 @@ public class RootLayoutController {
      */
     @FXML
     private void handleNewConnection() {
-        // new Conn instance with default name value
-        Conn conn = new Conn(DbType.INSTANCE.getDbDescriptorMap().get(DbType.MYSQL_KEY).getName());
 
-        // The tool bar menu is disabled if none or not a ConnFile is selected in Conn treeView,
+        // The tool bar menu is disabled if none or not a ConnFile is selected in Connection treeView,
         // so the item could only be a ConnFile -> (cast)
         ConnFile connFile = (ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue();
-
-        // Give Conn object reference to his ConnFile parent object
-        conn.setParent(connFile);
-
-        if (ConnEditor.INSTANCE.supply(conn)) {
-            connFile.getSubUnits().add(conn);
-        }
+        connFile.newConnection();
 
         //TODO Find a solution for the ConnEditDialogController Test Conn button side effect that update the edited conn:
         //- pass a temporary copy of the edited conn for testing.
@@ -200,11 +203,10 @@ public class RootLayoutController {
      */
     @FXML
     private void handleEditConnection() {
-        // The tool bar menu is disabled if none or not a Conn is selected in Conn treeView,
+        // The tool bar menu is disabled if none or not a Conn is selected in Connection treeView,
         // so the item could only be a Conn -> (cast)
         Conn conn = (Conn) connectionTreeView.getSelectionModel().getSelectedItem().getValue();
-
-        ConnEditor.INSTANCE.supply(conn);
+        conn.editConnection();
 
         //TODO Find a solution for the ConnEditDialogController Test Conn button side effect that update the edited conn:
         //- pass a temporary copy of the edited conn for testing.
@@ -215,13 +217,10 @@ public class RootLayoutController {
      */
     @FXML
     private void handleAbout() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        //TODO put text in static String
-        alert.setTitle("Data Traffic");
-        alert.setHeaderText("About");
-        alert.setContentText("Author: Olivier Durand\nWebsite: http://www.stageconcept.ch");
-
-        alert.showAndWait();
+        provideAlert(Alert.AlertType.INFORMATION,
+                ALINF_ABOUT_TITLE,
+                ALINF_ABOUT_HEADER,
+                ALINF_ABOUT_CONTENT, true);
     }
 
     /**
@@ -307,26 +306,30 @@ public class RootLayoutController {
 
                    List<Conn> listConn = loadConnDataFromFile(subUnit);
 
-                   // debug mode
-                   //System.out.println("String to decrypt: " + listConn.get(0).getPassword());
+                   // If loadConnDataFromFile raise an exception (file is damaged)
+                   // it set ConnFile object state to BROKEN and return null value in listConn.
+                   if (listConn != null) {
 
-                   // If first element (Conn) of the list is encrypted, also all others are (with same password)
-                   if (listConn.get(0).isPasswordEncrypted()) {
-                       subUnit.setState(ConnFileState.ENCRYPTED);
-                       decryptConnFile(subUnit);
-                   }
+                       // debug mode
+                       //System.out.println("String to decrypt: " + listConn.get(0).getPassword());
 
-                   // debug mode
+                       // If first element (Conn) of the list is encrypted, also all others are (with same password)
+                       if (listConn.get(0).isPasswordEncrypted()) {
+                           subUnit.setState(ConnFileState.ENCRYPTED);
+                           decryptConnFile(subUnit);
+                       }
+
+                       // debug mode
                             /*
                             for (Conn conn: listConn) {
                                 System.out.println(conn);
                             }
                             */
 
-                   if (subUnit.getState().equals(ConnFileState.CLEAR) || subUnit.getState().equals(ConnFileState.DECRYPTED)) {
-                       populateSubunit(subUnit, listConn);
+                       if (subUnit.getState().equals(ConnFileState.CLEAR) || subUnit.getState().equals(ConnFileState.DECRYPTED)) {
+                           populateSubunit(subUnit, listConn);
+                       }
                    }
-
                }
            });
        }
@@ -443,14 +446,12 @@ public class RootLayoutController {
             return wrapper.getConns();
 
         } catch (Exception e) { // catches ANY exception
+            provideAlert(Alert.AlertType.ERROR,
+                    ALERR_LOAD_DATA_TITLE,
+                    ALERR_LOAD_DATA_HEADER,
+                    ALERR_LOAD_DATA_CONTENT + file.getPath(), true);
 
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            //TODO put text in static String
-            alert.setTitle("Error");
-            alert.setHeaderText("Could not load data");
-            alert.setContentText("Could not load data from file:\n" + file.getPath());
-
-            alert.showAndWait();
+            connFile.setState(ConnFileState.BROKEN);
         }
 
         return null;
@@ -512,13 +513,13 @@ public class RootLayoutController {
 
                     //e.printStackTrace();
 
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                    //TODO put text in static String
-                    alert.setTitle("Password Dialog");
-                    alert.setHeaderText("Bad password!");
-                    alert.setContentText("Try again?");
+                    Alert alert = provideAlert(Alert.AlertType.CONFIRMATION,
+                            ALCNF_BAD_PASSWORD_TITLE,
+                            ALCNF_BAD_PASSWORD_HEADER,
+                            ALCNF_BAD_PASSWORD_CONTENT, false);
 
                     Optional<ButtonType> badPasswordDialogResult = alert.showAndWait();
+
                     if (badPasswordDialogResult.get() == ButtonType.OK) {
                         // ... user chose OK
                         tryAgain = true;
@@ -535,6 +536,28 @@ public class RootLayoutController {
         } while (tryAgain);
 
         return null;
+    }
+
+    /**
+     * Provide alert dialog with optional showAndWait possibility.
+     * Return Alert object in case of outside method behavior management needs.
+     *
+     * @param alertType
+     * @param title
+     * @param header
+     * @param content
+     * @param showAndWait
+     * @return alert Alert object
+     */
+    private Alert provideAlert(Alert.AlertType alertType, String title, String header, String content, boolean showAndWait) {
+        Alert alert = new Alert(alertType);
+
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+
+        if (showAndWait) alert.showAndWait();
+        return alert;
     }
 
 }
