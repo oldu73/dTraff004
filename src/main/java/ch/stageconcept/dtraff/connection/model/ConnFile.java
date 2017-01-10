@@ -29,6 +29,7 @@ public class ConnFile extends ConnUnit<Conn> {
     private static final String ICON_FILENAME = ConnFileState.CLEAR.getIconFileName();
 
     private static final String MENU_NEW_CONNECTION = "New Connection";
+    private static final String MENU_ENTER_PASSWORD = "Enter password";
     private static final String MENU_CLOSE_FILE = "Close File";
 
     private static final String ALERT_SAVE_DATA_TITLE = "Error";
@@ -79,6 +80,16 @@ public class ConnFile extends ConnUnit<Conn> {
                getState().equals(ConnFileState.BROKEN) || getState().equals(ConnFileState.ENCRYPTED), state));
        // ###################################################################
 
+       // ### Enter password Menu
+       MenuItem enterPasswordMenuItem = new MenuItem(MENU_ENTER_PASSWORD);
+
+       enterPasswordMenuItem.setOnAction((ActionEvent t) -> System.out.println("Enter password Menu"));
+
+       // Disable context menu New Connection if file state is broken or encrypted
+       enterPasswordMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
+               !getState().equals(ConnFileState.ENCRYPTED), state));
+       // ###################################################################
+
        // ### Close File Menu
        MenuItem closeFileMenuItem = new MenuItem(MENU_CLOSE_FILE);
 
@@ -90,7 +101,11 @@ public class ConnFile extends ConnUnit<Conn> {
 
        SeparatorMenuItem separatorMenuItem = new SeparatorMenuItem();
 
-       contextMenu.getItems().addAll(newConnectionMenuItem, separatorMenuItem, closeFileMenuItem);
+       contextMenu.getItems().addAll(newConnectionMenuItem,
+               enterPasswordMenuItem,
+               separatorMenuItem,
+               closeFileMenuItem);
+
        this.setMenu(contextMenu);
 
    }
