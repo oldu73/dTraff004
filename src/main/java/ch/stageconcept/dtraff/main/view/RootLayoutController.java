@@ -126,12 +126,29 @@ public class RootLayoutController {
             if (newValue.getValue() instanceof ConnFile) {
                 selectedConnFileState.bind(((ConnFile) newValue.getValue()).stateProperty());
 
+                // debug mode
+                //System.out.print("1 ");
+
                 if (((ConnFile) newValue.getValue()).getState().equals(ConnFileState.CLEAR) ||
                         ((ConnFile) newValue.getValue()).getState().equals(ConnFileState.DECRYPTED)) {
                     newServerConnectionMenuItem.setDisable(false);
+
+                    // debug mode
+                    //System.out.print("2 ");
+
+                } else {
+                    newServerConnectionMenuItem.setDisable(true);
+
+                    // debug mode
+                    //System.out.print("3 ");
+
                 }
             } else {
                 newServerConnectionMenuItem.setDisable(true);
+
+                // debug mode
+                //System.out.print("4 ");
+
             }
         });
 
@@ -142,6 +159,10 @@ public class RootLayoutController {
         selectedConnFileState.addListener((observable, oldValue, newValue) -> {
             if (oldValue != null && (oldValue.equals(ConnFileState.ENCRYPTED) && newValue.equals(ConnFileState.DECRYPTED))) {
                 newServerConnectionMenuItem.setDisable(false);
+
+                // debug mode
+                //System.out.print("5 ");
+
             }
         });
 
