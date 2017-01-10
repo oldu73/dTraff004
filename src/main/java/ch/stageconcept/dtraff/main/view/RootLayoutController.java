@@ -5,6 +5,11 @@ import ch.stageconcept.dtraff.connection.util.*;
 import ch.stageconcept.dtraff.connection.view.ModelTree;
 import ch.stageconcept.dtraff.main.MainApp;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.css.PseudoClass;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -50,6 +55,8 @@ public class RootLayoutController {
     private Network network;    // Network description to be used in a treeView : Network (root node) - ConnFile - Conn - Database - (...)
     private ModelTree<ConnUnit<?>> connectionTree;
     private TreeView<ConnUnit<?>> connectionTreeView;
+
+    private ObjectProperty<ConnFileState> selectedConnFileState = new SimpleObjectProperty<>();
 
     /**
      * Initializes the controller class. This method is automatically called
@@ -99,23 +106,44 @@ public class RootLayoutController {
 
         // ### Tool bar menu ############################################################
 
-        //TODO When file state change from encrypted to decrypted and selection in treeview hasn't changed,
-        //the serverConnectionMenuItem remain disabled until treeview selection changed!
-
         // New Server Connection Menu initial state is set to disable
         newServerConnectionMenuItem.setDisable(true);
 
         // Disable tool bar menu New Server Connection if the Connections treeView
         // selected item is not a clear or decrypted ConnFile object
         connectionTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.getValue() instanceof ConnFile &&
-                    (((ConnFile) newValue.getValue()).getState().equals(ConnFileState.CLEAR) ||
-                            ((ConnFile) newValue.getValue()).getState().equals(ConnFileState.DECRYPTED))) {
-                newServerConnectionMenuItem.setDisable(false);
-            } else {
-                newServerConnectionMenuItem.setDisable(true);
+            if (newValue.getValue() instanceof ConnFile) {
+                selectedConnFileState.bind(((ConnFile) newValue.getValue()).stateProperty());
+
+                if (((ConnFile) newValue.getValue()).getState().equals(ConnFileState.CLEAR) ||
+                        ((ConnFile) newValue.getValue()).getState().equals(ConnFileState.DECRYPTED)) {
+                    newServerConnectionMenuItem.setDisable(false);
+                } else {
+                    newServerConnectionMenuItem.setDisable(true);
+                }
             }
         });
+
+        // After double click on an encrypted file to enter correct password,
+        // the serverConnectionMenuItem remain disabled until treeview selection changed!
+        // So, the belowing lines deserv to track ConnFile (in Connections treeView)
+        // selected object state changes in order to update the newServerConnectionMenuItem disabled status.
+        selectedConnFileState.addListener((observable, oldValue, newValue) -> {
+            if (oldValue != null && (oldValue.equals(ConnFileState.ENCRYPTED) && newValue.equals(ConnFileState.DECRYPTED))) {
+                newServerConnectionMenuItem.setDisable(false);
+            }
+        });
+
+        /*
+        // Old version with BooleanBinding
+        newServerConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
+                        connectionTreeView.getSelectionModel().getSelectedItem() == null ||
+                                !(connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile) ||
+                                (connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile &&
+                                        (((ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue()).getState().equals(ConnFileState.BROKEN) ||
+                                                ((ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue()).getState().equals(ConnFileState.ENCRYPTED))),
+                connectionTreeView.getSelectionModel().selectedItemProperty()));
+        */
 
         // Disable tool bar menu Edit Server Connection if no item or not a Conn instance selected in Connections treeView
         editServerConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
