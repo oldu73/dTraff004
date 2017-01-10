@@ -171,7 +171,7 @@ public class RootLayoutController {
     }
 
     /**
-     * Called when the user selects the ConnFile - New Server Conn menu. Opens a dialog to edit
+     * Called when the user selects the File - New Server Connexion menu. Opens a dialog to edit
      * details for a new connection.
      */
     @FXML
@@ -179,11 +179,15 @@ public class RootLayoutController {
         // new Conn instance with default name value
         Conn conn = new Conn(DbType.INSTANCE.getDbDescriptorMap().get(DbType.MYSQL_KEY).getName());
 
+        // The tool bar menu is disabled if none or not a ConnFile is selected in Conn treeView,
+        // so the item could only be a ConnFile -> (cast)
+        ConnFile connFile = (ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue();
+
+        // Give Conn object reference to his ConnFile parent object
+        conn.setParent(connFile);
+
         if (ConnEditor.INSTANCE.supply(conn)) {
-            // The tool bar menu is disabled if none or not a ConnFile is selected in Conn treeView,
-            // so the item could only be a ConnFile -> (cast)
-            ConnFile file = (ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue();
-            file.getSubUnits().add(conn);
+            connFile.getSubUnits().add(conn);
         }
 
         //TODO Find a solution for the ConnEditDialogController Test Conn button side effect that update the edited conn:
