@@ -72,6 +72,9 @@ public class RootLayoutController {
     @FXML
     private MenuItem editServerConnectionMenuItem;
 
+    @FXML
+    private MenuItem enterPasswordServerConnectionMenuItem;
+
     private Network network;    // Network description to be used in a treeView : Network (root node) - ConnFile - Conn - Database - (...)
     private ModelTree<ConnUnit<?>> connectionTree;
     private TreeView<ConnUnit<?>> connectionTreeView;
@@ -236,7 +239,7 @@ public class RootLayoutController {
     }
 
     /**
-     * Called when the user selects the tool bar File - New Server Connection menu.
+     * Called when the user selects the tool bar File - Server Connection - New, menu.
      * Opens a dialog to edit details for a new connection.
      */
     @FXML
@@ -252,7 +255,7 @@ public class RootLayoutController {
     }
 
     /**
-     * Called when the user selects the tool bar File - Edit Server Connection menu.
+     * Called when the user selects the tool bar File - Server Connection - Edit, menu.
      * Opens a dialog to edit details for the existing connection.
      */
     @FXML
@@ -264,6 +267,14 @@ public class RootLayoutController {
 
         //TODO Find a solution for the ConnEditDialogController Test Conn button side effect that update the edited conn:
         //- pass a temporary copy of the edited conn for testing.
+    }
+
+    /**
+     * Called when the user selects the tool bar File - Server Connection - Enter Password, menu.
+     */
+    @FXML
+    private void handleEnterPasswordConnection() {
+        System.out.println("Enter Password..");
     }
 
     /**

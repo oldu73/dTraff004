@@ -25,6 +25,8 @@
                            </accelerator>
                         </MenuItem>
                       <MenuItem fx:id="editServerConnectionMenuItem" mnemonicParsing="false" onAction="#handleEditConnection" text="Edit" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="enterPasswordServerConnectionMenuItem" mnemonicParsing="false" onAction="#handleEnterPasswordConnection" text="Enter Password" />
                     </items>
                   </Menu>
                   <SeparatorMenuItem mnemonicParsing="false" />
