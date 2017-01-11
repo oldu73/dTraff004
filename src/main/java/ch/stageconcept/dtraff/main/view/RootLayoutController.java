@@ -4,6 +4,7 @@ import ch.stageconcept.dtraff.connection.model.*;
 import ch.stageconcept.dtraff.connection.util.*;
 import ch.stageconcept.dtraff.connection.view.ModelTree;
 import ch.stageconcept.dtraff.main.MainApp;
+import ch.stageconcept.dtraff.preference.util.PrefEditor;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -37,7 +38,7 @@ public class RootLayoutController {
 
     // Alerts statics texts
     private static final String ALINF_ABOUT_TITLE = "Data Traffic";
-    private static final String ALINF_ABOUT_HEADER = "About";
+    private static final String ALINF_ABOUT_HEADER = ALINF_ABOUT_TITLE + " r0.4";
     private static final String ALINF_ABOUT_CONTENT = "Author: Olivier Durand\nWebsite: http://www.stageconcept.ch";
 
     private static final String ALERR_LOAD_DATA_TITLE = "Error";
@@ -61,6 +62,9 @@ public class RootLayoutController {
     private MenuItem fileOpenMenuItem;
 
     @FXML
+    private MenuItem fileEnterPasswordMenuItem;
+
+    @FXML
     private MenuItem fileCloseMenuItem;
 
     @FXML
@@ -73,7 +77,10 @@ public class RootLayoutController {
     private MenuItem editServerConnectionMenuItem;
 
     @FXML
-    private MenuItem enterPasswordServerConnectionMenuItem;
+    private MenuItem editDeleteMenuItem;
+
+    @FXML
+    private MenuItem editPreferencesMenuItem;
 
     private Network network;    // Network description to be used in a treeView : Network (root node) - ConnFile - Conn - Database - (...)
     private ModelTree<ConnUnit<?>> connectionTree;
@@ -109,7 +116,7 @@ public class RootLayoutController {
 
         rootBorderPane.setLeft(connectionTreeView);
 
-        // Debug mode
+        // debug mode
         //printChildren(connectionTreeView.getRoot());
 
         // Double click on Connections treeView
@@ -231,6 +238,14 @@ public class RootLayoutController {
     }
 
     /**
+     * Called when the user selects the tool bar File - Enter Password menu.
+     */
+    @FXML
+    private void handleFileEnterPassword() {
+        System.out.println("Enter Password..");
+    }
+
+    /**
      * Called when the user selects the tool bar File - Close menu.
      */
     @FXML
@@ -270,11 +285,19 @@ public class RootLayoutController {
     }
 
     /**
-     * Called when the user selects the tool bar File - Server Connection - Enter Password, menu.
+     * Called when the user selects the tool bar Edit - Delete menu.
      */
     @FXML
-    private void handleEnterPasswordConnection() {
-        System.out.println("Enter Password..");
+    private void handleEditDelete() {
+        System.out.println("Edit Delete..");
+    }
+
+    /**
+     * Called when the user selects the tool bar Edit - Preferences menu.
+     */
+    @FXML
+    private void handleEditPreferences() {
+        PrefEditor.INSTANCE.supply();
     }
 
     /**

@@ -1,7 +1,6 @@
 package ch.stageconcept.dtraff.main;
 
 import ch.stageconcept.dtraff.main.view.RootLayoutController;
-import ch.stageconcept.dtraff.preference.Pref;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -63,11 +62,13 @@ public class MainApp extends Application {
     public static void main(String[] args) {
 
         // debug mode (testing preferences)
+        /*
         if (Pref.INSTANCE.isDecryptConnFilePassAtStart()) {
             Pref.INSTANCE.setDecryptConnFilePassAtStart(false);
         } else {
             Pref.INSTANCE.setDecryptConnFilePassAtStart(true);
         }
+        */
 
         launch(args);
     }

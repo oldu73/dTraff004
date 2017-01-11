@@ -1,4 +1,4 @@
-package ch.stageconcept.dtraff.preference;
+package ch.stageconcept.dtraff.preference.model;
 
 import java.util.prefs.Preferences;
 

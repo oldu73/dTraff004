@@ -1,8 +1,7 @@
-package ch.stageconcept.dtraff.connection.util;
+package ch.stageconcept.dtraff.preference.util;
 
-import ch.stageconcept.dtraff.connection.model.Conn;
-import ch.stageconcept.dtraff.connection.view.ConnEditDialogController;
 import ch.stageconcept.dtraff.main.MainApp;
+import ch.stageconcept.dtraff.preference.view.PrefDialogController;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
@@ -12,45 +11,38 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 /**
- * Helper enum class to supply ConnectionEditDialog
+ * Helper enum class to supply PrefDialog
  * in front of primaryStage
  *
  * @author Olivier Durand
  */
-public enum ConnEditor {
+public enum PrefEditor {
 
     INSTANCE;
 
-    // Fxml resource
-    private static final String CONN_EDIT_DIALOG_FXML = "../connection/view/ConnEditDialog.fxml";
-
     /**
-     * Opens a dialog to edit details for the specified Conn. If the user
-     * clicks OK, the changes are saved into the provided Conn object and true
-     * is returned.
+     * Opens a dialog to edit user preferences.
      *
-     * @param conn the Conn object to be edited
      * @return true if the user clicked OK, false otherwise.
      */
-    public boolean supply(Conn conn, String title) {
+    public boolean supply() {
         try {
             // Load the fxml file and create a new stage for the popup dialog.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource(CONN_EDIT_DIALOG_FXML));
+            loader.setLocation(MainApp.class.getResource("../preference/view/PrefDialog.fxml"));
             AnchorPane page = loader.load();
 
             // Create the dialog Stage.
             Stage dialogStage = new Stage();
-            dialogStage.setTitle(title);
+            dialogStage.setTitle("Edit User Preferences");
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.initOwner(MainApp.primaryStage);
             Scene scene = new Scene(page);
             dialogStage.setScene(scene);
 
-            // Set the Stage and Conn objects into the controller.
-            ConnEditDialogController controller = loader.getController();
+            // Set the Stage object into the controller.
+            PrefDialogController controller = loader.getController();
             controller.setDialogStage(dialogStage);
-            controller.setConn(conn);
 
             // Disable resize
             dialogStage.setResizable(false);

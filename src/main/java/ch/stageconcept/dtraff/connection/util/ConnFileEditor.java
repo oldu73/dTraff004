@@ -22,7 +22,7 @@ public enum ConnFileEditor {
     INSTANCE;
 
     /**
-     * Opens a dialog to edit details for the specified FIle. If the user
+     * Opens a dialog to edit details for the specified Connection File. If the user
      * clicks OK, the changes are saved into the provided ConnFile object and true
      * is returned.
      *
@@ -34,17 +34,17 @@ public enum ConnFileEditor {
             // Load the fxml file and create a new stage for the popup dialog.
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("../connection/view/ConnFileEditDialog.fxml"));
-            AnchorPane page = (AnchorPane) loader.load();
+            AnchorPane page = loader.load();
 
             // Create the dialog Stage.
             Stage dialogStage = new Stage();
-            dialogStage.setTitle("Edit ConnFile");
+            dialogStage.setTitle("New Connection File");
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.initOwner(MainApp.primaryStage);
             Scene scene = new Scene(page);
             dialogStage.setScene(scene);
 
-            // Set the dbConnect into the controller.
+            // Set the Stage and ConnFile objects into the controller.
             ConnFileEditDialogController controller = loader.getController();
             controller.setDialogStage(dialogStage);
             controller.setFile(file);

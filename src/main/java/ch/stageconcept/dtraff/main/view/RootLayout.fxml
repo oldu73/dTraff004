@@ -15,6 +15,7 @@
             <items>
                   <MenuItem fx:id="fileNewMenuItem" mnemonicParsing="false" onAction="#handleFileNew" text="New" />
                   <MenuItem fx:id="fileOpenMenuItem" mnemonicParsing="false" onAction="#handleFileOpen" text="Open" />
+                  <MenuItem fx:id="fileEnterPasswordMenuItem" mnemonicParsing="false" onAction="#handleFileEnterPassword" text="Enter Password" />
                   <MenuItem fx:id="fileCloseMenuItem" mnemonicParsing="false" onAction="#handleFileClose" text="Close" />
                   <SeparatorMenuItem mnemonicParsing="false" />
                   <Menu fx:id="serverConnectionMenuItem" mnemonicParsing="false" text="Server Connection">
@@ -25,8 +26,6 @@
                            </accelerator>
                         </MenuItem>
                       <MenuItem fx:id="editServerConnectionMenuItem" mnemonicParsing="false" onAction="#handleEditConnection" text="Edit" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem fx:id="enterPasswordServerConnectionMenuItem" mnemonicParsing="false" onAction="#handleEnterPasswordConnection" text="Enter Password" />
                     </items>
                   </Menu>
                   <SeparatorMenuItem mnemonicParsing="false" />
@@ -38,7 +37,9 @@
           </Menu>
           <Menu mnemonicParsing="false" text="Edit">
             <items>
-              <MenuItem mnemonicParsing="false" text="Delete" />
+              <MenuItem fx:id="editDeleteMenuItem" mnemonicParsing="false" onAction="#handleEditDelete" text="Delete" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem fx:id="editPreferencesMenuItem" mnemonicParsing="false" onAction="#handleEditPreferences" text="Preferences" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help">
