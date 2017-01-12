@@ -1,7 +1,9 @@
 package ch.stageconcept.dtraff.preference.view;
 
+import ch.stageconcept.dtraff.preference.model.Pref;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.stage.Stage;
 
 /**
@@ -10,6 +12,9 @@ import javafx.stage.Stage;
  * @author Olivier Durand
  */
 public class PrefDialogController {
+
+    @FXML
+    private CheckBox decryptConnFilePassAtStartCheckBox;
 
     @FXML
     private Button okButton;
@@ -26,6 +31,8 @@ public class PrefDialogController {
      */
     @FXML
     private void initialize() {
+
+        decryptConnFilePassAtStartCheckBox.setSelected(Pref.INSTANCE.isDecryptConnFilePassAtStart());
 
     }
 
@@ -53,6 +60,9 @@ public class PrefDialogController {
     @FXML
     private void handleOk() {
         okClicked = true;
+
+        Pref.INSTANCE.setDecryptConnFilePassAtStart(decryptConnFilePassAtStartCheckBox.isSelected());
+
         dialogStage.close();
     }
 

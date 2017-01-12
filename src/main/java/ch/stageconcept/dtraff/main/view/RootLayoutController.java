@@ -4,6 +4,7 @@ import ch.stageconcept.dtraff.connection.model.*;
 import ch.stageconcept.dtraff.connection.util.*;
 import ch.stageconcept.dtraff.connection.view.ModelTree;
 import ch.stageconcept.dtraff.main.MainApp;
+import ch.stageconcept.dtraff.preference.model.Pref;
 import ch.stageconcept.dtraff.preference.util.PrefEditor;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -405,7 +406,7 @@ public class RootLayoutController {
                        // If first element (Conn) of the list is encrypted, also all others are (with same password)
                        if (listConn.get(0).isPasswordEncrypted()) {
                            subUnit.setState(ConnFileState.ENCRYPTED);
-                           decryptConnFile(subUnit);
+                           if (Pref.INSTANCE.isDecryptConnFilePassAtStart()) decryptConnFile(subUnit);
                        }
 
                        // debug mode

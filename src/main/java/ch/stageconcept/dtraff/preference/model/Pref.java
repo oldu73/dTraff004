@@ -29,7 +29,7 @@ public enum Pref {
         // #########################################################################
 
         // debug mode
-        System.out.println("Pref instantiated..");
+        //System.out.println("Pref instantiated..");
     }
 
     // Getters and Setters
