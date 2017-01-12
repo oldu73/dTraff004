@@ -30,8 +30,10 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label text="Enter encrypted connection file password at start" />
-            <CheckBox fx:id="decryptConnFilePassAtStartCheckBox" mnemonicParsing="false" GridPane.columnIndex="1" />
+            <Label text="Splash screen" />
+            <CheckBox fx:id="splashScreenCheckBox" mnemonicParsing="false" GridPane.columnIndex="1" />
+            <Label text="Enter encrypted connection file password at start" GridPane.rowIndex="1" />
+            <CheckBox fx:id="decryptConnFilePassAtStartCheckBox" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
          </children>
       </GridPane>
       <Separator layoutX="14.0" layoutY="31.0" prefWidth="200.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" />

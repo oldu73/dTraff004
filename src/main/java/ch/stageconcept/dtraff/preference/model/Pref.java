@@ -15,6 +15,7 @@ public enum Pref {
     private Preferences pref;
 
     // Preferences
+    private boolean splashScreen;
     private boolean decryptConnFilePassAtStart;
 
     /**
@@ -24,6 +25,7 @@ public enum Pref {
         pref = Preferences.userRoot().node(PREFS_PATH);
 
         // Preferences
+        splashScreen = pref.getBoolean("splashScreen", true);
         decryptConnFilePassAtStart = pref.getBoolean("decryptConnFilePassAtStart", false);
 
         // #########################################################################
@@ -34,6 +36,16 @@ public enum Pref {
 
     // Getters and Setters
     // #####################################################################
+
+    public boolean isSplashScreen() {
+        return splashScreen;
+    }
+
+    public void setSplashScreen(boolean splashScreen) {
+        this.splashScreen = splashScreen;
+        // Store value in preferences
+        pref.putBoolean("splashScreen", splashScreen);
+    }
 
     public boolean isDecryptConnFilePassAtStart() {
         return decryptConnFilePassAtStart;

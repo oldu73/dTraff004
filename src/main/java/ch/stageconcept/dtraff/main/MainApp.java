@@ -1,6 +1,7 @@
 package ch.stageconcept.dtraff.main;
 
 import ch.stageconcept.dtraff.main.view.RootLayoutController;
+import ch.stageconcept.dtraff.preference.model.Pref;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -17,29 +18,36 @@ import java.io.IOException;
  */
 public class MainApp extends Application {
 
-    private static final String APP_TITLE = "Data Traffic";
+    private static final String APP_TITLE = RootLayoutController.ALINF_ABOUT_HEADER;
     private static final String ROOT_LAYOUT = "view/RootLayout.fxml";
 
     public static Stage primaryStage;   // Static reference to primaryStage
     private BorderPane rootLayout;
+    private Scene scene;
+    private RootLayoutController controller;
 
     /**
      * Constructor
      */
     public MainApp() {}
 
-    @Override
-    public void start(Stage primaryStage) {
-        this.primaryStage = primaryStage;
-        this.primaryStage.setTitle(APP_TITLE);
-
-        initRootLayout();
-    }
-
     /**
-     * Initializes the root layout.
+     * Initializes the root layout, scene and controller.
      */
-    public void initRootLayout() {
+    @Override
+    public void init() {
+
+        if (Pref.INSTANCE.isSplashScreen()) {
+            // (Do some heavy lifting)
+
+            // Let preloader some time to appear
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         try {
             // Load root layout from fxml file.
             FXMLLoader loader = new FXMLLoader();
@@ -47,29 +55,42 @@ public class MainApp extends Application {
             rootLayout = loader.load();
 
             // Set scene containing the root layout.
-            Scene scene = new Scene(rootLayout);
-            primaryStage.setScene(scene);
+            scene = new Scene(rootLayout);
 
             // Give the controller access to the main app.
-            RootLayoutController controller = loader.getController();
+            controller = loader.getController();
             controller.setMainApp(this);
 
-            // Show primaryStage.
-            primaryStage.show();
-
-            // RootLayoutController initialize process after main window shows.
-            // This way if user is asked for password (decrypt ConnFile at start, user preference),
-            // password dialog will be displayed in front of main window.
-            // Otherwise (with normal controller automatic call of initialize() method) the password
-            // dialog will appear before main window and seems to be lost (like not attached to an application)
-            // and since then, to my opinion, the user experience is not really smart in this case.
-            controller.subInitialize();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static void main(String[] args) {
+    @Override
+    public void start(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+        this.primaryStage.setTitle(APP_TITLE);
+
+        primaryStage.setScene(scene);
+
+        if (!Pref.INSTANCE.isDecryptConnFilePassAtStart()) {
+            controller.getRootBorderPane().getChildren().remove(controller.getInitializingLabel());
+        }
+
+        // Show primaryStage.
+        primaryStage.show();
+
+        // RootLayoutController initialize process after main window shows.
+        // This way if user is asked for password (decrypt ConnFile at start, user preference),
+        // password dialog will be displayed in front of main window.
+        // Otherwise (with normal controller automatic call of initialize() method) the password
+        // dialog will appear before main window and seems to be lost (like not attached to an application)
+        // and since then, to my opinion, the user experience is not really smart in this case.
+        controller.subInitialize();
+    }
+
+    // old version
+    //public static void main(String[] args) {
 
         // debug mode (testing preferences)
         /*
@@ -80,7 +101,7 @@ public class MainApp extends Application {
         }
         */
 
-        launch(args);
-    }
+        //launch(args);
+    //}
 
 }

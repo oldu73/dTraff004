@@ -37,6 +37,9 @@ import java.util.prefs.Preferences;
  */
 public class RootLayoutController {
 
+    // Attributes
+    // #####################################################################
+
     // Connections treeView root denomination
     private static final String NETWORK = "Network";
 
@@ -48,7 +51,7 @@ public class RootLayoutController {
 
     // Alerts statics texts
     private static final String ALINF_ABOUT_TITLE = "Data Traffic";
-    private static final String ALINF_ABOUT_HEADER = ALINF_ABOUT_TITLE + " r0.4";
+    public static final String ALINF_ABOUT_HEADER = ALINF_ABOUT_TITLE + " r0.4";
     private static final String ALINF_ABOUT_CONTENT = "Author: Olivier Durand\nWebsite: http://www.stageconcept.ch";
 
     private static final String ALERR_LOAD_DATA_TITLE = "Error";
@@ -101,6 +104,29 @@ public class RootLayoutController {
 
     private ObjectProperty<ConnFileState> selectedConnFileState = new SimpleObjectProperty<>();
 
+    // Getters and Setters
+    // #####################################################################
+
+    public BorderPane getRootBorderPane() {
+        return rootBorderPane;
+    }
+
+    public Label getInitializingLabel() {
+        return initializingLabel;
+    }
+
+    /**
+     * Is called by the main application to give a reference back to itself.
+     *
+     * @param mainApp
+     */
+    public void setMainApp(MainApp mainApp) {
+        this.mainApp = mainApp;
+    }
+
+    // Methods
+    // #####################################################################
+
     /**
      * Initializes the controller class. This method is automatically called
      * after the fxml file has been loaded.
@@ -117,46 +143,52 @@ public class RootLayoutController {
      */
     public void subInitialize() {
 
-        // Text animation
-        // SRC: http://stackoverflow.com/questions/33646317/typing-animation-on-a-text-with-javafx
-        // Initializing
-        // Initializing.
-        // Initializing..
-        // Initializing...
-        final IntegerProperty i = new SimpleIntegerProperty(12);
-        Timeline timeline = new Timeline();
-        KeyFrame keyFrame = new KeyFrame(
-                Duration.seconds(0.4),
-                event -> {
-                    if (i.get() > LABEL_INITIALIZING.length()) {
-                        i.set(12);
-                        timeline.playFromStart();
-                    } else {
-                        initializingLabel.setText(LABEL_INITIALIZING.substring(0, i.get()));
-                        i.set(i.get() + 1);
-                    }
-                });
-        timeline.getKeyFrames().add(keyFrame);
-        timeline.setCycleCount(Animation.INDEFINITE);
-        timeline.play();
+        if (Pref.INSTANCE.isDecryptConnFilePassAtStart()) {
+            // Text animation
+            // SRC: http://stackoverflow.com/questions/33646317/typing-animation-on-a-text-with-javafx
+            // Initializing
+            // Initializing.
+            // Initializing..
+            // Initializing...
+            final IntegerProperty i = new SimpleIntegerProperty(12);
+            Timeline timeline = new Timeline();
+            KeyFrame keyFrame = new KeyFrame(
+                    Duration.seconds(0.4),
+                    event -> {
+                        if (i.get() > LABEL_INITIALIZING.length()) {
+                            i.set(12);
+                            timeline.playFromStart();
+                        } else {
+                            initializingLabel.setText(LABEL_INITIALIZING.substring(0, i.get()));
+                            i.set(i.get() + 1);
+                        }
+                    });
+            timeline.getKeyFrames().add(keyFrame);
+            timeline.setCycleCount(Animation.INDEFINITE);
+            timeline.play();
+        }
 
         anteInitializeCore();
 
-        // Fade out Initialization label (main window background).
-        FadeTransition fadeOut = new FadeTransition(Duration.millis(1000));
-        fadeOut.setNode(initializingLabel);
-        fadeOut.setFromValue(1.0);
-        fadeOut.setToValue(0.0);
-        fadeOut.setCycleCount(1);
-        fadeOut.setAutoReverse(false);
-        fadeOut.playFromStart();
+        if (Pref.INSTANCE.isDecryptConnFilePassAtStart()) {
+            // Fade out Initialization label (main window background).
+            FadeTransition fadeOut = new FadeTransition(Duration.millis(1000));
+            fadeOut.setNode(initializingLabel);
+            fadeOut.setFromValue(1.0);
+            fadeOut.setToValue(0.0);
+            fadeOut.setCycleCount(1);
+            fadeOut.setAutoReverse(false);
+            fadeOut.playFromStart();
 
-        // When fade out finished, remove label
-        // and continue initialization process.
-        fadeOut.setOnFinished((ActionEvent event) -> {
-            rootBorderPane.getChildren().remove(initializingLabel);
+            // When fade out finished, remove label
+            // and continue initialization process.
+            fadeOut.setOnFinished((ActionEvent event) -> {
+                rootBorderPane.getChildren().remove(initializingLabel);
+                postInitializeCore();
+            });
+        } else {
             postInitializeCore();
-        });
+        }
 
     }
 
@@ -253,8 +285,8 @@ public class RootLayoutController {
         });
 
         // After double click on an encrypted file to enter correct password,
-        // the serverConnectionMenuItem remain disabled until treeview selection changed!
-        // So, the belowing lines deserv to track ConnFile (in Connections treeView)
+        // the serverConnectionMenuItem remain disabled until treeView selection changed!
+        // So, the bellowing lines deserve to track ConnFile (in Connections treeView)
         // selected object state changes in order to update the newServerConnectionMenuItem disabled status.
         selectedConnFileState.addListener((observable, oldValue, newValue) -> {
             if (oldValue != null && (oldValue.equals(ConnFileState.ENCRYPTED) && newValue.equals(ConnFileState.DECRYPTED))) {
@@ -291,17 +323,6 @@ public class RootLayoutController {
 
         // ##############################################################################
 
-    }
-
-    /**
-     * Is called by the main application to give a reference back to itself.
-     *
-     * @param mainApp
-     */
-    public void setMainApp(MainApp mainApp) {
-        this.mainApp = mainApp;
-        // debug mode
-        System.out.println("mainApp (setMainApp method): " + mainApp);
     }
 
     /**

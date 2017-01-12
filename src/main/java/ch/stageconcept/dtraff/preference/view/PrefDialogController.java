@@ -14,6 +14,9 @@ import javafx.stage.Stage;
 public class PrefDialogController {
 
     @FXML
+    private CheckBox splashScreenCheckBox;
+
+    @FXML
     private CheckBox decryptConnFilePassAtStartCheckBox;
 
     @FXML
@@ -32,6 +35,7 @@ public class PrefDialogController {
     @FXML
     private void initialize() {
 
+        splashScreenCheckBox.setSelected(Pref.INSTANCE.isSplashScreen());
         decryptConnFilePassAtStartCheckBox.setSelected(Pref.INSTANCE.isDecryptConnFilePassAtStart());
 
     }
@@ -61,6 +65,7 @@ public class PrefDialogController {
     private void handleOk() {
         okClicked = true;
 
+        Pref.INSTANCE.setSplashScreen(splashScreenCheckBox.isSelected());
         Pref.INSTANCE.setDecryptConnFilePassAtStart(decryptConnFilePassAtStartCheckBox.isSelected());
 
         dialogStage.close();
