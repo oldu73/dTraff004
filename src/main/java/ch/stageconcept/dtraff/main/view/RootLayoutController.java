@@ -96,6 +96,31 @@ public class RootLayoutController {
     @FXML
     private void initialize() {
 
+        // debug mode
+        System.out.println("mainApp (initialize method): " + mainApp);
+
+    }
+
+    /**
+     * Initialisation called from outside,
+     * implemented in order to wait until Main application
+     * window appear before launching process.
+     * The goal to reach is to ask user password for encrypted ConnFile objects
+     * after that Main window is displayed.
+     */
+    public void subInitialize() {
+
+        // debug mode
+        System.out.println("mainApp (subInitialize method): " + mainApp);
+
+        initializeCore();
+    }
+
+    /**
+     * Initialisation main process.
+     */
+    private void initializeCore() {
+
         // JavaFX TreeView of multiple object types? (and more)
         // SRC: http://stackoverflow.com/questions/35009982/javafx-treeview-of-multiple-object-types-and-more
         // ANSWER FROM: James_D
@@ -220,6 +245,8 @@ public class RootLayoutController {
      */
     public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
+        // debug mode
+        System.out.println("mainApp (setMainApp method): " + mainApp);
     }
 
     /**
@@ -325,6 +352,10 @@ public class RootLayoutController {
      * to be used in a treeView : Network (root node) - ConnFile - Conn - Database - (...)
      */
     private Network createNetwork() {
+
+        // debug mode
+        System.out.println("mainApp (createNetwork method): " + mainApp);
+
         Network network = new Network(NETWORK);
         boolean prefNodeExist = false;
         String netPrefPath = Network.PREFS_PATH;

@@ -5,6 +5,7 @@ import ch.stageconcept.dtraff.connection.util.Crypto;
 import ch.stageconcept.dtraff.connection.util.DbDescriptor;
 import ch.stageconcept.dtraff.connection.util.DbType;
 import ch.stageconcept.dtraff.connection.util.ErrorAlert;
+import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -16,6 +17,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.sql.SQLException;
 import java.util.Iterator;
@@ -180,6 +182,10 @@ public class ConnEditDialogController {
      */
     @FXML
     private void handleTestConnection() {
+
+        // SRC: http://stackoverflow.com/questions/35369591/updating-your-ui-and-forcibly-waiting-before-continuing-javafx
+        PauseTransition pause = new PauseTransition(Duration.seconds(1));
+
         if (setConnectionValues()) {
 
             Task<Boolean> task = new Task<Boolean>() {
@@ -188,11 +194,16 @@ public class ConnEditDialogController {
                     // updateMessage("Try to connect..");
 
                     //Pause for 1 seconds to let progress indicator enough time to appear
+                    pause.play();
+
+                    //old version
+                    /*
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                    */
 
                     if (conn.doConnect()) {
                         // updateMessage("Conn successfully established..");
