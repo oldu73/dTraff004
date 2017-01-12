@@ -178,7 +178,7 @@ public class ConnEditDialogController {
     }
 
     /**
-     * Called when the user clicks test conn.
+     * Called when the user clicks Test Connection button.
      */
     @FXML
     private void handleTestConnection() {
@@ -193,7 +193,8 @@ public class ConnEditDialogController {
 
                     // updateMessage("Try to connect..");
 
-                    //Pause for 1 seconds to let progress indicator enough time to appear
+                    // Pause for 1 seconds to let progress indicator enough time to appear
+                    // (Check if it really do the job (the old version below do the job for sure)
                     pause.play();
 
                     //old version

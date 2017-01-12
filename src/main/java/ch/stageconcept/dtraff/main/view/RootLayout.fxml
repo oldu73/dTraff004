@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
@@ -50,4 +52,10 @@
         </menus>
       </MenuBar>
    </top>
+   <center>
+      <Label fx:id="initializingLabel" text="Initializing..." textFill="#000000ba" BorderPane.alignment="BOTTOM_LEFT">
+         <BorderPane.margin>
+            <Insets bottom="200.0" left="370.0" />
+         </BorderPane.margin></Label>
+   </center>
 </BorderPane>

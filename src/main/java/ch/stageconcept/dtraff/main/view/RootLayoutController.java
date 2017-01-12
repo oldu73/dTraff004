@@ -6,13 +6,19 @@ import ch.stageconcept.dtraff.connection.view.ModelTree;
 import ch.stageconcept.dtraff.main.MainApp;
 import ch.stageconcept.dtraff.preference.model.Pref;
 import ch.stageconcept.dtraff.preference.util.PrefEditor;
+import javafx.animation.*;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.css.PseudoClass;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.util.Duration;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -37,6 +43,9 @@ public class RootLayoutController {
     // Connections treeView CSS resource
     private static final String CONNECTION_TREEVIEW_CSS = "/connectionTreeView.css";
 
+    // Initializing static text
+    private static final String LABEL_INITIALIZING = "Initializing...";
+
     // Alerts statics texts
     private static final String ALINF_ABOUT_TITLE = "Data Traffic";
     private static final String ALINF_ABOUT_HEADER = ALINF_ABOUT_TITLE + " r0.4";
@@ -55,6 +64,9 @@ public class RootLayoutController {
 
     @FXML
     private BorderPane rootBorderPane;
+
+    @FXML
+    private Label initializingLabel;
 
     @FXML
     private MenuItem fileNewMenuItem;
@@ -94,32 +106,66 @@ public class RootLayoutController {
      * after the fxml file has been loaded.
      */
     @FXML
-    private void initialize() {
-
-        // debug mode
-        System.out.println("mainApp (initialize method): " + mainApp);
-
-    }
+    private void initialize() {}
 
     /**
-     * Initialisation called from outside,
-     * implemented in order to wait until Main application
-     * window appear before launching process.
+     * Initialization called from outside.
+     * Implemented in order to wait until Main application
+     * window appear before launching initialization process.
      * The goal to reach is to ask user password for encrypted ConnFile objects
      * after that Main window is displayed.
      */
     public void subInitialize() {
 
-        // debug mode
-        System.out.println("mainApp (subInitialize method): " + mainApp);
+        // Text animation
+        // SRC: http://stackoverflow.com/questions/33646317/typing-animation-on-a-text-with-javafx
+        // Initializing
+        // Initializing.
+        // Initializing..
+        // Initializing...
+        final IntegerProperty i = new SimpleIntegerProperty(12);
+        Timeline timeline = new Timeline();
+        KeyFrame keyFrame = new KeyFrame(
+                Duration.seconds(0.4),
+                event -> {
+                    if (i.get() > LABEL_INITIALIZING.length()) {
+                        i.set(12);
+                        timeline.playFromStart();
+                    } else {
+                        initializingLabel.setText(LABEL_INITIALIZING.substring(0, i.get()));
+                        i.set(i.get() + 1);
+                    }
+                });
+        timeline.getKeyFrames().add(keyFrame);
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
 
-        initializeCore();
+        anteInitializeCore();
+
+        // Fade out Initialization label (main window background).
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(1000));
+        fadeOut.setNode(initializingLabel);
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0.0);
+        fadeOut.setCycleCount(1);
+        fadeOut.setAutoReverse(false);
+        fadeOut.playFromStart();
+
+        // When fade out finished, remove label
+        // and continue initialization process.
+        fadeOut.setOnFinished((ActionEvent event) -> {
+            rootBorderPane.getChildren().remove(initializingLabel);
+            postInitializeCore();
+        });
+
     }
 
     /**
-     * Initialisation main process.
+     * Ante Initialisation main process.
+     * Show Initialization label on main
+     * window background.
      */
-    private void initializeCore() {
+    private void anteInitializeCore() {
 
         // JavaFX TreeView of multiple object types? (and more)
         // SRC: http://stackoverflow.com/questions/35009982/javafx-treeview-of-multiple-object-types-and-more
@@ -140,6 +186,15 @@ public class RootLayoutController {
         // !WARNING! In order to use file that reside in resources folder, don’t forget to add a slash before file name!
         connectionTreeView.getStylesheets().add(getClass().getResource(CONNECTION_TREEVIEW_CSS).toExternalForm());
 
+        connectionTreeView.getRoot().setExpanded(true);
+    }
+
+    /**
+     * Post Initialisation main process.
+     * After Initialization label on main
+     * window background disappear.
+     */
+    private void postInitializeCore() {
         rootBorderPane.setLeft(connectionTreeView);
 
         // debug mode
@@ -352,9 +407,6 @@ public class RootLayoutController {
      * to be used in a treeView : Network (root node) - ConnFile - Conn - Database - (...)
      */
     private Network createNetwork() {
-
-        // debug mode
-        System.out.println("mainApp (createNetwork method): " + mainApp);
 
         Network network = new Network(NETWORK);
         boolean prefNodeExist = false;

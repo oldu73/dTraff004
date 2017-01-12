@@ -4,6 +4,7 @@ import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
@@ -56,7 +57,12 @@ public class MainApp extends Application {
             // Show primaryStage.
             primaryStage.show();
 
-            // for testing purpose
+            // RootLayoutController initialize process after main window shows.
+            // This way if user is asked for password (decrypt ConnFile at start, user preference),
+            // password dialog will be displayed in front of main window.
+            // Otherwise (with normal controller automatic call of initialize() method) the password
+            // dialog will appear before main window and seems to be lost (like not attached to an application)
+            // and since then, to my opinion, the user experience is not really smart in this case.
             controller.subInitialize();
         } catch (IOException e) {
             e.printStackTrace();
