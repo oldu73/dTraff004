@@ -47,7 +47,7 @@ public enum ConnFileEditor {
             // Set the Stage and ConnFile objects into the controller.
             ConnFileEditDialogController controller = loader.getController();
             controller.setDialogStage(dialogStage);
-            controller.setFile(file);
+            controller.setConnFile(file);
 
             // Disable resize
             dialogStage.setResizable(false);

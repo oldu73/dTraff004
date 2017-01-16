@@ -5,8 +5,6 @@ import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -75,7 +73,7 @@ public class ConnFile extends ConnUnit<Conn> {
        // ### New Connection Menu
        MenuItem newConnectionMenuItem = new MenuItem(MENU_NEW_CONNECTION);
 
-       newConnectionMenuItem.setOnAction((ActionEvent t) -> newConnection());
+       newConnectionMenuItem.setOnAction((ActionEvent t) -> newConn());
 
        // Disable context menu New Connection if file state is broken or encrypted
        newConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
@@ -101,7 +99,7 @@ public class ConnFile extends ConnUnit<Conn> {
 
        closeFileMenuItem.setOnAction((ActionEvent t) -> {
             //System.out.println("Close file on:" + this.getName());
-            this.getParent().closeFile(this);
+            this.getParent().closeConnFile(this);
        });
        // ###################################################################
 
@@ -186,9 +184,9 @@ public class ConnFile extends ConnUnit<Conn> {
     // ### Methods #####################################################################
 
     /**
-     * Create new connection
+     * Create new Conn object (connection)
      */
-    public void newConnection() {
+    public void newConn() {
         //System.out.println("New Connection on:" + this.getName());
 
         // new Conn instance with default name value

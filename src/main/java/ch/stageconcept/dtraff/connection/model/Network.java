@@ -25,18 +25,7 @@ public class Network extends ConnUnit<ConnFile> {
 
         ContextMenu contextMenu = new ContextMenu();
         MenuItem newFileMenuItem = new MenuItem(MENU_NEW_FILE);
-        newFileMenuItem.setOnAction((ActionEvent t) -> {
-            ConnFile connFile = new ConnFile(CONNFILE_DEFAULT_NAME);
-            if (ConnFileEditor.INSTANCE.supply(connFile)) {
-                if (connFile.isPasswordProtected()) {
-                    connFile.setState(ConnFileState.DECRYPTED);
-                }
-                connFile.setParent(this);
-                subUnits.add(connFile);
-                Preferences preferences = Preferences.userRoot().node(PREFS_PATH);
-                preferences.put(connFile.getName(), connFile.getFileName());
-            }
-        });
+        newFileMenuItem.setOnAction((ActionEvent t) -> newConnFile());
         contextMenu.getItems().add(newFileMenuItem);
         this.setMenu(contextMenu);
     }
@@ -45,7 +34,30 @@ public class Network extends ConnUnit<ConnFile> {
         this(name, FXCollections.observableArrayList());
     }
 
-    public void closeFile(ConnFile connFile) {
+    /**
+     * New ConnFile object.
+     * Create new File entry to Connections treeView.
+     */
+    public void newConnFile() {
+        ConnFile connFile = new ConnFile(CONNFILE_DEFAULT_NAME);
+        if (ConnFileEditor.INSTANCE.supply(connFile)) {
+            if (connFile.isPasswordProtected()) {
+                connFile.setState(ConnFileState.DECRYPTED);
+            }
+            connFile.setParent(this);
+            getSubUnits().add(connFile);
+            Preferences preferences = Preferences.userRoot().node(PREFS_PATH);
+            preferences.put(connFile.getName(), connFile.getFileName());
+        }
+    }
+
+    /**
+     * Close ConnFile object.
+     * Remove File entry from Connections treeView.
+     *
+     * @param connFile
+     */
+    public void closeConnFile(ConnFile connFile) {
         Preferences preferences = Preferences.userRoot().node(PREFS_PATH);
         preferences.remove(connFile.getName());
         this.getSubUnits().remove(connFile);

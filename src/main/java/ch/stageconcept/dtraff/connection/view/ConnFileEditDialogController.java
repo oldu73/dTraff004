@@ -47,7 +47,7 @@ public class ConnFileEditDialogController {
     private Button cancelButton;
 
     private Stage dialogStage;
-    private ConnFile file;
+    private ConnFile connFile;
     private boolean okClicked = false;
 
     /**
@@ -74,10 +74,10 @@ public class ConnFileEditDialogController {
     /**
      * Sets the ConnFile to be edited in the dialog.
      *
-     * @param file
+     * @param Connfile
      */
-    public void setFile(ConnFile file) {
-        this.file = file;
+    public void setConnFile(ConnFile Connfile) {
+        this.connFile = Connfile;
     }
 
     /**
@@ -94,7 +94,7 @@ public class ConnFileEditDialogController {
      */
     @FXML
     private void handleOk() {
-        if (setFileValues()) {
+        if (setConnFileValues()) {
             okClicked = true;
             dialogStage.close();
         }
@@ -113,29 +113,45 @@ public class ConnFileEditDialogController {
      */
     @FXML
     private void handleBrowse() {
+        //TODO Put in "Thread"
+        // Could take some times to get back from system to application
+        // with path information. During this time, nothing happen and the UI is frozen.
+        // So, put in task or something alike to let user be informed that process is on the way.
+        // (UI disabled and mouse waiting symbol animation.)
+
         DirectoryChooser directoryChooser = new DirectoryChooser();
-        folderField.setText(directoryChooser.showDialog(dialogStage).getAbsolutePath());
+
+        try {
+            folderField.setText(directoryChooser.showDialog(dialogStage).getAbsolutePath());
+        } catch(NullPointerException e)
+        {
+            folderField.setText(null);
+        }
+
     }
 
     /**
      * Utility method to set attributes of ConnFile object
      * from edit dialog form if fields contain valid values.
      */
-    private boolean setFileValues() {
+    private boolean setConnFileValues() {
+
+        //TODO Check if file already exist
+
         if (isInputValid()) {
-            file.setFileName(folderField.getText() + "\\" + fileField.getText() + FILE_EXT);
-            file.setName(fileField.getText());
+            connFile.setFileName(folderField.getText() + "\\" + fileField.getText() + FILE_EXT);
+            connFile.setName(fileField.getText());
 
             boolean isSafe = passwordCheckBox.isSelected();
-            file.setPasswordProtected(isSafe);
+            connFile.setPasswordProtected(isSafe);
             if (isSafe) {
-                file.setPassword(passwordField.getText());
+                connFile.setPassword(passwordField.getText());
             } else {
-                file.setPassword(null);
+                connFile.setPassword(null);
             }
 
-            //System.out.println(file.isPasswordProtected());
-            //System.out.println(file.getPassword());
+            //System.out.println(Connfile.isPasswordProtected());
+            //System.out.println(Connfile.getPassword());
             //System.out.println();
 
             return true;

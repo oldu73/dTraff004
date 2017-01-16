@@ -14,10 +14,10 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.FileChooser;
 import javafx.util.Duration;
 
 import javax.xml.bind.JAXBContext;
@@ -61,9 +61,6 @@ public class RootLayoutController {
     private static final String ALCNF_BAD_PASSWORD_TITLE = "Password Dialog";
     private static final String ALCNF_BAD_PASSWORD_HEADER = "Bad password!";
     private static final String ALCNF_BAD_PASSWORD_CONTENT = "Try again?";
-
-    // Reference to the main application
-    private MainApp mainApp;
 
     @FXML
     private BorderPane rootBorderPane;
@@ -113,15 +110,6 @@ public class RootLayoutController {
 
     public Label getInitializingLabel() {
         return initializingLabel;
-    }
-
-    /**
-     * Is called by the main application to give a reference back to itself.
-     *
-     * @param mainApp
-     */
-    public void setMainApp(MainApp mainApp) {
-        this.mainApp = mainApp;
     }
 
     // Methods
@@ -330,7 +318,7 @@ public class RootLayoutController {
      */
     @FXML
     private void handleFileNew() {
-        System.out.println("New File..");
+        network.newConnFile();
     }
 
     /**
@@ -338,7 +326,24 @@ public class RootLayoutController {
      */
     @FXML
     private void handleFileOpen() {
-        System.out.println("Open File..");
+
+        //TODO Check if file already open or broken
+
+        FileChooser fileChooser = new FileChooser();
+
+        // Set extension filter
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
+                "XML files (*.xml)", "*.xml");
+        fileChooser.getExtensionFilters().add(extFilter);
+
+        // Show open file dialog
+        File file = fileChooser.showOpenDialog(MainApp.primaryStage);
+
+        if (file != null) {
+            System.out.println(file.getAbsolutePath());
+            System.out.println(isConnFileAlreadyOpen(file.getAbsolutePath()));
+        }
+
     }
 
     /**
@@ -348,6 +353,12 @@ public class RootLayoutController {
     private void handleFileEnterPassword() {
         System.out.println("Enter Password..");
     }
+
+    //TODO File Save (nice to have)
+    // Put file state (also icon) in "Dirt" mode.
+    // For now saving process is automatic.
+    // If file save menu functionality is implemented,
+    // keep automatic saving possibility through user preferences.
 
     /**
      * Called when the user selects the tool bar File - Close menu.
@@ -367,7 +378,7 @@ public class RootLayoutController {
         // The tool bar menu is disabled if none or not a ConnFile is selected in Connection treeView,
         // so the item could only be a ConnFile -> (cast)
         ConnFile connFile = (ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue();
-        connFile.newConnection();
+        connFile.newConn();
 
         //TODO Find a solution for the ConnEditDialogController Test Conn button side effect that update the edited conn:
         //- pass a temporary copy of the edited conn for testing.
@@ -421,6 +432,22 @@ public class RootLayoutController {
     @FXML
     private void handleExit() {
         System.exit(0);
+    }
+
+    /**
+     * Check if a ConnFile object with given String fileName parameter
+     * is present in Network treeView.
+     *
+     * @param fileName
+     * @return true if ConnFile object with fileName attribute exist in Network treeView,
+     * false otherwise.
+     */
+    private boolean isConnFileAlreadyOpen(String fileName) {
+        // SRC: http://stackoverflow.com/questions/23407014/return-from-lambda-foreach-in-java
+        if (network.getSubUnits().stream().filter
+                (connFile -> connFile.getFileName().contains(fileName))
+                .findFirst().orElse(null) != null) return true;
+        else return false;
     }
 
     /**
