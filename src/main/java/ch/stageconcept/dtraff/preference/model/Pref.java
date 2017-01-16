@@ -16,7 +16,7 @@ public enum Pref {
 
     // Preferences
     private boolean splashScreen;
-    private boolean decryptConnFilePassAtStart;
+    private boolean decryptConnFilePassAtStartOrOnOpen;
 
     /**
      * Constructor.
@@ -26,7 +26,7 @@ public enum Pref {
 
         // Preferences
         splashScreen = pref.getBoolean("splashScreen", true);
-        decryptConnFilePassAtStart = pref.getBoolean("decryptConnFilePassAtStart", false);
+        decryptConnFilePassAtStartOrOnOpen = pref.getBoolean("decryptConnFilePassAtStartOrOnOpen", false);
 
         // #########################################################################
 
@@ -47,13 +47,13 @@ public enum Pref {
         pref.putBoolean("splashScreen", splashScreen);
     }
 
-    public boolean isDecryptConnFilePassAtStart() {
-        return decryptConnFilePassAtStart;
+    public boolean isDecryptConnFilePassAtStartOrOnOpen() {
+        return decryptConnFilePassAtStartOrOnOpen;
     }
 
-    public void setDecryptConnFilePassAtStart(boolean decryptConnFilePassAtStart) {
-        this.decryptConnFilePassAtStart = decryptConnFilePassAtStart;
+    public void setDecryptConnFilePassAtStartOrOnOpen(boolean decryptConnFilePassAtStartOrOnOpen) {
+        this.decryptConnFilePassAtStartOrOnOpen = decryptConnFilePassAtStartOrOnOpen;
         // Store value in preferences
-        pref.putBoolean("decryptConnFilePassAtStart", decryptConnFilePassAtStart);
+        pref.putBoolean("decryptConnFilePassAtStartOrOnOpen", decryptConnFilePassAtStartOrOnOpen);
     }
 }

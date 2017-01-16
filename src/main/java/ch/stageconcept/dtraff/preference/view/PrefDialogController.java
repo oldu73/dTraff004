@@ -17,7 +17,7 @@ public class PrefDialogController {
     private CheckBox splashScreenCheckBox;
 
     @FXML
-    private CheckBox decryptConnFilePassAtStartCheckBox;
+    private CheckBox decryptConnFilePassAtStartOrOnOpenCheckBox;
 
     @FXML
     private Button okButton;
@@ -36,7 +36,7 @@ public class PrefDialogController {
     private void initialize() {
 
         splashScreenCheckBox.setSelected(Pref.INSTANCE.isSplashScreen());
-        decryptConnFilePassAtStartCheckBox.setSelected(Pref.INSTANCE.isDecryptConnFilePassAtStart());
+        decryptConnFilePassAtStartOrOnOpenCheckBox.setSelected(Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen());
 
     }
 
@@ -66,7 +66,7 @@ public class PrefDialogController {
         okClicked = true;
 
         Pref.INSTANCE.setSplashScreen(splashScreenCheckBox.isSelected());
-        Pref.INSTANCE.setDecryptConnFilePassAtStart(decryptConnFilePassAtStartCheckBox.isSelected());
+        Pref.INSTANCE.setDecryptConnFilePassAtStartOrOnOpen(decryptConnFilePassAtStartOrOnOpenCheckBox.isSelected());
 
         dialogStage.close();
     }

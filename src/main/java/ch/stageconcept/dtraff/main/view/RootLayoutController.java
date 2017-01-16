@@ -131,7 +131,7 @@ public class RootLayoutController {
      */
     public void subInitialize() {
 
-        if (Pref.INSTANCE.isDecryptConnFilePassAtStart()) {
+        if (Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen()) {
             // Text animation
             // SRC: http://stackoverflow.com/questions/33646317/typing-animation-on-a-text-with-javafx
             // Initializing
@@ -158,7 +158,7 @@ public class RootLayoutController {
 
         anteInitializeCore();
 
-        if (Pref.INSTANCE.isDecryptConnFilePassAtStart()) {
+        if (Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen()) {
             // Fade out Initialization label (main window background).
             FadeTransition fadeOut = new FadeTransition(Duration.millis(1000));
             fadeOut.setNode(initializingLabel);
@@ -236,6 +236,8 @@ public class RootLayoutController {
         });
 
         // ### Tool bar menu ############################################################
+
+        //TODO fileEnterPasswordMenuItem.disableProperty().bind(newServerConnectionMenuItem.disableProperty().not());
 
         // New Server Connection Menu initial state is set to disable
         newServerConnectionMenuItem.setDisable(true);
@@ -326,24 +328,47 @@ public class RootLayoutController {
      */
     @FXML
     private void handleFileOpen() {
-
+        //TODO put in "Thread" like, when the fileChooser close, the UI is frozen for a while (depends of machine)
         //TODO Check if file already open or broken
 
         FileChooser fileChooser = new FileChooser();
-
         // Set extension filter
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
-                "XML files (*.xml)", "*.xml");
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
         fileChooser.getExtensionFilters().add(extFilter);
-
         // Show open file dialog
         File file = fileChooser.showOpenDialog(MainApp.primaryStage);
 
         if (file != null) {
-            System.out.println(file.getAbsolutePath());
-            System.out.println(isConnFileAlreadyOpen(file.getAbsolutePath()));
-        }
+            // name without extension
+            String name = file.getName().substring(0, file.getName().indexOf("."));
+            // file name
+            String fileName = file.getAbsolutePath();
 
+            if (isConnFileAlreadyOpen(fileName)) {
+                // Alert already open and nothing else to do
+            } else {
+                // Not already open but maybe present in Connections treeView with broken status
+                ConnFile connFile = getConnFile(name);
+                if (connFile != null && connFile.getState().equals(ConnFileState.BROKEN)) {
+                    // Reset connFile instance to default status (CLEAR)
+                    connFile.setState(ConnFileState.CLEAR);
+                    // Reset broken file name with the new selected one (through file chooser)
+                    connFile.setFileName(fileName);
+                } else {
+                    // Open file with new Connections treeView entry
+                    connFile = new ConnFile(name);
+                    connFile.setFileName(fileName);
+                    connFile.setParent(network);
+                    connFile.setRootLayoutController(this);
+                    network.getSubUnits().add(connFile);
+                }
+
+                treatSubUnit(connFile);
+                // update preference
+                Preferences preferences = Preferences.userRoot().node(Network.PREFS_PATH);
+                preferences.put(connFile.getName(), connFile.getFileName());
+            }
+        }
     }
 
     /**
@@ -444,10 +469,29 @@ public class RootLayoutController {
      */
     private boolean isConnFileAlreadyOpen(String fileName) {
         // SRC: http://stackoverflow.com/questions/23407014/return-from-lambda-foreach-in-java
-        if (network.getSubUnits().stream().filter
-                (connFile -> connFile.getFileName().contains(fileName))
-                .findFirst().orElse(null) != null) return true;
+        if (network
+                .getSubUnits()
+                .stream()
+                .filter(connFile -> connFile.getFileName().contains(fileName))
+                .findFirst()
+                .orElse(null) != null) return true;
         else return false;
+    }
+
+    /**
+     * Check if a ConnFile object with given String name parameter
+     * is present in Network treeView.
+     *
+     * @param name
+     * @return ConnFile object if one with name attribute exist in Network treeView,
+     * null otherwise.
+     */
+    private ConnFile getConnFile(String name) {
+        return network
+                .getSubUnits()
+                .stream()
+                .filter(connFile -> connFile.getName().contains(name))
+                .findFirst().orElse(null);
     }
 
     /**
@@ -517,49 +561,56 @@ public class RootLayoutController {
        }
        // #########################################################################
 
-       // ### 5. Iterate through network subunits (ConnFile objects)
-       // If ConnFile object is encrypted -> ask for password
-       // If not password protected or password OK, populate
-       // ConnFile object subunits with Conn objects.
-       if (!network.getSubUnits().isEmpty()) {
-           network.getSubUnits().forEach((subUnit) -> {
-               if (!subUnit.getState().equals(ConnFileState.BROKEN)) {
-
-                   List<Conn> listConn = loadConnDataFromFile(subUnit);
-
-                   // If loadConnDataFromFile raise an exception (file is damaged)
-                   // it set ConnFile object state to BROKEN and return null value in listConn.
-                   if (listConn != null) {
-
-                       // debug mode
-                       //System.out.println("String to decrypt: " + listConn.get(0).getPassword());
-
-                       // If first element (Conn) of the list is encrypted, also all others are (with same password)
-                       if (listConn.get(0).isPasswordEncrypted()) {
-                           subUnit.setState(ConnFileState.ENCRYPTED);
-                           if (Pref.INSTANCE.isDecryptConnFilePassAtStart()) decryptConnFile(subUnit);
-                       }
-
-                       // debug mode
-                            /*
-                            for (Conn conn: listConn) {
-                                System.out.println(conn);
-                            }
-                            */
-
-                       if (subUnit.getState().equals(ConnFileState.CLEAR) || subUnit.getState().equals(ConnFileState.DECRYPTED)) {
-                           populateSubunit(subUnit, listConn);
-                       }
-                   }
-               }
-           });
-       }
+       // ### 5. Iterate through network subunits (ConnFile objects).
+       if (!network.getSubUnits().isEmpty()) network.getSubUnits().forEach((subUnit) -> {
+           if (!subUnit.getState().equals(ConnFileState.BROKEN)) treatSubUnit(subUnit);
+       });
        // #########################################################################
 
        // Some sample data, debug mode
        //buildSampleData(network);
 
        return network;
+    }
+
+    /**
+     * ConnFile subUnit ante populate treatment.
+     *
+     *  If ConnFile object is encrypted ->
+     *  ask for password (if atStart/onOpen user preference is set
+     *  otherwise let ConnFile object in an encrypted state)
+     *  If not password protected or password OK, populate
+     *  ConnFile object subunits with Conn objects.
+     *
+     * @param subUnit
+     */
+    private void treatSubUnit(ConnFile subUnit) {
+        List<Conn> listConn = loadConnDataFromFile(subUnit);
+
+        // If loadConnDataFromFile raise an exception (file is damaged)
+        // it set ConnFile object state to BROKEN and return null value in listConn.
+        if (listConn != null) {
+
+            // debug mode
+            //System.out.println("String to decrypt: " + listConn.get(0).getPassword());
+
+            // If first element (Conn) of the list is encrypted, also all others are (with same password)
+            if (listConn.get(0).isPasswordEncrypted()) {
+                subUnit.setState(ConnFileState.ENCRYPTED);
+                if (Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen()) decryptConnFile(subUnit);
+            }
+
+            // debug mode
+                        /*
+                        for (Conn conn: listConn) {
+                            System.out.println(conn);
+                        }
+                        */
+
+            if (subUnit.getState().equals(ConnFileState.CLEAR) || subUnit.getState().equals(ConnFileState.DECRYPTED)) {
+                populateSubunit(subUnit, listConn);
+            }
+        }
     }
 
     /**

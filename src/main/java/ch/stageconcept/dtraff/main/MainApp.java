@@ -5,7 +5,6 @@ import ch.stageconcept.dtraff.preference.model.Pref;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
@@ -71,7 +70,7 @@ public class MainApp extends Application {
 
         primaryStage.setScene(scene);
 
-        if (!Pref.INSTANCE.isDecryptConnFilePassAtStart()) {
+        if (!Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen()) {
             controller.getRootBorderPane().getChildren().remove(controller.getInitializingLabel());
         }
 
@@ -92,10 +91,10 @@ public class MainApp extends Application {
 
         // debug mode (testing preferences)
         /*
-        if (Pref.INSTANCE.isDecryptConnFilePassAtStart()) {
-            Pref.INSTANCE.setDecryptConnFilePassAtStart(false);
+        if (Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen()) {
+            Pref.INSTANCE.setDecryptConnFilePassAtStartOrOnOpen(false);
         } else {
-            Pref.INSTANCE.setDecryptConnFilePassAtStart(true);
+            Pref.INSTANCE.setDecryptConnFilePassAtStartOrOnOpen(true);
         }
         */
 

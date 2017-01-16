@@ -89,7 +89,7 @@ public class ConnFile extends ConnUnit<Conn> {
            }
        });
 
-       // Disable context menu New Connection if file state is broken or encrypted
+       // Disable context menu Enter password if file state is not encrypted
        enterPasswordMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
                !getState().equals(ConnFileState.ENCRYPTED), state));
        // ###################################################################
