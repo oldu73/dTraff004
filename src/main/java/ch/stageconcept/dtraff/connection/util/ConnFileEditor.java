@@ -12,8 +12,8 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 /**
- * Helper enum class to supply ConnectionEditDialog
- * in front of primaryStage
+ * Helper enum class to supply ConnFileEditDialog
+ * in front of primaryStage.
  *
  * @author Olivier Durand
  */
@@ -21,24 +21,29 @@ public enum ConnFileEditor {
 
     INSTANCE;
 
+    private static final String DIALOG_TITLE = "New Connection File";
+
+    // Fxml resource
+    private static final String FXML_RESOURCE_PATH = "../connection/view/ConnFileEditDialog.fxml";
+
     /**
-     * Opens a dialog to edit details for the specified Connection File. If the user
-     * clicks OK, the changes are saved into the provided ConnFile object and true
+     * Opens a dialog to edit details for the specified Connection File (ConnFile).
+     * If the user clicks OK, the changes are saved into the provided ConnFile object and true
      * is returned.
      *
-     * @param file the file object to be edited
+     * @param connFile the object to be edited
      * @return true if the user clicked OK, false otherwise.
      */
-    public boolean supply(ConnFile file) {
+    public boolean supply(ConnFile connFile) {
         try {
             // Load the fxml file and create a new stage for the popup dialog.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("../connection/view/ConnFileEditDialog.fxml"));
+            loader.setLocation(MainApp.class.getResource(FXML_RESOURCE_PATH));
             AnchorPane page = loader.load();
 
             // Create the dialog Stage.
             Stage dialogStage = new Stage();
-            dialogStage.setTitle("New Connection File");
+            dialogStage.setTitle(DIALOG_TITLE);
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.initOwner(MainApp.primaryStage);
             Scene scene = new Scene(page);
@@ -47,7 +52,7 @@ public enum ConnFileEditor {
             // Set the Stage and ConnFile objects into the controller.
             ConnFileEditDialogController controller = loader.getController();
             controller.setDialogStage(dialogStage);
-            controller.setConnFile(file);
+            controller.setConnFile(connFile);
 
             // Disable resize
             dialogStage.setResizable(false);

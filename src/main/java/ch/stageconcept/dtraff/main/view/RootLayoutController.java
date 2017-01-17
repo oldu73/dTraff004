@@ -58,9 +58,13 @@ public class RootLayoutController {
     private static final String ALERR_LOAD_DATA_HEADER = "Could not load data";
     private static final String ALERR_LOAD_DATA_CONTENT = "Could not load data from file:\n";
 
-    private static final String ALCNF_BAD_PASSWORD_TITLE = "Password Dialog";
+    private static final String ALCNF_BAD_PASSWORD_TITLE = ConnFile.MENU_ENTER_PASSWORD;
     private static final String ALCNF_BAD_PASSWORD_HEADER = "Bad password!";
     private static final String ALCNF_BAD_PASSWORD_CONTENT = "Try again?";
+
+    private static final String ALINF_FILE_ALREADY_OPEN_TITLE = "File Open";
+    public static final String ALINF_FILE_ALREADY_OPEN_HEADER = "File already open";
+    private static final String ALINF_FILE_ALREADY_OPEN_CONTENT = "The specified file is already open:\n";
 
     @FXML
     private BorderPane rootBorderPane;
@@ -230,27 +234,30 @@ public class RootLayoutController {
                 ConnFile connFile = (ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue();
 
                 if (connFile.getState().equals(ConnFileState.ENCRYPTED) && decryptConnFile(connFile)) {
-                    populateSubunit(connFile, loadConnDataFromFile(connFile));
+                    populateSubunit(connFile, loadConnDataFromConnFile(connFile));
                 }
             }
         });
 
-        // ### Tool bar menu ############################################################
+        // ### Tool bar menu ###
+        // #####################
 
-        //TODO fileEnterPasswordMenuItem.disableProperty().bind(newServerConnectionMenuItem.disableProperty().not());
-
-        // New Server Connection Menu initial state is set to disable
+        // Some File - menus disable property initial state
         newServerConnectionMenuItem.setDisable(true);
+        fileEnterPasswordMenuItem.setDisable(true);
 
-        // Disable tool bar menu New Server Connection if the Connections treeView
-        // selected item is not a clear or decrypted ConnFile object
+        // Some File - menus disable property setting if the Connections treeView
+        // selected item is not a ConnFile object and other menu specific related conditions
         connectionTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.getValue() instanceof ConnFile) {
+                // Following line is related on double click (see above and below)
                 selectedConnFileState.bind(((ConnFile) newValue.getValue()).stateProperty());
 
                 // debug mode
                 //System.out.print("1 ");
 
+                // ### File - Server Connection - New: Disable if the Connections treeView
+                // selected item is not a clear or decrypted ConnFile object
                 if (((ConnFile) newValue.getValue()).getState().equals(ConnFileState.CLEAR) ||
                         ((ConnFile) newValue.getValue()).getState().equals(ConnFileState.DECRYPTED)) {
                     newServerConnectionMenuItem.setDisable(false);
@@ -265,8 +272,21 @@ public class RootLayoutController {
                     //System.out.print("3 ");
 
                 }
+                // ############################################################
+
+                // ### File - Enter Password: Disable if the Connections treeView
+                // selected item is not an encrypted ConnFile object
+                if (((ConnFile) newValue.getValue()).getState().equals(ConnFileState.ENCRYPTED)) {
+                    fileEnterPasswordMenuItem.setDisable(false);
+                } else {
+                    fileEnterPasswordMenuItem.setDisable(true);
+                }
+                // ############################################################
+
             } else {
+                // Connections treeView selected item is NOT a ConnFile object
                 newServerConnectionMenuItem.setDisable(true);
+                fileEnterPasswordMenuItem.setDisable(true);
 
                 // debug mode
                 //System.out.print("4 ");
@@ -281,6 +301,7 @@ public class RootLayoutController {
         selectedConnFileState.addListener((observable, oldValue, newValue) -> {
             if (oldValue != null && (oldValue.equals(ConnFileState.ENCRYPTED) && newValue.equals(ConnFileState.DECRYPTED))) {
                 newServerConnectionMenuItem.setDisable(false);
+                fileEnterPasswordMenuItem.setDisable(true);
 
                 // debug mode
                 //System.out.print("5 ");
@@ -299,19 +320,17 @@ public class RootLayoutController {
                 connectionTreeView.getSelectionModel().selectedItemProperty()));
         */
 
-        // Disable tool bar menu Edit Server Connection if no item or not a Conn instance selected in Connections treeView
+        // Disable tool bar menu File - Server Connection - Edit if no item or not a Conn object instance are selected in Connections treeView
         editServerConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
                         connectionTreeView.getSelectionModel().getSelectedItem() == null ||
                                 !(connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof Conn),
                 connectionTreeView.getSelectionModel().selectedItemProperty()));
 
-        // Disable tool bar menu Server Connection if New and Edit Server Connection menus are disabled
+        // Disable tool bar menu File - Server Connection if File - Server Connection - New and Edit are disabled
         serverConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
                         newServerConnectionMenuItem.isDisable() && editServerConnectionMenuItem.isDisable(),
                 newServerConnectionMenuItem.disableProperty(),
                 editServerConnectionMenuItem.disableProperty()));
-
-        // ##############################################################################
 
     }
 
@@ -346,6 +365,10 @@ public class RootLayoutController {
 
             if (isConnFileAlreadyOpen(fileName)) {
                 // Alert already open and nothing else to do
+                provideAlert(Alert.AlertType.INFORMATION,
+                        ALINF_FILE_ALREADY_OPEN_TITLE,
+                        ALINF_FILE_ALREADY_OPEN_HEADER,
+                        ALINF_FILE_ALREADY_OPEN_CONTENT + fileName, true);
             } else {
                 // Not already open but maybe present in Connections treeView with broken status
                 ConnFile connFile = getConnFile(name);
@@ -376,7 +399,12 @@ public class RootLayoutController {
      */
     @FXML
     private void handleFileEnterPassword() {
-        System.out.println("Enter Password..");
+        // The tool bar menu is disabled if none or not an encrypted ConnFile is selected in Connection treeView.
+        ConnFile connFile = getSelectedConnFile();
+
+        if (connFile != null && decryptConnFile(connFile)) {
+            populateSubunit(connFile, loadConnDataFromConnFile(connFile));
+        }
     }
 
     //TODO File Save (nice to have)
@@ -399,11 +427,8 @@ public class RootLayoutController {
      */
     @FXML
     private void handleNewConnection() {
-
-        // The tool bar menu is disabled if none or not a ConnFile is selected in Connection treeView,
-        // so the item could only be a ConnFile -> (cast)
-        ConnFile connFile = (ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue();
-        connFile.newConn();
+        // The tool bar menu is disabled if none or not a decrypted ConnFile is selected in Connection treeView.
+        if (getSelectedConnFile() != null) getSelectedConnFile().newConn();
 
         //TODO Find a solution for the ConnEditDialogController Test Conn button side effect that update the edited conn:
         //- pass a temporary copy of the edited conn for testing.
@@ -457,6 +482,21 @@ public class RootLayoutController {
     @FXML
     private void handleExit() {
         System.exit(0);
+    }
+
+    /**
+     * Get Connections treeView selected ConnFile object
+     *
+     * @return If selected item is an instance of ConnFile, return this object,
+     * null otherwise
+     */
+    private ConnFile getSelectedConnFile() {
+
+        if (connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile) {
+            return (ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue();
+        }
+
+        return null;
     }
 
     /**
@@ -585,9 +625,9 @@ public class RootLayoutController {
      * @param subUnit
      */
     private void treatSubUnit(ConnFile subUnit) {
-        List<Conn> listConn = loadConnDataFromFile(subUnit);
+        List<Conn> listConn = loadConnDataFromConnFile(subUnit);
 
-        // If loadConnDataFromFile raise an exception (file is damaged)
+        // If loadConnDataFromConnFile raise an exception (file is damaged)
         // it set ConnFile object state to BROKEN and return null value in listConn.
         if (listConn != null) {
 
@@ -686,12 +726,13 @@ public class RootLayoutController {
     }
 
 /**
- * Loads connection data from the specified file,
+ * Loads connections (Conn) data from the specified ConnFile,
  * unmarshaled with JAXB.
  *
  * @param connFile
+ * @return List of Conn objects
  */
-    public List<Conn> loadConnDataFromFile(ConnFile connFile) {
+    public List<Conn> loadConnDataFromConnFile(ConnFile connFile) {
         File file = new java.io.File(connFile.getFileName());
 
         // debug mode
@@ -775,9 +816,9 @@ public class RootLayoutController {
                 try {
                     Crypto crypto = new Crypto(password);
                     // If no exception thrown by line below, means that password is correct
-                    // If first element (Conn (get(0))) of the list returned by loadConnDataFromFile method is encrypted,
+                    // If first element (Conn (get(0))) of the list returned by loadConnDataFromConnFile method is encrypted,
                     // also all others are (with same password)
-                    crypto.getDecrypted(loadConnDataFromFile(connFile).get(0).getPassword());
+                    crypto.getDecrypted(loadConnDataFromConnFile(connFile).get(0).getPassword());
 
                     return password;
 

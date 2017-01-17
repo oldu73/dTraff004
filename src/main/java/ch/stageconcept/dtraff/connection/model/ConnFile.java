@@ -28,7 +28,7 @@ public class ConnFile extends ConnUnit<Conn> {
     private static final String ICON_FILENAME = ConnFileState.CLEAR.getIconFileName();
 
     private static final String MENU_NEW_CONNECTION = "New Connection";
-    private static final String MENU_ENTER_PASSWORD = "Enter Password";
+    public static final String MENU_ENTER_PASSWORD = "Enter Password";
     private static final String MENU_CLOSE_FILE = "Close File";
 
     private static final String ALERT_SAVE_DATA_TITLE = "Error";
@@ -85,7 +85,7 @@ public class ConnFile extends ConnUnit<Conn> {
 
        enterPasswordMenuItem.setOnAction((ActionEvent t) -> {
            if (getRootLayoutController().decryptConnFile(this)) {
-               getRootLayoutController().populateSubunit(this, getRootLayoutController().loadConnDataFromFile(this));
+               getRootLayoutController().populateSubunit(this, getRootLayoutController().loadConnDataFromConnFile(this));
            }
        });
 

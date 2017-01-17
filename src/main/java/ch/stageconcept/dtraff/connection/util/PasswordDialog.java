@@ -1,5 +1,6 @@
 package ch.stageconcept.dtraff.connection.util;
 
+import ch.stageconcept.dtraff.connection.model.ConnFile;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -15,12 +16,13 @@ import javafx.scene.layout.Priority;
  * SRC: https://gist.github.com/drguildo/ba2834bf52d624113041
  *
  * @author Simon Morgan
+ * Adapted by Olivier Durand
  */
 public class PasswordDialog extends Dialog<String> {
     private PasswordField passwordField;
 
     public PasswordDialog(String fileName) {
-        setTitle("Password Dialog");
+        setTitle(ConnFile.MENU_ENTER_PASSWORD);
         setHeaderText("Please enter password for: \n" + fileName);
 
         ButtonType okButton = new ButtonType("OK", ButtonData.OK_DONE);

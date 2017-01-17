@@ -8,7 +8,8 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 /**
- * Dialog to edit details of a ConnFile.
+ * Dialog controller to edit details
+ * of a ConnFile object instance.
  *
  * @author Olivier Durand
  */
