@@ -27,6 +27,7 @@ public class ConnFile extends ConnUnit<Conn> {
 
     private static final String ICON_FILENAME = ConnFileState.CLEAR.getIconFileName();
 
+    private static final String MENU_OPEN_FILE = "Open File";
     private static final String MENU_NEW_CONNECTION = "New Connection";
     public static final String MENU_ENTER_PASSWORD = "Enter Password";
     private static final String MENU_CLOSE_FILE = "Close File";
@@ -70,12 +71,22 @@ public class ConnFile extends ConnUnit<Conn> {
        // treeView context menu
        ContextMenu contextMenu = new ContextMenu();
 
+       // ### Open File Menu
+       MenuItem openFileMenuItem = new MenuItem(MENU_OPEN_FILE);
+
+       openFileMenuItem.setOnAction((ActionEvent t) -> openBrokenConnFile());
+
+       // Disable context menu Open File if ConnFile object state is not broken
+       openFileMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
+               !getState().equals(ConnFileState.BROKEN), state));
+       // ###################################################################
+
        // ### New Connection Menu
        MenuItem newConnectionMenuItem = new MenuItem(MENU_NEW_CONNECTION);
 
        newConnectionMenuItem.setOnAction((ActionEvent t) -> newConn());
 
-       // Disable context menu New Connection if file state is broken or encrypted
+       // Disable context menu New Connection if ConnFile object state is broken or encrypted
        newConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
                getState().equals(ConnFileState.BROKEN) || getState().equals(ConnFileState.ENCRYPTED), state));
        // ###################################################################
@@ -89,7 +100,7 @@ public class ConnFile extends ConnUnit<Conn> {
            }
        });
 
-       // Disable context menu Enter password if file state is not encrypted
+       // Disable context menu Enter password if ConnFile object state is not encrypted
        enterPasswordMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
                !getState().equals(ConnFileState.ENCRYPTED), state));
        // ###################################################################
@@ -105,7 +116,8 @@ public class ConnFile extends ConnUnit<Conn> {
 
        SeparatorMenuItem separatorMenuItem = new SeparatorMenuItem();
 
-       contextMenu.getItems().addAll(newConnectionMenuItem,
+       contextMenu.getItems().addAll(openFileMenuItem,
+               newConnectionMenuItem,
                enterPasswordMenuItem,
                separatorMenuItem,
                closeFileMenuItem);
@@ -182,6 +194,15 @@ public class ConnFile extends ConnUnit<Conn> {
     }
 
     // ### Methods #####################################################################
+
+    /**
+     * Open broken state ConnFile object (file).
+     * The broken state of object on which this method is called
+     * is guaranteed by the disable property of the related contextual menu (Open File).
+     */
+    private void openBrokenConnFile() {
+        rootLayoutController.connFileOpen(this);
+    }
 
     /**
      * Create new Conn object (connection)

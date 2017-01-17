@@ -62,9 +62,9 @@ public class RootLayoutController {
     private static final String ALCNF_BAD_PASSWORD_HEADER = "Bad password!";
     private static final String ALCNF_BAD_PASSWORD_CONTENT = "Try again?";
 
-    private static final String ALINF_FILE_ALREADY_OPEN_TITLE = "File Open";
-    private static final String ALINF_FILE_ALREADY_OPEN_HEADER = "File entry already present";
-    public static final String ALINF_FILE_ALREADY_OPEN_CONTENT = "A file entry with specified name is already present:\n";
+    private static final String ALINF_FILE_ALREADY_PRESENT_TITLE = "File Open";
+    private static final String ALINF_FILE_ALREADY_PRESENT_HEADER = "File entry already present";
+    public static final String ALINF_FILE_ALREADY_PRESENT_CONTENT = "A file entry with specified name is already present:\n";
 
     @FXML
     private BorderPane rootBorderPane;
@@ -348,8 +348,20 @@ public class RootLayoutController {
      */
     @FXML
     private void handleFileOpen() {
+        connFileOpen(null);
+    }
+
+    /**
+     * ConnFile object open process.
+     *
+     * @param connFile A null value means called from tool bar menu.
+     *                 A not null value means called from contextual menu
+     *                 with broken state ConnFile object right selected.
+     */
+    public void connFileOpen(ConnFile connFile) {
         //TODO put in "Thread" like, when the fileChooser close, the UI is frozen for a while (depends of machine)
-        //TODO Check if file already open or broken
+        //TODO treat case where ConnFile object comes from contextual menu and the user choice (through fileChooser)
+        //is a Network treeView already present ConnFile object.
 
         FileChooser fileChooser = new FileChooser();
         // Set extension filter
@@ -363,11 +375,15 @@ public class RootLayoutController {
             String name = file.getName().substring(0, file.getName().indexOf("."));
             // file name
             String fileName = file.getAbsolutePath();
-            // ConnFile
-            ConnFile connFile = getConnFile(name);
+
+            // If action called from tool bar menu (without Network treeView ConnFile object specifically selected in mind)
+            // try to get ConnFile object with name attribute from Network treeView, if he exist.
+            // Otherwise (ConnFile object isn't null) it means that action has been called directly
+            // from broken state ConnFile object contextual menu to try to open it.
+            if (connFile == null) connFile = getConnFile(name);
 
             if (connFile == null) {
-                // Open file with new Network treeView entry
+                // Open ConnFile (file) with new Network treeView entry
                 connFile = new ConnFile(name);
                 connFile.setFileName(fileName);
                 connFile.setParent(network);
@@ -376,18 +392,27 @@ public class RootLayoutController {
                 treatSubUnit(connFile, true);
             } else {
                 if (connFile.getState().equals(ConnFileState.BROKEN)) {
-                    // Not already open but maybe present in Network treeView with broken status
+                    // At this stage, the connFile instance is either provided by parameter or by return of method getConnFile(),
+                    // and is not already open but present in Network treeView with broken status.
+
                     // Reset connFile instance to default status (CLEAR)
                     connFile.setState(ConnFileState.CLEAR);
-                    // Reset broken file name with the new selected one (through file chooser)
+
+                    // Reset broken ConnFile (file) fileName (path) with the new selected one (through file chooser)
                     connFile.setFileName(fileName);
+
+                    // Reset ConnFile name attribute in case of the one given by parameter (broken state ConnFile object contextual menu)
+                    // differ from the chosen one (through fileChooser).
+                    // This doesn't change anything, if ConnFile object comes from getConnFile() method.
+                    connFile.setName(name);
+
                     treatSubUnit(connFile, true);
                 } else {
-                    // Alert already open and nothing else to do
+                    // Alert ConnFile entry already present in Network treeView and nothing else to do.
                     provideAlert(Alert.AlertType.INFORMATION,
-                            ALINF_FILE_ALREADY_OPEN_TITLE,
-                            ALINF_FILE_ALREADY_OPEN_HEADER,
-                            ALINF_FILE_ALREADY_OPEN_CONTENT + connFile.getFileName(), true);
+                            ALINF_FILE_ALREADY_PRESENT_TITLE,
+                            ALINF_FILE_ALREADY_PRESENT_HEADER,
+                            ALINF_FILE_ALREADY_PRESENT_CONTENT + connFile.getFileName(), true);
                 }
             }
         }
@@ -407,7 +432,7 @@ public class RootLayoutController {
     }
 
     //TODO File Save (nice to have)
-    // Put file state (also icon) in "Dirt" mode.
+    // Put ConnFile object state (also icon) in "Dirt" mode.
     // For now saving process is automatic.
     // If file save menu functionality is implemented,
     // keep automatic saving possibility through user preferences.
