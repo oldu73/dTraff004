@@ -2,6 +2,7 @@ package ch.stageconcept.dtraff.connection.model;
 
 import ch.stageconcept.dtraff.connection.util.ConnFileEditor;
 import ch.stageconcept.dtraff.connection.util.ConnFileState;
+import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -20,6 +21,8 @@ public class Network extends ConnUnit<ConnFile> {
     private static final String MENU_NEW_FILE = "New File";
     private static final String CONNFILE_DEFAULT_NAME = "default";
 
+    private RootLayoutController rootLayoutController;
+
     public Network(String name, ObservableList<ConnFile> subUnits) {
         super(name, subUnits, ConnFile::new, ICON_FILENAME);
 
@@ -34,12 +37,17 @@ public class Network extends ConnUnit<ConnFile> {
         this(name, FXCollections.observableArrayList());
     }
 
+    public void setRootLayoutController(RootLayoutController rootLayoutController) {
+        this.rootLayoutController = rootLayoutController;
+    }
+
     /**
      * New ConnFile object.
      * Create new File entry to Connections treeView.
      */
     public void newConnFile() {
         ConnFile connFile = new ConnFile(CONNFILE_DEFAULT_NAME);
+        connFile.setRootLayoutController(rootLayoutController);
         if (ConnFileEditor.INSTANCE.supply(connFile)) {
             if (connFile.isPasswordProtected()) {
                 connFile.setState(ConnFileState.DECRYPTED);

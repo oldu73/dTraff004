@@ -40,11 +40,11 @@ public class RootLayoutController {
     // Attributes
     // #####################################################################
 
-    // Connections treeView root denomination
+    // Network treeView root denomination
     private static final String NETWORK = "Network";
 
-    // Connections treeView CSS resource
-    private static final String CONNECTION_TREEVIEW_CSS = "/connectionTreeView.css";
+    // Network treeView CSS resource
+    private static final String NETWORK_TREE_VIEW_CSS = "/networkTreeView.css";
 
     // Initializing static text
     private static final String LABEL_INITIALIZING = "Initializing...";
@@ -63,8 +63,8 @@ public class RootLayoutController {
     private static final String ALCNF_BAD_PASSWORD_CONTENT = "Try again?";
 
     private static final String ALINF_FILE_ALREADY_OPEN_TITLE = "File Open";
-    public static final String ALINF_FILE_ALREADY_OPEN_HEADER = "File already open";
-    private static final String ALINF_FILE_ALREADY_OPEN_CONTENT = "The specified file is already open:\n";
+    private static final String ALINF_FILE_ALREADY_OPEN_HEADER = "File entry already present";
+    public static final String ALINF_FILE_ALREADY_OPEN_CONTENT = "A file entry with specified name is already present:\n";
 
     @FXML
     private BorderPane rootBorderPane;
@@ -102,6 +102,7 @@ public class RootLayoutController {
     private Network network;    // Network description to be used in a treeView : Network (root node) - ConnFile - Conn - Database - (...)
     private ModelTree<ConnUnit<?>> connectionTree;
     private TreeView<ConnUnit<?>> connectionTreeView;
+    private Preferences preferences = null; // User preferences
 
     private ObjectProperty<ConnFileState> selectedConnFileState = new SimpleObjectProperty<>();
 
@@ -208,7 +209,7 @@ public class RootLayoutController {
 
         // CSS pseudo class treeView style.
         // !WARNING! In order to use file that reside in resources folder, don’t forget to add a slash before file name!
-        connectionTreeView.getStylesheets().add(getClass().getResource(CONNECTION_TREEVIEW_CSS).toExternalForm());
+        connectionTreeView.getStylesheets().add(getClass().getResource(NETWORK_TREE_VIEW_CSS).toExternalForm());
 
         connectionTreeView.getRoot().setExpanded(true);
     }
@@ -224,7 +225,7 @@ public class RootLayoutController {
         // debug mode
         //printChildren(connectionTreeView.getRoot());
 
-        // Double click on Connections treeView
+        // Double click on Network treeView
         connectionTreeView.setOnMouseClicked((event) ->
         {
             if(event.getClickCount() == 2 &&
@@ -246,7 +247,7 @@ public class RootLayoutController {
         newServerConnectionMenuItem.setDisable(true);
         fileEnterPasswordMenuItem.setDisable(true);
 
-        // Some File - menus disable property setting if the Connections treeView
+        // Some File - menus disable property setting if the Network treeView
         // selected item is not a ConnFile object and other menu specific related conditions
         connectionTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.getValue() instanceof ConnFile) {
@@ -256,7 +257,7 @@ public class RootLayoutController {
                 // debug mode
                 //System.out.print("1 ");
 
-                // ### File - Server Connection - New: Disable if the Connections treeView
+                // ### File - Server Connection - New: Disable if the Network treeView
                 // selected item is not a clear or decrypted ConnFile object
                 if (((ConnFile) newValue.getValue()).getState().equals(ConnFileState.CLEAR) ||
                         ((ConnFile) newValue.getValue()).getState().equals(ConnFileState.DECRYPTED)) {
@@ -274,7 +275,7 @@ public class RootLayoutController {
                 }
                 // ############################################################
 
-                // ### File - Enter Password: Disable if the Connections treeView
+                // ### File - Enter Password: Disable if the Network treeView
                 // selected item is not an encrypted ConnFile object
                 if (((ConnFile) newValue.getValue()).getState().equals(ConnFileState.ENCRYPTED)) {
                     fileEnterPasswordMenuItem.setDisable(false);
@@ -284,7 +285,7 @@ public class RootLayoutController {
                 // ############################################################
 
             } else {
-                // Connections treeView selected item is NOT a ConnFile object
+                // Network treeView selected item is NOT a ConnFile object
                 newServerConnectionMenuItem.setDisable(true);
                 fileEnterPasswordMenuItem.setDisable(true);
 
@@ -296,7 +297,7 @@ public class RootLayoutController {
 
         // After double click on an encrypted file to enter correct password,
         // the serverConnectionMenuItem remain disabled until treeView selection changed!
-        // So, the bellowing lines deserve to track ConnFile (in Connections treeView)
+        // So, the bellowing lines deserve to track ConnFile (in Network treeView)
         // selected object state changes in order to update the newServerConnectionMenuItem disabled status.
         selectedConnFileState.addListener((observable, oldValue, newValue) -> {
             if (oldValue != null && (oldValue.equals(ConnFileState.ENCRYPTED) && newValue.equals(ConnFileState.DECRYPTED))) {
@@ -320,7 +321,7 @@ public class RootLayoutController {
                 connectionTreeView.getSelectionModel().selectedItemProperty()));
         */
 
-        // Disable tool bar menu File - Server Connection - Edit if no item or not a Conn object instance are selected in Connections treeView
+        // Disable tool bar menu File - Server Connection - Edit if no item or not a Conn object instance are selected in Network treeView
         editServerConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
                         connectionTreeView.getSelectionModel().getSelectedItem() == null ||
                                 !(connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof Conn),
@@ -362,34 +363,32 @@ public class RootLayoutController {
             String name = file.getName().substring(0, file.getName().indexOf("."));
             // file name
             String fileName = file.getAbsolutePath();
+            // ConnFile
+            ConnFile connFile = getConnFile(name);
 
-            if (isConnFileAlreadyOpen(fileName)) {
-                // Alert already open and nothing else to do
-                provideAlert(Alert.AlertType.INFORMATION,
-                        ALINF_FILE_ALREADY_OPEN_TITLE,
-                        ALINF_FILE_ALREADY_OPEN_HEADER,
-                        ALINF_FILE_ALREADY_OPEN_CONTENT + fileName, true);
+            if (connFile == null) {
+                // Open file with new Network treeView entry
+                connFile = new ConnFile(name);
+                connFile.setFileName(fileName);
+                connFile.setParent(network);
+                connFile.setRootLayoutController(this);
+                network.getSubUnits().add(connFile);
+                treatSubUnit(connFile, true);
             } else {
-                // Not already open but maybe present in Connections treeView with broken status
-                ConnFile connFile = getConnFile(name);
-                if (connFile != null && connFile.getState().equals(ConnFileState.BROKEN)) {
+                if (connFile.getState().equals(ConnFileState.BROKEN)) {
+                    // Not already open but maybe present in Network treeView with broken status
                     // Reset connFile instance to default status (CLEAR)
                     connFile.setState(ConnFileState.CLEAR);
                     // Reset broken file name with the new selected one (through file chooser)
                     connFile.setFileName(fileName);
+                    treatSubUnit(connFile, true);
                 } else {
-                    // Open file with new Connections treeView entry
-                    connFile = new ConnFile(name);
-                    connFile.setFileName(fileName);
-                    connFile.setParent(network);
-                    connFile.setRootLayoutController(this);
-                    network.getSubUnits().add(connFile);
+                    // Alert already open and nothing else to do
+                    provideAlert(Alert.AlertType.INFORMATION,
+                            ALINF_FILE_ALREADY_OPEN_TITLE,
+                            ALINF_FILE_ALREADY_OPEN_HEADER,
+                            ALINF_FILE_ALREADY_OPEN_CONTENT + connFile.getFileName(), true);
                 }
-
-                treatSubUnit(connFile);
-                // update preference
-                Preferences preferences = Preferences.userRoot().node(Network.PREFS_PATH);
-                preferences.put(connFile.getName(), connFile.getFileName());
             }
         }
     }
@@ -485,37 +484,20 @@ public class RootLayoutController {
     }
 
     /**
-     * Get Connections treeView selected ConnFile object
+     * Get Network treeView selected ConnFile object
      *
      * @return If selected item is an instance of ConnFile, return this object,
      * null otherwise
      */
     private ConnFile getSelectedConnFile() {
 
-        if (connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile) {
-            return (ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue();
+        Object selectedObject = connectionTreeView.getSelectionModel().getSelectedItem().getValue();
+
+        if (selectedObject instanceof ConnFile) {
+            return (ConnFile) selectedObject;
         }
 
         return null;
-    }
-
-    /**
-     * Check if a ConnFile object with given String fileName parameter
-     * is present in Network treeView.
-     *
-     * @param fileName
-     * @return true if ConnFile object with fileName attribute exist in Network treeView,
-     * false otherwise.
-     */
-    private boolean isConnFileAlreadyOpen(String fileName) {
-        // SRC: http://stackoverflow.com/questions/23407014/return-from-lambda-foreach-in-java
-        if (network
-                .getSubUnits()
-                .stream()
-                .filter(connFile -> connFile.getFileName().contains(fileName))
-                .findFirst()
-                .orElse(null) != null) return true;
-        else return false;
     }
 
     /**
@@ -526,7 +508,8 @@ public class RootLayoutController {
      * @return ConnFile object if one with name attribute exist in Network treeView,
      * null otherwise.
      */
-    private ConnFile getConnFile(String name) {
+    public ConnFile getConnFile(String name) {
+        // SRC: http://stackoverflow.com/questions/23407014/return-from-lambda-foreach-in-java
         return network
                 .getSubUnits()
                 .stream()
@@ -542,13 +525,13 @@ public class RootLayoutController {
 
         Network network = new Network(NETWORK);
         boolean prefNodeExist = false;
-        String netPrefPath = Network.PREFS_PATH;
-        Preferences pref = null;
         String[] prefKeys = null;
+
+        network.setRootLayoutController(this);
 
         // ### 1. Check if preference node exist.
         try {
-            prefNodeExist = Preferences.userRoot().nodeExists(netPrefPath);
+            prefNodeExist = Preferences.userRoot().nodeExists(Network.PREFS_PATH);
         } catch (BackingStoreException e) {
             //e.printStackTrace();
         }
@@ -556,14 +539,14 @@ public class RootLayoutController {
 
        // ### 2. Set preference node.
        if (prefNodeExist) {
-           pref = Preferences.userRoot().node(netPrefPath);
+           preferences = Preferences.userRoot().node(Network.PREFS_PATH);
        }
        // #########################################################################
 
        // ### 3. Get preference keys.
-       if (pref != null) {
+       if (preferences != null) {
            try {
-               prefKeys = pref.keys();
+               prefKeys = preferences.keys();
            } catch (BackingStoreException e) {
                //System.err.println("createNetwork() method, unable to read backing store: " + e);
                //e.printStackTrace();
@@ -581,7 +564,7 @@ public class RootLayoutController {
            for (String prefKey : prefKeys) {
                ConnFile connFile = new ConnFile(prefKey);
 
-               String fileName = pref.get(prefKey, null);
+               String fileName = preferences.get(prefKey, null);
 
                if (fileName != null) {
                    connFile.setFileName(fileName);
@@ -601,9 +584,10 @@ public class RootLayoutController {
        }
        // #########################################################################
 
-       // ### 5. Iterate through network subunits (ConnFile objects).
+       // ### 5. Iterate through network subunits (ConnFile objects) to treat and populate
+       // Conn objects list.
        if (!network.getSubUnits().isEmpty()) network.getSubUnits().forEach((subUnit) -> {
-           if (!subUnit.getState().equals(ConnFileState.BROKEN)) treatSubUnit(subUnit);
+           if (!subUnit.getState().equals(ConnFileState.BROKEN)) treatSubUnit(subUnit, false);
        });
        // #########################################################################
 
@@ -623,8 +607,9 @@ public class RootLayoutController {
      *  ConnFile object subunits with Conn objects.
      *
      * @param subUnit
+     * @param updatePreference
      */
-    private void treatSubUnit(ConnFile subUnit) {
+    private void treatSubUnit(ConnFile subUnit, boolean updatePreference) {
         List<Conn> listConn = loadConnDataFromConnFile(subUnit);
 
         // If loadConnDataFromConnFile raise an exception (file is damaged)
@@ -650,6 +635,12 @@ public class RootLayoutController {
             if (subUnit.getState().equals(ConnFileState.CLEAR) || subUnit.getState().equals(ConnFileState.DECRYPTED)) {
                 populateSubunit(subUnit, listConn);
             }
+        }
+
+        // update preference
+        if (updatePreference) {
+            preferences = Preferences.userRoot().node(Network.PREFS_PATH);
+            preferences.put(subUnit.getName(), subUnit.getFileName());
         }
     }
 

@@ -2,6 +2,7 @@ package ch.stageconcept.dtraff.connection.view;
 
 import ch.stageconcept.dtraff.connection.model.ConnFile;
 import ch.stageconcept.dtraff.connection.util.*;
+import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.DirectoryChooser;
@@ -16,6 +17,13 @@ import javafx.stage.Stage;
 public class ConnFileEditDialogController {
 
     private static final String FILE_EXT = ".xml";
+
+    private static final String ALERR_INPUT_INVALID_TITLE = "Invalid Fields";
+    private static final String ALERR_INPUT_INVALID_HEADER = "Please correct invalid fields";
+    private static final String ALERR_INPUT_INVALID_CONTENT_FOLDER = "No valid folder!\n";
+    private static final String ALERR_INPUT_INVALID_CONTENT_FILE_1 = "No valid file!\n";
+    private static final String ALERR_INPUT_INVALID_CONTENT_FILE_2 = RootLayoutController.ALINF_FILE_ALREADY_OPEN_CONTENT;
+    private static final String ALERR_INPUT_INVALID_CONTENT_PASSWORD = "No valid password!\n";
 
     @FXML
     private TextField folderField;
@@ -166,28 +174,31 @@ public class ConnFileEditDialogController {
      * @return true if the input is valid
      */
     private boolean isInputValid() {
+        String folder = folderField.getText();
+        String file = fileField.getText();
+        String password = passwordField.getText();
+        String repeatPassword = repeatPasswordField.getText();
         String errorMessage = "";
 
-        if (folderField.getText() == null || folderField.getText().length() == 0) {
-            errorMessage += "No valid folder!\n";
+        if (folder == null || folder.length() == 0) errorMessage += ALERR_INPUT_INVALID_CONTENT_FOLDER;
+
+        if (file == null || file.length() == 0) errorMessage += ALERR_INPUT_INVALID_CONTENT_FILE_1;
+        else {
+            ConnFile existingConnFile = connFile.getRootLayoutController().getConnFile(file);
+            if (existingConnFile != null) {
+                errorMessage += "\n" + ALERR_INPUT_INVALID_CONTENT_FILE_2 + existingConnFile.getFileName() + "\n\n";
+            }
         }
 
-        if (fileField.getText() == null || fileField.getText().length() == 0) {
-            errorMessage += "No valid file!\n";
-        }
-
-        if (passwordCheckBox.isSelected() && (passwordField.getText() == null
-                || passwordField.getText().length() == 0
-                || !passwordField.getText().equals(repeatPasswordField.getText()))) {
-
-            errorMessage += "No valid password!\n";
-        }
+        if (passwordCheckBox.isSelected() && (password == null ||
+                password.length() == 0 ||
+                !password.equals(repeatPassword))) errorMessage += ALERR_INPUT_INVALID_CONTENT_PASSWORD;
 
         if (errorMessage.length() == 0) {
             return true;
         } else {
             // Show the error message.
-            ErrorAlert.INSTANCE.show(dialogStage, "Invalid Fields", "Please correct invalid fields", errorMessage);
+            ErrorAlert.INSTANCE.show(dialogStage, ALERR_INPUT_INVALID_TITLE, ALERR_INPUT_INVALID_HEADER, errorMessage);
             return false;
         }
     }
