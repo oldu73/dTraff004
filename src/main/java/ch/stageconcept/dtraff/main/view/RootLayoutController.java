@@ -376,6 +376,48 @@ public class RootLayoutController {
             // file name
             String fileName = file.getAbsolutePath();
 
+
+            //*******************************************************************************
+
+
+            ConnFile connFileAlreadyPresent = getConnFile(name);
+
+            if (connFile == null) {
+                // toolbar
+
+                if (connFileAlreadyPresent == null) {
+                    // new entry
+                } else {
+
+                    if (connFileAlreadyPresent.getState().equals(ConnFileState.BROKEN)) {
+                        // open
+                    } else {
+                        // Alert already present
+                    }
+
+                }
+
+            } else {
+                // context
+
+                if (connFileAlreadyPresent == null) {
+                    // means chosen file differ from selected one
+                    // open and rename
+                } else {
+
+                    if (connFileAlreadyPresent.getState().equals(ConnFileState.BROKEN)) {
+                        // ???
+                    } else {
+                        // ???
+                    }
+
+                }
+            }
+
+
+            //*******************************************************************************
+
+
             // If action called from tool bar menu (without Network treeView ConnFile object specifically selected in mind)
             // try to get ConnFile object with name attribute from Network treeView, if he exist.
             // Otherwise (ConnFile object isn't null) it means that action has been called directly
