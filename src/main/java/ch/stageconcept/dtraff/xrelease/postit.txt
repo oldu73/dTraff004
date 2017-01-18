@@ -1,0 +1,30 @@
+
+- Could not load data alert when file is broken (in front of primary stage) at start (-> preferences)
+
+- File (directory) chooser in "Thread" like, UI stay frozen for a while when chooser close on office machine
+
+- File entry in Connections treeView on mouse over show filePath baloon (debrayable preference)
+
+- Create File even if empty
+
+- Change file to Encryt <-> Clear
+
+- Rename file (directly in treeView (no form)?!)
+
+- Raccourci clavier sur les menus (tool bar) et sur les boutons dans les formulaires (tab, tab, tab.. return)
+
+- drag&drop ConnFile in Connections treeView. Where is the treeView objects (ConnFile) persisted?
+The opened files order in Connections treeView stay in order they was opened even if in preferences
+they are in an alphabetical/numerical order. So, from where comes this order?
+
+- Refactor Connections treeView by Network treeView
+
+- Use ErrorAlert everywhere (find usage of Alert) especially in RootLayoutController where provideAlert
+method has been implemented
+
+- Open file on Network contextual menu
+
+- Exception in Alert popup
+
+- Check ErrorAlert for on top of which stage popup is displayed
+

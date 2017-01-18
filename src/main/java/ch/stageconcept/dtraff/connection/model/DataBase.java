@@ -2,7 +2,7 @@ package ch.stageconcept.dtraff.connection.model;
 
 import javafx.collections.FXCollections;
 
-//TODO javadoc
+//TODO javadoc (cf. Network class header documentation)
 
 public class DataBase extends ConnUnit<ConnUnit<?>> {
 

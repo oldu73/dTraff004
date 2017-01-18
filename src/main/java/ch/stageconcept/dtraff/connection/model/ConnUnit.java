@@ -12,7 +12,7 @@ import javafx.scene.image.ImageView;
 import javax.xml.bind.annotation.*;
 import java.util.function.Function;
 
-//TODO javadoc
+//TODO javadoc (cf. Network class header documentation)
 
 @XmlAccessorType(XmlAccessType.NONE)
 public class ConnUnit<T extends ConnUnit<?>> {

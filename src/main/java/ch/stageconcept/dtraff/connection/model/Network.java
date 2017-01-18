@@ -8,37 +8,87 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.image.ImageView;
 
 import java.util.prefs.Preferences;
 
-//TODO javadoc
-
+/**
+ * Root class for Network.
+ *
+ * The treeView structure:
+ * #######################
+ *
+ * Network
+ * |
+ * +-- ConnFile A
+ * |    |-- Conn A
+ * |    |    +-- DataBase A
+ * |    |    +-- DataBase B
+ * |    |-- Conn B
+ * |
+ * +-- ConnFile B
+ * |    |-- Conn A
+ * |    |-- Conn B
+ *
+ * #######################
+ *
+ * SRC: http://stackoverflow.com/questions/35009982/javafx-treeview-of-multiple-object-types-and-more
+ * SRC: https://github.com/james-d/heterogeneous-tree-example
+ *
+ * @author james-d
+ * Adapted by Olivier Durand
+ */
 public class Network extends ConnUnit<ConnFile> {
 
     private static final String ICON_FILENAME = "network001.png";
     public static final String PREFS_PATH = "/ch/stageconcept/datatraffic/file";
     private static final String MENU_NEW_FILE = "New File";
+    private static final String MENU_OPEN_FILE = ConnFile.MENU_OPEN_FILE;
     private static final String CONNFILE_DEFAULT_NAME = "default";
 
     private RootLayoutController rootLayoutController;
 
+    /**
+     * Constructor
+     * @param name
+     * @param subUnits
+     */
     public Network(String name, ObservableList<ConnFile> subUnits) {
         super(name, subUnits, ConnFile::new, ICON_FILENAME);
 
         ContextMenu contextMenu = new ContextMenu();
+
         MenuItem newFileMenuItem = new MenuItem(MENU_NEW_FILE);
         newFileMenuItem.setOnAction((ActionEvent t) -> newConnFile());
-        contextMenu.getItems().add(newFileMenuItem);
+
+        MenuItem openFileMenuItem = new MenuItem(MENU_OPEN_FILE);
+        openFileMenuItem.setOnAction((ActionEvent t) -> getRootLayoutController().openConnFile());
+
+        contextMenu.getItems().addAll(newFileMenuItem, openFileMenuItem);
         this.setMenu(contextMenu);
     }
 
+    /**
+     * Constructor
+     * @param name
+     */
     public Network(String name) {
         this(name, FXCollections.observableArrayList());
     }
 
+    /**
+     * rootLayoutController setter
+     * @param rootLayoutController
+     */
     public void setRootLayoutController(RootLayoutController rootLayoutController) {
         this.rootLayoutController = rootLayoutController;
+    }
+
+    /**
+     * rootLayoutController getter
+     * @return rootLayoutController
+     */
+    public RootLayoutController getRootLayoutController() {
+        return rootLayoutController;
     }
 
     /**

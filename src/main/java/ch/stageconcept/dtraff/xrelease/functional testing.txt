@@ -1,0 +1,55 @@
+Functional testing
+##################
+
+<
+Functional test number: 002
+Published on:           20170118-1620
+Status:                 Live
+Log:
+- Quality check:        not passed
+
+Check that ConnFile.name attribute is case sensitive which mean the ability to have two (or more) Network treeView entry with same the name
+but different case (considered as distinct).
+>
+
+<
+Functional test number: 004
+Published on:           20170118-1639
+Status:                 Live
+Log:
+- Quality check:        NOT OK! at 20170118-1651 on r0.4.001
+REM It's working well in current session, but when close and reopen the application, problems appear.
+Maybe something to do with preferences.
+
+Update broken state ConnFile.name (path, pref, (etc.)) on contextual menu Open File return if the file chosen
+differ from the selected one and is not present in Network treeView.
+>
+
+<
+Functional test number: 003
+Published on:           20170118-1631
+Status:                 Live
+Log:
+- Quality check:        passed at 20170118-1631 on r0.4.001
+
+ConnFile, Open File contextual menu enabled only on broken state ConnFile object in Network treeView.
+The menu status should change from enabled to disabled on ConnFile.state change even if Network treeView selection hasn't changed
+(no treeView refresh triggered).
+>
+
+<
+Functional test number: 001
+Published on:           20170118-1609
+Status:                 Live
+Log:
+- Quality check:        passed at 20170118-1609 on r0.4.001
+
+Prevent file new/open of an already present one (at any state) uniqueness is checked through ConnFile.name attribute (key)
+not fileName (path).
+
+Access via:
+- File - Open/New
+- Network treeView Network - Open/New File contextual menu
+- Network treeView broken state ConnFile - Open File contextual menu
+>
+

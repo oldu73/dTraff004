@@ -19,7 +19,7 @@ import javax.xml.bind.Marshaller;
 import java.io.File;
 import java.io.IOException;
 
-//TODO javadoc
+//TODO javadoc (cf. Network class header documentation)
 
 public class ConnFile extends ConnUnit<Conn> {
 
@@ -27,7 +27,7 @@ public class ConnFile extends ConnUnit<Conn> {
 
     private static final String ICON_FILENAME = ConnFileState.CLEAR.getIconFileName();
 
-    private static final String MENU_OPEN_FILE = "Open File";
+    public static final String MENU_OPEN_FILE = "Open File";
     private static final String MENU_NEW_CONNECTION = "New Connection";
     public static final String MENU_ENTER_PASSWORD = "Enter Password";
     private static final String MENU_CLOSE_FILE = "Close File";

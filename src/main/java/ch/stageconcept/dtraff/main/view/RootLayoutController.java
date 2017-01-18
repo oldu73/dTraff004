@@ -6,6 +6,7 @@ import ch.stageconcept.dtraff.connection.view.ModelTree;
 import ch.stageconcept.dtraff.main.MainApp;
 import ch.stageconcept.dtraff.preference.model.Pref;
 import ch.stageconcept.dtraff.preference.util.PrefEditor;
+import ch.stageconcept.dtraff.xrelease.Release;
 import javafx.animation.*;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
@@ -51,7 +52,7 @@ public class RootLayoutController {
 
     // Alerts statics texts
     private static final String ALINF_ABOUT_TITLE = "Data Traffic";
-    public static final String ALINF_ABOUT_HEADER = ALINF_ABOUT_TITLE + " r0.4";
+    public static final String ALINF_ABOUT_HEADER = ALINF_ABOUT_TITLE + Release.NUMBER.getValue();
     private static final String ALINF_ABOUT_CONTENT = "Author: Olivier Durand\nWebsite: http://www.stageconcept.ch";
 
     private static final String ALERR_LOAD_DATA_TITLE = "Error";
@@ -350,7 +351,7 @@ public class RootLayoutController {
     private void handleFileOpen() {
         ConnFile connFile = getSelectedConnFile();
         if (connFile != null && connFile.isBroken()) openBrokenConnFile(connFile);
-        else openConnFile(null);
+        else openConnFile();
     }
 
     /**
@@ -429,124 +430,28 @@ public class RootLayoutController {
 
     /**
      * Open ConnFile object.
-     *
-     * @param connFile
      */
-    public void openConnFile(ConnFile connFile) {
+    public void openConnFile() {
 
-        System.out.println("Open ConnFile..");
-
-        if (getSelectedConnFile().isBroken()) {
-            System.out.println("is broken");
-        }
-        else  {
-            System.out.println("nothing");
-            System.out.println(getSelectedConnFile().getState());
-        }
-
-        /*
-
-        //TODO put in "Thread" like, when the fileChooser close, the UI is frozen for a while (depends of machine)
-        //TODO treat case where ConnFile object comes from contextual menu and the user choice (through fileChooser)
-        //is a Network treeView already present ConnFile object.
-
-        FileChooser fileChooser = new FileChooser();
-        // Set extension filter
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
-        fileChooser.getExtensionFilters().add(extFilter);
-        // Show open file dialog
-        File file = fileChooser.showOpenDialog(MainApp.primaryStage);
+        File file = getXmlFile();
 
         if (file != null) {
             // name without extension
             String name = file.getName().substring(0, file.getName().indexOf("."));
-            // file name
+            // file name (path)
             String fileName = file.getAbsolutePath();
 
-
-            //*******************************************************************************
-
-
-            ConnFile connFileAlreadyPresent = getConnFile(name);
-
-            if (connFile == null) {
-                // toolbar
-
-                if (connFileAlreadyPresent == null) {
-                    // new entry
-                } else {
-
-                    if (connFileAlreadyPresent.isBroken()) {
-                        // open
-                    } else {
-                        // Alert already present
-                    }
-
-                }
-
-            } else {
-                // context
-
-                if (connFileAlreadyPresent == null) {
-                    // means chosen file differ from selected one
-                    // open and rename
-                } else {
-                    // means this is the one given by parameter
-                    if (connFileAlreadyPresent.isBroken()) {
-                        // open
-                    } else {
-                        // ???
-                    }
-
-                }
-            }
-
-
-            //*******************************************************************************
-
-
-            // If action called from tool bar menu (without Network treeView ConnFile object specifically selected in mind)
-            // try to get ConnFile object with name attribute from Network treeView, if he exist.
-            // Otherwise (ConnFile object isn't null) it means that action has been called directly
-            // from broken state ConnFile object contextual menu to try to open it.
-            if (connFile == null) connFile = getConnFile(name);
-
-            if (connFile == null) {
-                // Open ConnFile (file) with new Network treeView entry
-                connFile = new ConnFile(name);
+            if (getConnFile(name) != null) alertAlreadyPresent(getConnFile(name));
+            else {
+                // Open ConnFile (file) and create new Network treeView entry
+                ConnFile connFile = new ConnFile(name);
                 connFile.setFileName(fileName);
                 connFile.setParent(network);
                 connFile.setRootLayoutController(this);
                 network.getSubUnits().add(connFile);
                 treatSubUnit(connFile, true);
-            } else {
-                if (connFile.isBroken()) {
-                    // At this stage, the connFile instance is either provided by parameter or by return of method getConnFile(),
-                    // and is not already open but present in Network treeView with broken status.
-
-                    // Reset connFile instance to default status (CLEAR)
-                    connFile.setState(ConnFileState.CLEAR);
-
-                    // Reset broken ConnFile (file) fileName (path) with the new selected one (through file chooser)
-                    connFile.setFileName(fileName);
-
-                    // Reset ConnFile name attribute in case of the one given by parameter (broken state ConnFile object contextual menu)
-                    // differ from the chosen one (through fileChooser).
-                    // This doesn't change anything, if ConnFile object comes from getConnFile() method.
-                    connFile.setName(name);
-
-                    treatSubUnit(connFile, true);
-                } else {
-                    // Alert ConnFile entry already present in Network treeView and nothing else to do.
-                    provideAlert(Alert.AlertType.INFORMATION,
-                            ALINF_FILE_ALREADY_PRESENT_TITLE,
-                            ALINF_FILE_ALREADY_PRESENT_HEADER,
-                            ALINF_FILE_ALREADY_PRESENT_CONTENT + connFile.getFileName(), true);
-                }
             }
         }
-
-        */
     }
 
     /**
@@ -647,10 +552,14 @@ public class RootLayoutController {
      */
     private ConnFile getSelectedConnFile() {
 
-        Object selectedObject = connectionTreeView.getSelectionModel().getSelectedItem().getValue();
+        try {
+            Object selectedObject = connectionTreeView.getSelectionModel().getSelectedItem().getValue();
 
-        if (selectedObject instanceof ConnFile) {
-            return (ConnFile) selectedObject;
+            if (selectedObject instanceof ConnFile) {
+                return (ConnFile) selectedObject;
+            }
+        } catch (NullPointerException e) {
+            return null;
         }
 
         return null;
