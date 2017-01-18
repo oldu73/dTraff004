@@ -17,12 +17,28 @@ Functional test number: 004
 Published on:           20170118-1639
 Status:                 Live
 Log:
+- Quality check:        passed at 20170118-2212 on r0.4.002
+WARNING Side effect is that newly opened ConnFile appear at the end of Network treeView,
+even he was (with broken state) on other position in the list.
 - Quality check:        NOT OK! at 20170118-1651 on r0.4.001
 REM It's working well in current session, but when close and reopen the application, problems appear.
 Maybe something to do with preferences.
 
 Update broken state ConnFile.name (path, pref, (etc.)) on contextual menu Open File return if the file chosen
 differ from the selected one and is not present in Network treeView.
+>
+
+<
+Functional test number: 005
+Published on:           20170118-2212
+Status:                 Live
+Log:
+- Quality check:        passed at 20170118-2259 on r0.4.002
+
+Test that on first run (user preferences node does not exist yet) createNetwork() process
+work's as expected: - only root "Network" entry should appear in Network treeView and mostly
+NO NullPointerException due to RootLayoutController.preferences attribute initialisation or first use,
+when starting creating new or opening existing ConnFile (file). See also Network class Preferences usage.
 >
 
 <

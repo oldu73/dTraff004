@@ -16,6 +16,7 @@
 - drag&drop ConnFile in Connections treeView. Where is the treeView objects (ConnFile) persisted?
 The opened files order in Connections treeView stay in order they was opened even if in preferences
 they are in an alphabetical/numerical order. So, from where comes this order?
+>>>>>>>>>>>>>>>>>> !!!!!! Also, workaround for Functional test number: 004 WARNING -> sort Network treeView alphabetically(numerically)!
 
 - Refactor Connections treeView by Network treeView
 
@@ -27,4 +28,12 @@ method has been implemented
 - Exception in Alert popup
 
 - Check ErrorAlert for on top of which stage popup is displayed
+
+- Evaluate IntelliJ ability to manage functional testing process (or other dedicated tool)
+
+- Home PC - JVM crash on 20170118-2128, message: Process finished with exit code 255
+- Home PC - JVM crash on 20170118-2150 (around), message: Process finished with exit code 255
+Seems to be caused by FileChooser which on Office PC may freeze UI on close for a few seconds
+and on Home PC display message "Qt: Untested Windows version 10.0 detected!" multiple time (15) in console.
+Both PCs run Windows 10-64 OS.
 

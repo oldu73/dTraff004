@@ -103,8 +103,7 @@ public class RootLayoutController {
     private Network network;    // Network description to be used in a treeView : Network (root node) - ConnFile - Conn - Database - (...)
     private ModelTree<ConnUnit<?>> connectionTree;
     private TreeView<ConnUnit<?>> connectionTreeView;
-    private Preferences preferences = null; // User preferences
-
+    private Preferences preferences = Preferences.userRoot().node(Network.PREFS_PATH);  // User preferences
     private ObjectProperty<ConnFileState> selectedConnFileState = new SimpleObjectProperty<>();
 
     // Getters and Setters
@@ -390,6 +389,7 @@ public class RootLayoutController {
                 if (!name.equals(connFile.getName()) && (getConnFile(name) != null)) alertAlreadyPresent(getConnFile(name));
                 else {
                     // update and open (treat..)
+                    preferences.remove(connFile.getName());
                     connFile.setName(name);
                     connFile.setFileName(fileName);
                     connFile.setState(ConnFileState.CLEAR);
@@ -589,26 +589,11 @@ public class RootLayoutController {
     private Network createNetwork() {
 
         Network network = new Network(NETWORK);
-        boolean prefNodeExist = false;
         String[] prefKeys = null;
 
         network.setRootLayoutController(this);
 
-        // ### 1. Check if preference node exist.
-        try {
-            prefNodeExist = Preferences.userRoot().nodeExists(Network.PREFS_PATH);
-        } catch (BackingStoreException e) {
-            //e.printStackTrace();
-        }
-        // #########################################################################
-
-       // ### 2. Set preference node.
-       if (prefNodeExist) {
-           preferences = Preferences.userRoot().node(Network.PREFS_PATH);
-       }
-       // #########################################################################
-
-       // ### 3. Get preference keys.
+       // ### 1. Get preference keys.
        if (preferences != null) {
            try {
                prefKeys = preferences.keys();
@@ -622,7 +607,7 @@ public class RootLayoutController {
        }
        // #########################################################################
 
-       // ### 4. Iterate through preference keys to create ConnFile object
+       // ### 2. Iterate through preference keys to create ConnFile object
        // and check if corresponding file exist.
        if (prefKeys != null) {
 
@@ -649,7 +634,7 @@ public class RootLayoutController {
        }
        // #########################################################################
 
-       // ### 5. Iterate through network subunits (ConnFile objects) to treat and populate
+       // ### 3. Iterate through network subunits (ConnFile objects) to treat and populate
        // Conn objects list.
        if (!network.getSubUnits().isEmpty()) network.getSubUnits().forEach((subUnit) -> {
            if (!subUnit.isBroken()) treatSubUnit(subUnit, false);
@@ -704,8 +689,13 @@ public class RootLayoutController {
 
         // update preference
         if (updatePreference) {
-            preferences = Preferences.userRoot().node(Network.PREFS_PATH);
+            // debug mode
+            //System.out.println("\nbefore:\n\n" + preferencesToString());
+
             preferences.put(subUnit.getName(), subUnit.getFileName());
+
+            // debug mode
+            //System.out.println("\nafter:\n\n" + preferencesToString());
         }
     }
 
@@ -927,6 +917,33 @@ public class RootLayoutController {
 
         if (showAndWait) alert.showAndWait();
         return alert;
+    }
+
+    /**
+     * Debug helper method to get preferences
+     * in a String format.
+     *
+     * @return user preferences in a String format
+     */
+    private String preferencesToString() {
+        String[] prefKeys = null;
+        String preferencesToString = "";
+
+        if (preferences != null) {
+            try {
+                prefKeys = preferences.keys();
+            } catch (BackingStoreException e) {
+                //e.printStackTrace();
+            } catch (IllegalStateException e) {
+                //e.printStackTrace();
+            }
+        }
+
+        if (prefKeys != null) {
+            for (String prefKey : prefKeys) preferencesToString += "key: " + prefKey + " / value: " + preferences.get(prefKey, null) + "\n";
+        }
+
+        return preferencesToString;
     }
 
 }

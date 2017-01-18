@@ -46,6 +46,7 @@ public class Network extends ConnUnit<ConnFile> {
     private static final String CONNFILE_DEFAULT_NAME = "default";
 
     private RootLayoutController rootLayoutController;
+    private Preferences preferences = Preferences.userRoot().node(PREFS_PATH);
 
     /**
      * Constructor
@@ -104,7 +105,6 @@ public class Network extends ConnUnit<ConnFile> {
             }
             connFile.setParent(this);
             getSubUnits().add(connFile);
-            Preferences preferences = Preferences.userRoot().node(PREFS_PATH);
             preferences.put(connFile.getName(), connFile.getFileName());
         }
     }
@@ -116,7 +116,6 @@ public class Network extends ConnUnit<ConnFile> {
      * @param connFile
      */
     public void closeConnFile(ConnFile connFile) {
-        Preferences preferences = Preferences.userRoot().node(PREFS_PATH);
         preferences.remove(connFile.getName());
         this.getSubUnits().remove(connFile);
     }
