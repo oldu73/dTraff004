@@ -41,7 +41,7 @@ public class ConnFile extends ConnUnit<Conn> {
     // Reference to parent object
     private final ObjectProperty<Network> parent;
 
-    private String fileName;
+    private String fileName;    // path
     private boolean isPasswordProtected = false;
     private String password;
     private final ObjectProperty<ConnFileState> state;
@@ -73,53 +73,34 @@ public class ConnFile extends ConnUnit<Conn> {
 
        // ### Open File Menu
        MenuItem openFileMenuItem = new MenuItem(MENU_OPEN_FILE);
-
        openFileMenuItem.setOnAction((ActionEvent t) -> openBrokenConnFile());
-
        // Disable context menu Open File if ConnFile object state is not broken
-       openFileMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
-               !getState().equals(ConnFileState.BROKEN), state));
+       openFileMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> !isBroken(), state));
        // ###################################################################
 
        // ### New Connection Menu
        MenuItem newConnectionMenuItem = new MenuItem(MENU_NEW_CONNECTION);
-
        newConnectionMenuItem.setOnAction((ActionEvent t) -> newConn());
-
        // Disable context menu New Connection if ConnFile object state is broken or encrypted
-       newConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
-               getState().equals(ConnFileState.BROKEN) || getState().equals(ConnFileState.ENCRYPTED), state));
+       newConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> isBroken() || isEncrypted(), state));
        // ###################################################################
 
        // ### Enter password Menu
        MenuItem enterPasswordMenuItem = new MenuItem(MENU_ENTER_PASSWORD);
-
-       enterPasswordMenuItem.setOnAction((ActionEvent t) -> {
-           if (getRootLayoutController().decryptConnFile(this)) {
-               getRootLayoutController().populateSubunit(this, getRootLayoutController().loadConnDataFromConnFile(this));
-           }
-       });
-
+       enterPasswordMenuItem.setOnAction((ActionEvent t) -> enterPassword());
        // Disable context menu Enter password if ConnFile object state is not encrypted
-       enterPasswordMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
-               !getState().equals(ConnFileState.ENCRYPTED), state));
+       enterPasswordMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> !isEncrypted(), state));
        // ###################################################################
 
        // ### Close File Menu
        MenuItem closeFileMenuItem = new MenuItem(MENU_CLOSE_FILE);
-
-       closeFileMenuItem.setOnAction((ActionEvent t) -> {
-            //System.out.println("Close file on:" + this.getName());
-            this.getParent().closeConnFile(this);
-       });
+       closeFileMenuItem.setOnAction((ActionEvent t) -> closeConnFile());
        // ###################################################################
-
-       SeparatorMenuItem separatorMenuItem = new SeparatorMenuItem();
 
        contextMenu.getItems().addAll(openFileMenuItem,
                newConnectionMenuItem,
                enterPasswordMenuItem,
-               separatorMenuItem,
+               new SeparatorMenuItem(),
                closeFileMenuItem);
 
        this.setMenu(contextMenu);
@@ -196,12 +177,64 @@ public class ConnFile extends ConnUnit<Conn> {
     // ### Methods #####################################################################
 
     /**
+     * Test BROKEN state
+     * @return true on BROKEN state, false otherwise
+     */
+    public boolean isBroken() {
+        return state.getValue().equals(ConnFileState.BROKEN);
+    }
+
+    /**
+     * Test CLEAR state
+     * @return true on CLEAR state, false otherwise
+     */
+    public boolean isClear() {
+        return state.getValue().equals(ConnFileState.CLEAR);
+    }
+
+    /**
+     * Test ENCRYPTED state
+     * @return true on ENCRYPTED state, false otherwise
+     */
+    public boolean isEncrypted() {
+        return state.getValue().equals(ConnFileState.ENCRYPTED);
+    }
+
+    /**
+     * Test DECRYPTED state
+     * @return true on DECRYPTED state, false otherwise
+     */
+    public boolean isDecrypted() {
+        return state.getValue().equals(ConnFileState.DECRYPTED);
+    }
+
+    /**
      * Open broken state ConnFile object (file).
-     * The broken state of object on which this method is called
-     * is guaranteed by the disable property of the related contextual menu (Open File).
      */
     private void openBrokenConnFile() {
-        rootLayoutController.connFileOpen(this);
+        /*
+        To be safe, the state is checked even it should be guaranteed
+        by the method caller (in this case, the disable property
+        of the related contextual menu (Open File)).
+         */
+        if (isBroken()) rootLayoutController.openBrokenConnFile(this);
+    }
+
+    /**
+     * Enter password
+     */
+    private void enterPassword() {
+        if (getRootLayoutController().decryptConnFile(this)) {
+            getRootLayoutController().populateSubunit(this, getRootLayoutController().loadConnDataFromConnFile(this));
+        }
+    }
+
+    /**
+     * Close ConnFile
+     */
+    private void closeConnFile() {
+        //System.out.println("Close file on:" + this.getName());
+        this.getParent().closeConnFile(this);
     }
 
     /**

@@ -234,7 +234,7 @@ public class RootLayoutController {
                 //TreeItem<?> item = connectionTreeView.getSelectionModel().getSelectedItem();
                 ConnFile connFile = (ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue();
 
-                if (connFile.getState().equals(ConnFileState.ENCRYPTED) && decryptConnFile(connFile)) {
+                if (connFile.isEncrypted() && decryptConnFile(connFile)) {
                     populateSubunit(connFile, loadConnDataFromConnFile(connFile));
                 }
             }
@@ -259,8 +259,8 @@ public class RootLayoutController {
 
                 // ### File - Server Connection - New: Disable if the Network treeView
                 // selected item is not a clear or decrypted ConnFile object
-                if (((ConnFile) newValue.getValue()).getState().equals(ConnFileState.CLEAR) ||
-                        ((ConnFile) newValue.getValue()).getState().equals(ConnFileState.DECRYPTED)) {
+                if (((ConnFile) newValue.getValue()).isClear() ||
+                        ((ConnFile) newValue.getValue()).isDecrypted()) {
                     newServerConnectionMenuItem.setDisable(false);
 
                     // debug mode
@@ -277,7 +277,7 @@ public class RootLayoutController {
 
                 // ### File - Enter Password: Disable if the Network treeView
                 // selected item is not an encrypted ConnFile object
-                if (((ConnFile) newValue.getValue()).getState().equals(ConnFileState.ENCRYPTED)) {
+                if (((ConnFile) newValue.getValue()).isEncrypted()) {
                     fileEnterPasswordMenuItem.setDisable(false);
                 } else {
                     fileEnterPasswordMenuItem.setDisable(true);
@@ -316,8 +316,8 @@ public class RootLayoutController {
                         connectionTreeView.getSelectionModel().getSelectedItem() == null ||
                                 !(connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile) ||
                                 (connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile &&
-                                        (((ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue()).getState().equals(ConnFileState.BROKEN) ||
-                                                ((ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue()).getState().equals(ConnFileState.ENCRYPTED))),
+                                        (((ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue()).isBroken() ||
+                                                ((ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue()).isEncrypted())),
                 connectionTreeView.getSelectionModel().selectedItemProperty()));
         */
 
@@ -348,17 +348,104 @@ public class RootLayoutController {
      */
     @FXML
     private void handleFileOpen() {
-        connFileOpen(null);
+        ConnFile connFile = getSelectedConnFile();
+        if (connFile != null && connFile.isBroken()) openBrokenConnFile(connFile);
+        else openConnFile(null);
     }
 
     /**
-     * ConnFile object open process.
-     *
-     * @param connFile A null value means called from tool bar menu.
-     *                 A not null value means called from contextual menu
-     *                 with broken state ConnFile object right selected.
+     * Open broken state ConnFile object (file)
+     * @param connFile
      */
-    public void connFileOpen(ConnFile connFile) {
+    public void openBrokenConnFile(ConnFile connFile) {
+        if (connFile != null && connFile.isBroken()) {
+
+            File file = getXmlFile();
+
+            if (file != null) {
+
+                // ### Process ###
+
+                // Chosen file differ from connFile and is already present (whatever the state)
+                // -> Alert already present and nothing else!
+
+                // Chosen file differ from connFile and is not present
+                // connFile update name, fileName (path), state
+                // -> Open
+
+                // Chosen file name == connFile.name
+                // connFile update fileName (path), state
+                // -> Open
+
+                // ###############
+
+                // ### Implementation ###
+
+                // name without extension
+                String name = file.getName().substring(0, file.getName().indexOf("."));
+                // file name (path)
+                String fileName = file.getAbsolutePath();
+
+                if (!name.equals(connFile.getName()) && (getConnFile(name) != null)) alertAlreadyPresent(getConnFile(name));
+                else {
+                    // update and open (treat..)
+                    connFile.setName(name);
+                    connFile.setFileName(fileName);
+                    connFile.setState(ConnFileState.CLEAR);
+
+                    treatSubUnit(connFile, true);
+                }
+
+                // ######################
+
+            }
+        }
+    }
+
+    /**
+     * Open file chooser on primary stage with xml file type filter
+     * @return File or null
+     */
+    private File getXmlFile() {
+        //TODO put in "Thread" like, when the fileChooser close, the UI is frozen for a while (depends of machine)
+        FileChooser fileChooser = new FileChooser();
+        // Set extension filter
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
+        fileChooser.getExtensionFilters().add(extFilter);
+        // Show open file dialog
+        return fileChooser.showOpenDialog(MainApp.primaryStage);
+    }
+
+    /**
+     * Alert ConnFile already present in treeView.
+     * @param connFile
+     */
+    private void alertAlreadyPresent(ConnFile connFile) {
+        provideAlert(Alert.AlertType.INFORMATION,
+                ALINF_FILE_ALREADY_PRESENT_TITLE,
+                ALINF_FILE_ALREADY_PRESENT_HEADER,
+                ALINF_FILE_ALREADY_PRESENT_CONTENT + connFile.getFileName(), true);
+    }
+
+    /**
+     * Open ConnFile object.
+     *
+     * @param connFile
+     */
+    public void openConnFile(ConnFile connFile) {
+
+        System.out.println("Open ConnFile..");
+
+        if (getSelectedConnFile().isBroken()) {
+            System.out.println("is broken");
+        }
+        else  {
+            System.out.println("nothing");
+            System.out.println(getSelectedConnFile().getState());
+        }
+
+        /*
+
         //TODO put in "Thread" like, when the fileChooser close, the UI is frozen for a while (depends of machine)
         //TODO treat case where ConnFile object comes from contextual menu and the user choice (through fileChooser)
         //is a Network treeView already present ConnFile object.
@@ -389,7 +476,7 @@ public class RootLayoutController {
                     // new entry
                 } else {
 
-                    if (connFileAlreadyPresent.getState().equals(ConnFileState.BROKEN)) {
+                    if (connFileAlreadyPresent.isBroken()) {
                         // open
                     } else {
                         // Alert already present
@@ -404,9 +491,9 @@ public class RootLayoutController {
                     // means chosen file differ from selected one
                     // open and rename
                 } else {
-
-                    if (connFileAlreadyPresent.getState().equals(ConnFileState.BROKEN)) {
-                        // ???
+                    // means this is the one given by parameter
+                    if (connFileAlreadyPresent.isBroken()) {
+                        // open
                     } else {
                         // ???
                     }
@@ -433,7 +520,7 @@ public class RootLayoutController {
                 network.getSubUnits().add(connFile);
                 treatSubUnit(connFile, true);
             } else {
-                if (connFile.getState().equals(ConnFileState.BROKEN)) {
+                if (connFile.isBroken()) {
                     // At this stage, the connFile instance is either provided by parameter or by return of method getConnFile(),
                     // and is not already open but present in Network treeView with broken status.
 
@@ -458,6 +545,8 @@ public class RootLayoutController {
                 }
             }
         }
+
+        */
     }
 
     /**
@@ -654,7 +743,7 @@ public class RootLayoutController {
        // ### 5. Iterate through network subunits (ConnFile objects) to treat and populate
        // Conn objects list.
        if (!network.getSubUnits().isEmpty()) network.getSubUnits().forEach((subUnit) -> {
-           if (!subUnit.getState().equals(ConnFileState.BROKEN)) treatSubUnit(subUnit, false);
+           if (!subUnit.isBroken()) treatSubUnit(subUnit, false);
        });
        // #########################################################################
 
@@ -699,7 +788,7 @@ public class RootLayoutController {
                         }
                         */
 
-            if (subUnit.getState().equals(ConnFileState.CLEAR) || subUnit.getState().equals(ConnFileState.DECRYPTED)) {
+            if (subUnit.isClear() || subUnit.isDecrypted()) {
                 populateSubunit(subUnit, listConn);
             }
         }
