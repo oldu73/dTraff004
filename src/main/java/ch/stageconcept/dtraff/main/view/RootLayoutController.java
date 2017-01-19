@@ -19,7 +19,6 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.ListChangeListener;
 import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -147,7 +146,8 @@ public class RootLayoutController {
      */
     public void subInitialize() {
 
-        if (Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen()) {
+        if (Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen() ||
+                Pref.INSTANCE.isErrorLoadingDataFromFilePopUpAtStartOrOnOpen()) {
             // Text animation
             // SRC: http://stackoverflow.com/questions/33646317/typing-animation-on-a-text-with-javafx
             // Initializing
@@ -174,7 +174,8 @@ public class RootLayoutController {
 
         anteInitializeCore();
 
-        if (Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen()) {
+        if (Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen() ||
+                Pref.INSTANCE.isErrorLoadingDataFromFilePopUpAtStartOrOnOpen()) {
             // Fade out Initialization label (main window background).
             FadeTransition fadeOut = new FadeTransition(Duration.millis(1000));
             fadeOut.setNode(initializingLabel);
@@ -641,7 +642,7 @@ public class RootLayoutController {
                    File file = new File(fileName);
 
                    if(!file.exists() || file.isDirectory()) {
-                       connFile.setState(ConnFileState.BROKEN);
+                       setBrokenAndAlertLoadData(connFile, file);
                    }
 
                    connFile.setParent(network);
@@ -824,15 +825,29 @@ public class RootLayoutController {
             return wrapper.getConns();
 
         } catch (Exception e) { // catches ANY exception
+            setBrokenAndAlertLoadData(connFile, file);
+        }
+
+        return null;
+    }
+
+    /**
+     * Set broken state to connFile parameter
+     * and popup Error to load data on specified file.
+     *
+     * @param connFile
+     * @param file
+     */
+    private void setBrokenAndAlertLoadData(ConnFile connFile, File file) {
+
+        connFile.setState(ConnFileState.BROKEN);
+
+        if (Pref.INSTANCE.isErrorLoadingDataFromFilePopUpAtStartOrOnOpen()) {
             provideAlert(Alert.AlertType.ERROR,
                     ALERR_LOAD_DATA_TITLE,
                     ALERR_LOAD_DATA_HEADER,
                     ALERR_LOAD_DATA_CONTENT + file.getPath(), true);
-
-            connFile.setState(ConnFileState.BROKEN);
         }
-
-        return null;
     }
 
     /**

@@ -13,12 +13,12 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ch.stageconcept.dtraff.preference.view.PrefDialogController">
    <children>
-      <ButtonBar layoutX="186.0" layoutY="546.0" prefHeight="40.0" prefWidth="200.0" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0">
-        <buttons>
-          <Button fx:id="okButton" mnemonicParsing="false" onAction="#handleOk" text="OK" />
-            <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#handleCancel" text="Cancel" />
-        </buttons>
-      </ButtonBar>
+      <Label layoutX="14.0" layoutY="14.0" text="Start" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0">
+         <font>
+            <Font name="System Bold Italic" size="12.0" />
+         </font>
+      </Label>
+      <Separator layoutX="14.0" layoutY="31.0" prefWidth="200.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" />
       <GridPane layoutX="6.0" layoutY="31.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" maxWidth="301.0" minWidth="10.0" prefWidth="275.0" />
@@ -26,22 +26,25 @@
         </columnConstraints>
         <rowConstraints>
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
           <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
             <Label text="Splash screen" />
             <CheckBox fx:id="splashScreenCheckBox" mnemonicParsing="false" GridPane.columnIndex="1" />
-            <Label text="Enter encrypted connection file password at start&#10;or on open" GridPane.rowIndex="1" />
-            <CheckBox fx:id="decryptConnFilePassAtStartOrOnOpenCheckBox" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Label text="Error loading data from file popup at start&#10;or on open" GridPane.rowIndex="1" />
+            <CheckBox fx:id="errorLoadingDataFromFilePopUpAtStartOrOnOpenCheckBox" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Label text="Enter encrypted connection file password at start&#10;or on open" GridPane.rowIndex="2" />
+            <CheckBox fx:id="decryptConnFilePassAtStartOrOnOpenCheckBox" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
          </children>
       </GridPane>
-      <Separator layoutX="14.0" layoutY="31.0" prefWidth="200.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" />
-      <Separator layoutX="7.0" layoutY="131.0" prefWidth="200.0" AnchorPane.leftAnchor="7.0" AnchorPane.rightAnchor="21.0" />
-      <Label layoutX="14.0" layoutY="14.0" text="Start" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0">
-         <font>
-            <Font name="System Bold Italic" size="12.0" />
-         </font>
-      </Label>
+      <Separator layoutX="7.0" layoutY="171.0" prefWidth="200.0" AnchorPane.leftAnchor="7.0" AnchorPane.rightAnchor="21.0" />
+      <ButtonBar layoutX="186.0" layoutY="546.0" prefHeight="40.0" prefWidth="200.0" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0">
+        <buttons>
+          <Button fx:id="okButton" mnemonicParsing="false" onAction="#handleOk" text="OK" />
+            <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#handleCancel" text="Cancel" />
+        </buttons>
+      </ButtonBar>
    </children>
 </AnchorPane>

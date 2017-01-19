@@ -70,7 +70,7 @@ public class MainApp extends Application {
 
         primaryStage.setScene(scene);
 
-        if (!Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen()) {
+        if (!Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen() && !Pref.INSTANCE.isErrorLoadingDataFromFilePopUpAtStartOrOnOpen()) {
             controller.getRootBorderPane().getChildren().remove(controller.getInitializingLabel());
         }
 

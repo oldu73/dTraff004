@@ -17,6 +17,9 @@ public class PrefDialogController {
     private CheckBox splashScreenCheckBox;
 
     @FXML
+    private CheckBox errorLoadingDataFromFilePopUpAtStartOrOnOpenCheckBox;
+
+    @FXML
     private CheckBox decryptConnFilePassAtStartOrOnOpenCheckBox;
 
     @FXML
@@ -36,6 +39,7 @@ public class PrefDialogController {
     private void initialize() {
 
         splashScreenCheckBox.setSelected(Pref.INSTANCE.isSplashScreen());
+        errorLoadingDataFromFilePopUpAtStartOrOnOpenCheckBox.setSelected(Pref.INSTANCE.isErrorLoadingDataFromFilePopUpAtStartOrOnOpen());
         decryptConnFilePassAtStartOrOnOpenCheckBox.setSelected(Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen());
 
     }
@@ -66,6 +70,7 @@ public class PrefDialogController {
         okClicked = true;
 
         Pref.INSTANCE.setSplashScreen(splashScreenCheckBox.isSelected());
+        Pref.INSTANCE.setErrorLoadingDataFromFilePopUpAtStartOrOnOpen(errorLoadingDataFromFilePopUpAtStartOrOnOpenCheckBox.isSelected());
         Pref.INSTANCE.setDecryptConnFilePassAtStartOrOnOpen(decryptConnFilePassAtStartOrOnOpenCheckBox.isSelected());
 
         dialogStage.close();

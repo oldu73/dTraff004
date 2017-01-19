@@ -16,6 +16,7 @@ public enum Pref {
 
     // Preferences
     private boolean splashScreen;
+    private boolean errorLoadingDataFromFilePopUpAtStartOrOnOpen;
     private boolean decryptConnFilePassAtStartOrOnOpen;
 
     /**
@@ -26,6 +27,7 @@ public enum Pref {
 
         // Preferences
         splashScreen = pref.getBoolean("splashScreen", true);
+        errorLoadingDataFromFilePopUpAtStartOrOnOpen = pref.getBoolean("errorLoadingDataFromFilePopUpAtStartOrOnOpen", true);
         decryptConnFilePassAtStartOrOnOpen = pref.getBoolean("decryptConnFilePassAtStartOrOnOpen", false);
 
         // #########################################################################
@@ -45,6 +47,16 @@ public enum Pref {
         this.splashScreen = splashScreen;
         // Store value in preferences
         pref.putBoolean("splashScreen", splashScreen);
+    }
+
+    public boolean isErrorLoadingDataFromFilePopUpAtStartOrOnOpen() {
+        return errorLoadingDataFromFilePopUpAtStartOrOnOpen;
+    }
+
+    public void setErrorLoadingDataFromFilePopUpAtStartOrOnOpen(boolean errorLoadingDataFromFilePopUpAtStartOrOnOpen) {
+        this.errorLoadingDataFromFilePopUpAtStartOrOnOpen = errorLoadingDataFromFilePopUpAtStartOrOnOpen;
+        // Store value in preferences
+        pref.putBoolean("errorLoadingDataFromFilePopUpAtStartOrOnOpen", errorLoadingDataFromFilePopUpAtStartOrOnOpen);
     }
 
     public boolean isDecryptConnFilePassAtStartOrOnOpen() {
