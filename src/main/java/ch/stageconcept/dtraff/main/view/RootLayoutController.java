@@ -124,7 +124,11 @@ public class RootLayoutController {
         return initializingLabel;
     }
 
-    // Methods
+    public TreeView<ConnUnit<?>> getConnectionTreeView() {
+        return connectionTreeView;
+    }
+
+// Methods
     // #####################################################################
 
     /**
@@ -205,14 +209,6 @@ public class RootLayoutController {
         // GITHUB: - heterogeneous-tree-example - https://github.com/james-d/heterogeneous-tree-example
         network = createNetwork();
 
-        //########################################
-
-        //TODO when debugged put those method call directly in Network constructor
-        network.sortSubUnits();
-        network.sortSubUnitsOnChangeListener();
-
-        //########################################
-
         connectionTree = new ModelTree<>(network,
                 ConnUnit::getSubUnits,
                 ConnUnit::nameProperty,
@@ -221,6 +217,10 @@ public class RootLayoutController {
                 unit -> PseudoClass.getPseudoClass(unit.getClass().getSimpleName().toLowerCase()));
 
         connectionTreeView = connectionTree.getTreeView();
+
+        network.sortSubUnitsOnChangeListener();
+        // Initial sort
+        network.sortSubUnits();
 
         // CSS pseudo class treeView style.
         // !WARNING! In order to use file that reside in resources folder, don’t forget to add a slash before file name!
@@ -411,6 +411,10 @@ public class RootLayoutController {
 
                     treatSubUnit(connFile, true);
                 }
+
+                // Network treeView entry modification in place, so no list change triggered
+                // therefore the sort method should be called "manually".
+                network.sortSubUnits();
 
                 // ######################
 

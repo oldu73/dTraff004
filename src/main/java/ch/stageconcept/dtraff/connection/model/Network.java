@@ -11,6 +11,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TreeItem;
 import org.codefx.libfx.listener.handle.ListenerHandle;
 import org.codefx.libfx.listener.handle.ListenerHandles;
 
@@ -131,25 +132,69 @@ public class Network extends ConnUnit<ConnFile> {
      * Sort subUnits, alphabetical/numerical order.
      */
     public void sortSubUnits() {
+
+        // debug mode
+        /*
+        System.out.println("sort in..");
+        System.out.println("/////////");
+        getSubUnits().forEach((subUnit) -> {
+            System.out.println("subUnit1: " + subUnit);
+        });
+        System.out.println("/////////");
+        rootLayoutController.getConnectionTreeView().getRoot().getChildren().forEach((subUnit) -> {
+            System.out.println("subUnit2: " + subUnit);
+        });
+        System.out.println("/////////");
+        */
+
+        // Provided by LibFX. If omitted:
+        // - list change triggered listener which call sort method which change the list
+        // that triggered listener which call sort method... and so on, until a nice StackOverflowError exception.
+        // Workaround: - detach listener - do the job (sort list) - attach listener.
+        subUnitsListenerHandle.detach();
+
         try {
-            getSubUnits().sort((ConnFile cf1, ConnFile cf2) -> cf1.getName().compareTo(cf2.getName()));
+            //FXCollections.sort(getSubUnits(), (ConnFile cf1, ConnFile cf2) -> cf1.getName().compareTo(cf2.getName()));
+            //getSubUnits().sort((ConnFile cf1, ConnFile cf2) -> cf1.getName().compareTo(cf2.getName()));
+
+            //TODO Improve comparator: - test1, test10, test2, test3.. in the list is not so nice
+            // (because of one, one zero for test1, test10)
+
+            rootLayoutController.getConnectionTreeView().getRoot().getChildren()
+                    .sort((TreeItem<? super ConnFile> cf1, TreeItem<? super ConnFile> cf2) ->
+                            ((ConnFile)(cf1.getValue())).getName().compareTo(((ConnFile)(cf2.getValue())).getName()));
+
+            //rootLayoutController.getConnectionTreeView().refresh();
         } catch (StackOverflowError e) {
             System.err.println("The method Network.sortSubUnits() raise a StackOverflowError exception!");
         }
+
+        subUnitsListenerHandle.attach();
+
+        // debug mode
+        /*
+        System.out.println("..sort out");
+        System.out.println("/////////");
+        getSubUnits().forEach((subUnit) -> {
+            System.out.println("subUnit1: " + subUnit);
+        });
+        System.out.println("/////////");
+        rootLayoutController.getConnectionTreeView().getRoot().getChildren().forEach((subUnit) -> {
+            System.out.println("subUnit2: " + subUnit);
+        });
+        System.out.println("/////////");
+        */
     }
 
     /**
      * Sort subUnits on list change.
+     *
+     * SRC: https://www.javacodegeeks.com/2015/01/dont-remove-listeners-use-listenerhandles.html
+     * SRC: http://libfx.codefx.org/
+     * SRC: https://github.com/CodeFX-org/LibFX/wiki/ListenerHandle
+     * SRC: http://java.developpez.com/faq/javafx/?page=Collections-observables
      */
     public void sortSubUnitsOnChangeListener() {
-
-        //TODO Post a 2slash.ch article on methodology once working
-
-        //TODO check intensively open/close file, it have now suspect behavior
-
-        // SRC: https://www.javacodegeeks.com/2015/01/dont-remove-listeners-use-listenerhandles.html
-        // SRC: http://libfx.codefx.org/
-        // SRC: https://github.com/CodeFX-org/LibFX/wiki/ListenerHandle
 
         /*
         ChangeListener<? extends ObservableList<ConnFile>> listener = (ChangeListener<ObservableList<ConnFile>>) (observable, oldValue, newValue) -> {
@@ -159,21 +204,25 @@ public class Network extends ConnUnit<ConnFile> {
         */
 
         ListChangeListener<? super ConnFile> listener = (ListChangeListener<ConnFile>) (change) -> {
-            System.out.println(change);
-            //myFunc();
+            // debug mode
+            //System.out.println("\n" + change + "\n");
+            sortSubUnits();
         };
 
-        //getSubUnits().addListener(listener);
-
-        // this immediately adds the listener to the property
+        // LibFX way, enable to attach/detach listener on property
+        // which is useful in sort method (cf. sortSubUnits() method for more documentation)
+        // This immediately adds the listener to the property
         subUnitsListenerHandle = ListenerHandles.createAttached(getSubUnits(), listener);
 
-
+        // Standard way
         /*
-        // SRC: http://java.developpez.com/faq/javafx/?page=Collections-observables
+        getSubUnits().addListener(listener);
+
+        // or
+
         getSubUnits().addListener((ListChangeListener.Change<? extends ConnFile> change) -> {
             // debug mode
-            System.out.println(change);
+            //System.out.println(change);
             sortSubUnits();
         });
         */
