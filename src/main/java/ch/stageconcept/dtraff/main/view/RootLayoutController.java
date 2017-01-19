@@ -1,18 +1,25 @@
 package ch.stageconcept.dtraff.main.view;
 
 import ch.stageconcept.dtraff.connection.model.*;
-import ch.stageconcept.dtraff.connection.util.*;
+import ch.stageconcept.dtraff.connection.util.ConnFileState;
+import ch.stageconcept.dtraff.connection.util.ConnListWrapper;
+import ch.stageconcept.dtraff.connection.util.Crypto;
+import ch.stageconcept.dtraff.connection.util.PasswordDialog;
 import ch.stageconcept.dtraff.connection.view.ModelTree;
 import ch.stageconcept.dtraff.main.MainApp;
 import ch.stageconcept.dtraff.preference.model.Pref;
 import ch.stageconcept.dtraff.preference.util.PrefEditor;
 import ch.stageconcept.dtraff.xrelease.Release;
-import javafx.animation.*;
+import javafx.animation.Animation;
+import javafx.animation.FadeTransition;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ListChangeListener;
 import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -197,6 +204,14 @@ public class RootLayoutController {
         // ANSWER FROM: James_D
         // GITHUB: - heterogeneous-tree-example - https://github.com/james-d/heterogeneous-tree-example
         network = createNetwork();
+
+        //########################################
+
+        //TODO when debugged put those method call directly in Network constructor
+        network.sortSubUnits();
+        network.sortSubUnitsOnChangeListener();
+
+        //########################################
 
         connectionTree = new ModelTree<>(network,
                 ConnUnit::getSubUnits,
