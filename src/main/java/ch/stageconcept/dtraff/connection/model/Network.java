@@ -3,8 +3,6 @@ package ch.stageconcept.dtraff.connection.model;
 import ch.stageconcept.dtraff.connection.util.ConnFileEditor;
 import ch.stageconcept.dtraff.connection.util.ConnFileState;
 import ch.stageconcept.dtraff.main.view.RootLayoutController;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -15,6 +13,8 @@ import javafx.scene.control.TreeItem;
 import org.codefx.libfx.listener.handle.ListenerHandle;
 import org.codefx.libfx.listener.handle.ListenerHandles;
 
+import java.io.File;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 /**
@@ -52,7 +52,10 @@ public class Network extends ConnUnit<ConnFile> {
     private static final String CONNFILE_DEFAULT_NAME = "default";
 
     private RootLayoutController rootLayoutController;
+
+    // User preferences (file node)
     private Preferences preferences = Preferences.userRoot().node(PREFS_PATH);
+    private String[] prefKeys = null;
 
     private ListenerHandle subUnitsListenerHandle;
 
@@ -98,6 +101,83 @@ public class Network extends ConnUnit<ConnFile> {
      */
     public RootLayoutController getRootLayoutController() {
         return rootLayoutController;
+    }
+
+    /**
+     * Create network description in a tree data structure,
+     * to be used in a treeView : Network (root node) - ConnFile - Conn - Database - (...)
+     *
+     * @return true if user interaction (through popup (relative to user preferences))
+     * may be necessary either to confirm error loading data from file or enter password
+     * for encrypted file (use case example: display of Initializing... message in center of RootLayout at start),
+     * false otherwise.
+     */
+    public boolean create() {
+        // True if popup may be raised
+        boolean askUserToAct = false;
+
+        if (isLoadPrefKeysOk()) {
+            createSubUnitsFromPrefKeys();
+            askUserToAct = !areSubUnitsFilesOk();
+
+        }
+
+        return askUserToAct;
+    }
+
+    /**
+     * Load user preferences from BackingStore
+     * to field prefKeys (String array).
+     *
+     * @return true if load is ok,
+     * false otherwise.
+     */
+    private boolean isLoadPrefKeysOk() {
+
+        if (preferences != null) {
+            try {
+                prefKeys = preferences.keys();
+                return true;
+            } catch (BackingStoreException e) {
+                //System.err.println("unable to read backing store: " + e);
+                //e.printStackTrace();
+            } catch (IllegalStateException e) {
+                //System.err.println("..., " + e);
+                //System.out.println("node has been removed!");
+                //e.printStackTrace();
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Create Network Sub Units (ConnFile)
+     * from prefKeys field.
+     */
+    private void createSubUnitsFromPrefKeys() {
+        if (prefKeys != null) {
+
+            for (String prefKey : prefKeys) {
+                ConnFile connFile = new ConnFile(prefKey);
+
+                String fileName = preferences.get(prefKey, null);
+
+                if (fileName != null) {
+                    connFile.setFileName(fileName);
+
+                    connFile.setParent(this);
+                    connFile.setRootLayoutController(rootLayoutController);
+                    getSubUnits().add(connFile);
+                }
+            }
+
+        }
+    }
+
+    private boolean areSubUnitsFilesOk() {
+
+        return false;
     }
 
     /**
