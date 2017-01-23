@@ -1,8 +1,8 @@
 package ch.stageconcept.dtraff.connection.view;
 
 import ch.stageconcept.dtraff.connection.model.ConnFile;
-import ch.stageconcept.dtraff.connection.util.*;
 import ch.stageconcept.dtraff.main.view.RootLayoutController;
+import ch.stageconcept.dtraff.util.ErrorAlert;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.DirectoryChooser;
@@ -198,7 +198,7 @@ public class ConnFileEditDialogController {
             return true;
         } else {
             // Show the error message.
-            ErrorAlert.INSTANCE.show(dialogStage, ALERR_INPUT_INVALID_TITLE, ALERR_INPUT_INVALID_HEADER, errorMessage);
+            ErrorAlert.INSTANCE.provide(dialogStage, Alert.AlertType.ERROR, ALERR_INPUT_INVALID_TITLE, ALERR_INPUT_INVALID_HEADER, errorMessage, true);
             return false;
         }
     }

@@ -4,13 +4,11 @@ import ch.stageconcept.dtraff.connection.model.Conn;
 import ch.stageconcept.dtraff.connection.util.Crypto;
 import ch.stageconcept.dtraff.connection.util.DbDescriptor;
 import ch.stageconcept.dtraff.connection.util.DbType;
-import ch.stageconcept.dtraff.connection.util.ErrorAlert;
+import ch.stageconcept.dtraff.util.ErrorAlert;
 import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx.concurrent.WorkerStateEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
@@ -362,7 +360,7 @@ public class ConnEditDialogController {
             return true;
         } else {
             // Show the error message.
-            ErrorAlert.INSTANCE.show(dialogStage, ALERT_INVALID_TITLE, ALERT_INVALID_HEADER, errorMessage);
+            ErrorAlert.INSTANCE.provide(dialogStage, Alert.AlertType.ERROR, ALERT_INVALID_TITLE, ALERT_INVALID_HEADER, errorMessage, true);
             return false;
         }
     }

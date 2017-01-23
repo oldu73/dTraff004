@@ -1,6 +1,4 @@
 
-- Could not load data alert when file is broken (in front of primary stage) at start (-> preferences)
-
 - File (directory) chooser in "Thread" like, UI stay frozen for a while when chooser close on office machine
 
 - File entry in Connections treeView on mouse over show filePath baloon (debrayable preference)
@@ -20,16 +18,7 @@ they are in an alphabetical/numerical order. So, from where comes this order?
 
 - Refactor Connections treeView by Network treeView
 
-- Use ErrorAlert everywhere (find usage of Alert) especially in RootLayoutController where provideAlert
-method has been implemented
-
-- Open file on Network contextual menu
-
 - Exception in Alert popup
-
-- Check ErrorAlert for on top of which stage popup is displayed
-
-- Evaluate IntelliJ ability to manage functional testing process (or other dedicated tool)
 
 - Home PC - JVM crash on 20170118-2128, message: Process finished with exit code 255
 - Home PC - JVM crash on 20170118-2150 (around), message: Process finished with exit code 255

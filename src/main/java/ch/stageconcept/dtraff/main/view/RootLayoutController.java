@@ -1,14 +1,12 @@
 package ch.stageconcept.dtraff.main.view;
 
 import ch.stageconcept.dtraff.connection.model.*;
-import ch.stageconcept.dtraff.connection.util.ConnFileState;
-import ch.stageconcept.dtraff.connection.util.ConnListWrapper;
-import ch.stageconcept.dtraff.connection.util.Crypto;
-import ch.stageconcept.dtraff.connection.util.PasswordDialog;
+import ch.stageconcept.dtraff.connection.util.*;
 import ch.stageconcept.dtraff.connection.view.ModelTree;
 import ch.stageconcept.dtraff.main.MainApp;
 import ch.stageconcept.dtraff.preference.model.Pref;
 import ch.stageconcept.dtraff.preference.util.PrefEditor;
+import ch.stageconcept.dtraff.util.ErrorAlert;
 import ch.stageconcept.dtraff.xrelease.Release;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
@@ -146,8 +144,12 @@ public class RootLayoutController {
      */
     public void subInitialize() {
 
-        if (Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen() ||
-                Pref.INSTANCE.isErrorLoadingDataFromFilePopUpAtStartOrOnOpen()) {
+        //TODO Initializing... message (should not appear (not clean)) if warn error loading file at start pref set but everything OK.
+
+        boolean initializingLabelAnimation = Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen() ||
+                Pref.INSTANCE.isErrorLoadingDataFromFilePopUpAtStartOrOnOpen();
+
+        if (initializingLabelAnimation) {
             // Text animation
             // SRC: http://stackoverflow.com/questions/33646317/typing-animation-on-a-text-with-javafx
             // Initializing
@@ -174,8 +176,7 @@ public class RootLayoutController {
 
         anteInitializeCore();
 
-        if (Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen() ||
-                Pref.INSTANCE.isErrorLoadingDataFromFilePopUpAtStartOrOnOpen()) {
+        if (initializingLabelAnimation) {
             // Fade out Initialization label (main window background).
             FadeTransition fadeOut = new FadeTransition(Duration.millis(1000));
             fadeOut.setNode(initializingLabel);
@@ -442,7 +443,8 @@ public class RootLayoutController {
      * @param connFile
      */
     private void alertAlreadyPresent(ConnFile connFile) {
-        provideAlert(Alert.AlertType.INFORMATION,
+        ErrorAlert.INSTANCE.provide(MainApp.primaryStage,
+                Alert.AlertType.INFORMATION,
                 ALINF_FILE_ALREADY_PRESENT_TITLE,
                 ALINF_FILE_ALREADY_PRESENT_HEADER,
                 ALINF_FILE_ALREADY_PRESENT_CONTENT + connFile.getFileName(), true);
@@ -550,7 +552,8 @@ public class RootLayoutController {
      */
     @FXML
     private void handleAbout() {
-        provideAlert(Alert.AlertType.INFORMATION,
+        ErrorAlert.INSTANCE.provide(MainApp.primaryStage,
+                Alert.AlertType.INFORMATION,
                 ALINF_ABOUT_TITLE,
                 ALINF_ABOUT_HEADER,
                 ALINF_ABOUT_CONTENT, true);
@@ -791,13 +794,13 @@ public class RootLayoutController {
         }
     }
 
-/**
- * Loads connections (Conn) data from the specified ConnFile,
- * unmarshaled with JAXB.
- *
- * @param connFile
- * @return List of Conn objects
- */
+    /**
+     * Loads connections (Conn) data from the specified ConnFile,
+     * unmarshaled with JAXB.
+     *
+     * @param connFile
+     * @return List of Conn objects
+     */
     public List<Conn> loadConnDataFromConnFile(ConnFile connFile) {
         File file = new java.io.File(connFile.getFileName());
 
@@ -843,7 +846,8 @@ public class RootLayoutController {
         connFile.setState(ConnFileState.BROKEN);
 
         if (Pref.INSTANCE.isErrorLoadingDataFromFilePopUpAtStartOrOnOpen()) {
-            provideAlert(Alert.AlertType.ERROR,
+            ErrorAlert.INSTANCE.provide(MainApp.primaryStage,
+                    Alert.AlertType.ERROR,
                     ALERR_LOAD_DATA_TITLE,
                     ALERR_LOAD_DATA_HEADER,
                     ALERR_LOAD_DATA_CONTENT + file.getPath(), true);
@@ -906,7 +910,8 @@ public class RootLayoutController {
 
                     //e.printStackTrace();
 
-                    Alert alert = provideAlert(Alert.AlertType.CONFIRMATION,
+                    Alert alert = ErrorAlert.INSTANCE.provide(MainApp.primaryStage,
+                            Alert.AlertType.CONFIRMATION,
                             ALCNF_BAD_PASSWORD_TITLE,
                             ALCNF_BAD_PASSWORD_HEADER,
                             ALCNF_BAD_PASSWORD_CONTENT, false);
@@ -929,28 +934,6 @@ public class RootLayoutController {
         } while (tryAgain);
 
         return null;
-    }
-
-    /**
-     * Provide alert dialog with optional showAndWait possibility.
-     * Return Alert object in case of outside method behavior management needs.
-     *
-     * @param alertType
-     * @param title
-     * @param header
-     * @param content
-     * @param showAndWait
-     * @return alert Alert object
-     */
-    private Alert provideAlert(Alert.AlertType alertType, String title, String header, String content, boolean showAndWait) {
-        Alert alert = new Alert(alertType);
-
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
-
-        if (showAndWait) alert.showAndWait();
-        return alert;
     }
 
     /**
