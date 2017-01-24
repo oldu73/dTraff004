@@ -9,65 +9,60 @@ import java.util.prefs.Preferences;
  */
 public enum Pref {
 
-    //TODO Refactor by removing INSTANCE but let semicolon, method should be static after that.
-    // Check other enum as well to check if INSTANCE is really necessary!
-    INSTANCE;
+    //TODO Check other enum if INSTANCE (let semicolon) is really necessary!
+    ;
 
     public static final String PREFS_PATH = "/ch/stageconcept/datatraffic/pref";
-    private Preferences pref;
+    private static Preferences pref = Preferences.userRoot().node(PREFS_PATH);
 
     // Preferences
-    private boolean splashScreen;
-    private boolean errorLoadingDataFromFilePopUpAtStartOrOnOpen;
-    private boolean decryptConnFilePassAtStartOrOnOpen;
+    private static boolean splashScreen = pref.getBoolean("splashScreen", true);
+    private static boolean errorLoadingFilePopUpAtStartOrOnOpen = pref.getBoolean("errorLoadingFilePopUpAtStartOrOnOpen", true);
+    private static boolean decryptFilePassPopUpAtStartOrOnOpen = pref.getBoolean("decryptFilePassPopUpAtStartOrOnOpen", false);
 
     /**
      * Constructor.
      */
     Pref() {
-        pref = Preferences.userRoot().node(PREFS_PATH);
-
-        // Preferences
-        splashScreen = pref.getBoolean("splashScreen", true);
-        errorLoadingDataFromFilePopUpAtStartOrOnOpen = pref.getBoolean("errorLoadingDataFromFilePopUpAtStartOrOnOpen", true);
-        decryptConnFilePassAtStartOrOnOpen = pref.getBoolean("decryptConnFilePassAtStartOrOnOpen", false);
-
-        // #########################################################################
-
         // debug mode
         //System.out.println("Pref instantiated..");
     }
 
+    // #####################################################################
+
     // Getters and Setters
     // #####################################################################
 
-    public boolean isSplashScreen() {
+    public static boolean isSplashScreen() {
         return splashScreen;
     }
 
-    public void setSplashScreen(boolean splashScreen) {
-        this.splashScreen = splashScreen;
+    public static void setSplashScreen(boolean splashScreenParam) {
+        splashScreen = splashScreenParam;
         // Store value in preferences
         pref.putBoolean("splashScreen", splashScreen);
     }
 
-    public boolean isErrorLoadingDataFromFilePopUpAtStartOrOnOpen() {
-        return errorLoadingDataFromFilePopUpAtStartOrOnOpen;
+    public static boolean isErrorLoadingFilePopUpAtStartOrOnOpen() {
+        return errorLoadingFilePopUpAtStartOrOnOpen;
     }
 
-    public void setErrorLoadingDataFromFilePopUpAtStartOrOnOpen(boolean errorLoadingDataFromFilePopUpAtStartOrOnOpen) {
-        this.errorLoadingDataFromFilePopUpAtStartOrOnOpen = errorLoadingDataFromFilePopUpAtStartOrOnOpen;
+    public static void setErrorLoadingFilePopUpAtStartOrOnOpen(boolean errorLoadingDataFromFilePopUpAtStartOrOnOpenParam) {
+        errorLoadingFilePopUpAtStartOrOnOpen = errorLoadingDataFromFilePopUpAtStartOrOnOpenParam;
         // Store value in preferences
-        pref.putBoolean("errorLoadingDataFromFilePopUpAtStartOrOnOpen", errorLoadingDataFromFilePopUpAtStartOrOnOpen);
+        pref.putBoolean("errorLoadingFilePopUpAtStartOrOnOpen", errorLoadingFilePopUpAtStartOrOnOpen);
     }
 
-    public boolean isDecryptConnFilePassAtStartOrOnOpen() {
-        return decryptConnFilePassAtStartOrOnOpen;
+    public static boolean isDecryptFilePassPopUpAtStartOrOnOpen() {
+        return decryptFilePassPopUpAtStartOrOnOpen;
     }
 
-    public void setDecryptConnFilePassAtStartOrOnOpen(boolean decryptConnFilePassAtStartOrOnOpen) {
-        this.decryptConnFilePassAtStartOrOnOpen = decryptConnFilePassAtStartOrOnOpen;
+    public static void setDecryptFilePassPopUpAtStartOrOnOpen(boolean decryptConnFilePassAtStartOrOnOpenParam) {
+        decryptFilePassPopUpAtStartOrOnOpen = decryptConnFilePassAtStartOrOnOpenParam;
         // Store value in preferences
-        pref.putBoolean("decryptConnFilePassAtStartOrOnOpen", decryptConnFilePassAtStartOrOnOpen);
+        pref.putBoolean("decryptFilePassPopUpAtStartOrOnOpen", decryptFilePassPopUpAtStartOrOnOpen);
     }
+
+    // #####################################################################
+
 }

@@ -4,10 +4,13 @@ import ch.stageconcept.dtraff.connection.util.ConnFileEditor;
 import ch.stageconcept.dtraff.connection.util.ConnFileState;
 import ch.stageconcept.dtraff.connection.util.ConnListWrapper;
 import ch.stageconcept.dtraff.main.view.RootLayoutController;
+import ch.stageconcept.dtraff.preference.model.Pref;
+import ch.stageconcept.dtraff.util.AlertDialog;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
@@ -21,6 +24,7 @@ import java.io.File;
 import java.util.List;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 /**
  * Root class for Network.
@@ -57,6 +61,11 @@ public class Network extends ConnUnit<ConnFile> {
     private static final String MENU_NEW_FILE = "New File";
     private static final String MENU_OPEN_FILE = ConnFile.MENU_OPEN_FILE;
     private static final String CONNFILE_DEFAULT_NAME = "default";
+
+    // Alerts statics texts
+    private static final String ALERR_LOAD_DATA_TITLE = "Error";
+    private static final String ALERR_LOAD_DATA_HEADER = "Could not load data";
+    private static final String ALERR_LOAD_DATA_CONTENT = "Could not load data from file(s):\n";
 
     private Stage stage;
     private RootLayoutController rootLayoutController;
@@ -154,12 +163,18 @@ public class Network extends ConnUnit<ConnFile> {
         createSubUnitsFromPrefKeys();
 
         if (!subUnits.isEmpty()) {
+
             checkSubUnitsBrokenFiles();
+            if (hasSubUnitBroken() && Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) alertLoadFiles();
+
             checkSubUnitsEncryptedFiles();
+
+            //...
 
         }
 
         return askUserToAct;
+
     }
 
     /**
@@ -220,6 +235,73 @@ public class Network extends ConnUnit<ConnFile> {
     }
 
     /**
+     * Iterate through Sub Units (ConnFiles) to check if at least one is at BROKEN state.
+     * SRC: http://www.concretepage.com/java/jdk-8/java-8-stream-allmatch-anymatch-nonematch-example
+     *
+     * @return true if subUnits field contains at least one BROKEN state ConnFile instance,
+     * false otherwise.
+     */
+    private boolean hasSubUnitBroken() {
+
+        // long
+        /*
+        Predicate<ConnFile> predicate = connFile -> connFile.isBroken();
+        boolean found = subUnits.stream().anyMatch(predicate);
+        return found;
+        */
+
+        // short
+        return subUnits.stream().anyMatch(connFile -> connFile.isBroken());
+    }
+
+    /**
+     * Get Broken Sub Units (ConnFiles).
+     * SRC: http://stackoverflow.com/questions/39950785/java-8-stream-sorting-list-of-string
+     *
+     * @return subUnits field sub list
+     * of BROKEN state ConnFile instances.
+     */
+    private List<ConnFile> getBrokenSubUnits() {
+        return subUnits
+                .stream()
+                .sorted((connFile1, connFile2) -> connFile1.getName().compareTo(connFile2.getName()))
+                .filter(connFile -> connFile.isBroken())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get names and file names (path) from ConnFile instances list
+     * given by parameter to format them in a string output.
+     * Name, file name represent an entry separated by a space, a hyphen and a space
+     * and each entry is separated by a new line.
+     *
+     * SRC: https://ivarconr.wordpress.com/2013/11/20/java-8-joining-strings-with-stream-api/
+     *
+     * @param subUnits
+     * @return string in format name - fileName (path) \n
+     */
+    private String getNamesAndFileNames(List<ConnFile> subUnits) {
+        return subUnits
+                .stream()
+                .map(connFile -> connFile.getName() + " - " + connFile.getFileName())
+                .collect(Collectors.joining("\n"));
+    }
+
+    /**
+     * Alert popup dialog to inform user
+     * with broken files.
+     */
+    private void alertLoadFiles() {
+
+        AlertDialog.provide(stage,
+                Alert.AlertType.ERROR,
+                ALERR_LOAD_DATA_TITLE,
+                ALERR_LOAD_DATA_HEADER,
+                ALERR_LOAD_DATA_CONTENT + getNamesAndFileNames(getBrokenSubUnits()), true);
+
+    }
+
+    /**
      * Iterate through Sub Units (ConnFiles) to check if corresponding OS file is encrypted
      * (has an encrypted password field) if so, set ConnFile instance state to ENCRYPTED.
      */
@@ -239,13 +321,23 @@ public class Network extends ConnUnit<ConnFile> {
     }
 
     /**
+     * Iterate through Sub Units (ConnFiles) to check if at least one is at ENCRYPTED state.
+     *
+     * @return true if subUnits field contains at least one ENCRYPTED state ConnFile instance,
+     * false otherwise.
+     */
+    private boolean hasSubUnitEncrypted() {
+        return subUnits.stream().anyMatch(connFile -> connFile.isEncrypted());
+    }
+
+    /**
      * Loads connections (Conn) data from the specified ConnFile
      * instance parameter, unmarshaled with JAXB.
      *
      * @param connFile
      * @return List of Conn instances
      */
-    public List<Conn> loadConnFromConnFile(ConnFile connFile) {
+    private List<Conn> loadConnFromConnFile(ConnFile connFile) {
 
         File file = new java.io.File(connFile.getFileName());
 

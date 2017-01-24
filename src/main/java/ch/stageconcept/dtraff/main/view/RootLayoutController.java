@@ -146,8 +146,8 @@ public class RootLayoutController {
 
         //TODO Initializing... message (should not appear (not clean)) if warn error loading file at start pref set but everything OK.
 
-        boolean initializingLabelAnimation = Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen() ||
-                Pref.INSTANCE.isErrorLoadingDataFromFilePopUpAtStartOrOnOpen();
+        boolean initializingLabelAnimation = Pref.isDecryptFilePassPopUpAtStartOrOnOpen() ||
+                Pref.isErrorLoadingFilePopUpAtStartOrOnOpen();
 
         if (initializingLabelAnimation) {
             // Text animation
@@ -696,7 +696,7 @@ public class RootLayoutController {
             // If first element (Conn) of the list is encrypted, also all others are (with same password)
             if (listConn.get(0).isPasswordEncrypted()) {
                 subUnit.setState(ConnFileState.ENCRYPTED);
-                if (Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen()) decryptConnFile(subUnit);
+                if (Pref.isDecryptFilePassPopUpAtStartOrOnOpen()) decryptConnFile(subUnit);
             }
 
             // debug mode
@@ -846,7 +846,7 @@ public class RootLayoutController {
 
         connFile.setState(ConnFileState.BROKEN);
 
-        if (Pref.INSTANCE.isErrorLoadingDataFromFilePopUpAtStartOrOnOpen()) {
+        if (Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) {
             AlertDialog.provide(MainApp.primaryStage,
                     Alert.AlertType.ERROR,
                     ALERR_LOAD_DATA_TITLE,

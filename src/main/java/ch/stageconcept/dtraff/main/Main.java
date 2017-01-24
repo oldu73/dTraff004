@@ -12,7 +12,7 @@ import com.sun.javafx.application.LauncherImpl;
  */
 public class Main {
     public static void main(String[] args) {
-        if (Pref.INSTANCE.isSplashScreen()) LauncherImpl.launchApplication(MainApp.class, MainPreloader.class, args);
+        if (Pref.isSplashScreen()) LauncherImpl.launchApplication(MainApp.class, MainPreloader.class, args);
         else LauncherImpl.launchApplication(MainApp.class, args);
     }
 }

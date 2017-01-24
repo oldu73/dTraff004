@@ -36,7 +36,7 @@ public class MainApp extends Application {
     @Override
     public void init() {
 
-        if (Pref.INSTANCE.isSplashScreen()) {
+        if (Pref.isSplashScreen()) {
             // (Do some heavy lifting)
 
             // Let preloader some time to appear
@@ -70,7 +70,7 @@ public class MainApp extends Application {
 
         primaryStage.setScene(scene);
 
-        if (!Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen() && !Pref.INSTANCE.isErrorLoadingDataFromFilePopUpAtStartOrOnOpen()) {
+        if (!Pref.isDecryptFilePassPopUpAtStartOrOnOpen() && !Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) {
             controller.getRootBorderPane().getChildren().remove(controller.getInitializingLabel());
         }
 
@@ -91,10 +91,10 @@ public class MainApp extends Application {
 
         // debug mode (testing preferences)
         /*
-        if (Pref.INSTANCE.isDecryptConnFilePassAtStartOrOnOpen()) {
-            Pref.INSTANCE.setDecryptConnFilePassAtStartOrOnOpen(false);
+        if (Pref.isDecryptFilePassPopUpAtStartOrOnOpen()) {
+            Pref.setDecryptFilePassPopUpAtStartOrOnOpen(false);
         } else {
-            Pref.INSTANCE.setDecryptConnFilePassAtStartOrOnOpen(true);
+            Pref.setDecryptFilePassPopUpAtStartOrOnOpen(true);
         }
         */
 
