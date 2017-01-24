@@ -119,7 +119,7 @@ public class Network extends ConnUnit<ConnFile> {
         this.stage = stage;
         this.rootLayoutController = rootLayoutController;
 
-        create();
+        createSubUnits();
     }
 
     // #####################################################################################
@@ -147,33 +147,27 @@ public class Network extends ConnUnit<ConnFile> {
     // Methods #############################################################################
 
     /**
-     * Create network description in a tree data structure,
+     * Create network first sub level structure ConnFile instances list (subUnits),
      * to be used in a treeView : Network (root node) - ConnFile - Conn - Database - (...)
      *
-     * @return true if user interaction (through popup (relative to user preferences))
-     * may be necessary either to confirm error loading data from file or enter password
-     * for encrypted file (use case example: display of Initializing... message in center of RootLayout at start),
-     * false otherwise.
+     * Process:
+     * ========
+     *
+     * - 1. Load user preferences keys
+     * - 2. Create Sub Units list from keys
+     * - 3. If list not empty
+     *      - 4. Set nonexistent file in list to broken
+     *      - 5. Set password protected file in list to encrypted
      */
-    public boolean create() {
-        // True if popup may be raised
-        boolean askUserToAct = false;
+    private void createSubUnits() {
 
         loadPrefKeys();
         createSubUnitsFromPrefKeys();
 
         if (!subUnits.isEmpty()) {
-
-            checkSubUnitsBrokenFiles();
-            if (hasSubUnitBroken() && Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) alertLoadFiles();
-
-            checkSubUnitsEncryptedFiles();
-
-            //...
-
+            setSubUnitsBroken();
+            setSubUnitsEncrypted();
         }
-
-        return askUserToAct;
 
     }
 
@@ -223,13 +217,11 @@ public class Network extends ConnUnit<ConnFile> {
      * Iterate through Sub Units (ConnFiles) to check if corresponding OS file is OK
      * (exist and not a directory), if not, set ConnFile instance state to BROKEN.
      */
-    private void checkSubUnitsBrokenFiles() {
+    private void setSubUnitsBroken() {
 
         subUnits.forEach(subUnit -> {
             File file = new File(subUnit.getFileName());
-            if(!file.exists() || file.isDirectory()) {
-                subUnit.setBroken();
-            }
+            if(!file.exists() || file.isDirectory()) subUnit.setBroken();
         });
 
     }
@@ -280,7 +272,7 @@ public class Network extends ConnUnit<ConnFile> {
      * @param subUnits
      * @return string in format name - fileName (path) \n
      */
-    private String getNamesAndFileNames(List<ConnFile> subUnits) {
+    private String namesFileNamesToString(List<ConnFile> subUnits) {
         return subUnits
                 .stream()
                 .map(connFile -> connFile.getName() + " - " + connFile.getFileName())
@@ -297,7 +289,7 @@ public class Network extends ConnUnit<ConnFile> {
                 Alert.AlertType.ERROR,
                 ALERR_LOAD_DATA_TITLE,
                 ALERR_LOAD_DATA_HEADER,
-                ALERR_LOAD_DATA_CONTENT + getNamesAndFileNames(getBrokenSubUnits()), true);
+                ALERR_LOAD_DATA_CONTENT + namesFileNamesToString(getBrokenSubUnits()), true);
 
     }
 
@@ -305,7 +297,7 @@ public class Network extends ConnUnit<ConnFile> {
      * Iterate through Sub Units (ConnFiles) to check if corresponding OS file is encrypted
      * (has an encrypted password field) if so, set ConnFile instance state to ENCRYPTED.
      */
-    private void checkSubUnitsEncryptedFiles() {
+    private void setSubUnitsEncrypted() {
 
         subUnits.stream().filter(subUnit -> !subUnit.isBroken()).forEach(subUnit -> {
 
@@ -370,6 +362,29 @@ public class Network extends ConnUnit<ConnFile> {
 
         return null;
 
+    }
+
+    /**
+     * Load file error confirmation or enter encrypted file password,
+     * at start is needed.
+     *
+     * @return true if user interaction (through popup (relative to ConnFile instances state
+     * in subUnits field (list) and user preferences)) may be necessary either to confirm
+     * error loading data from file or enter password for encrypted file (use case example:
+     * display of Initializing... message in center of RootLayout at start),
+     * false otherwise.
+     */
+    public boolean isUserActionNeededAtStart () {
+        return (hasSubUnitBroken() && Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) ||
+                (hasSubUnitEncrypted() && Pref.isDecryptFilePassPopUpAtStartOrOnOpen());
+    }
+
+    /**
+     * On filled conditions (the "OnNeed" in method name ;-)
+     * Popup an alert message to inform user about broken files.
+     */
+    public void alertUserLoadFileErrorOnNeed() {
+        if (hasSubUnitBroken() && Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) alertLoadFiles();
     }
 
     /**

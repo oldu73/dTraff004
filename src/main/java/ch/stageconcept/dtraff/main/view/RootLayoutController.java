@@ -133,61 +133,42 @@ public class RootLayoutController {
      * after the fxml file has been loaded.
      */
     @FXML
-    private void initialize() {}
+    private void initialize() { /* not used! */ }
 
     /**
      * Initialization called from outside.
      * Implemented in order to wait until Main application
      * window appear before launching initialization process.
-     * The goal to reach is to ask user password for encrypted ConnFile objects
-     * after that Main window is displayed.
+     * The goal to reach is, about ConnFile objects, to warn user about broken one
+     * or ask user password for encrypted one after that Main window is displayed.
      */
     public void subInitialize() {
 
         //TODO Initializing... message (should not appear (not clean)) if warn error loading file at start pref set but everything OK.
 
-        boolean initializingLabelAnimation = Pref.isDecryptFilePassPopUpAtStartOrOnOpen() ||
-                Pref.isErrorLoadingFilePopUpAtStartOrOnOpen();
+        // JavaFX TreeView of multiple object types? (and more)
+        // SRC: http://stackoverflow.com/questions/35009982/javafx-treeview-of-multiple-object-types-and-more
+        // ANSWER FROM: James_D
+        // GITHUB: - heterogeneous-tree-example - https://github.com/james-d/heterogeneous-tree-example
 
-        if (initializingLabelAnimation) {
-            // Text animation
-            // SRC: http://stackoverflow.com/questions/33646317/typing-animation-on-a-text-with-javafx
-            // Initializing
-            // Initializing.
-            // Initializing..
-            // Initializing...
-            final IntegerProperty i = new SimpleIntegerProperty(12);
-            Timeline timeline = new Timeline();
-            KeyFrame keyFrame = new KeyFrame(
-                    Duration.seconds(0.4),
-                    event -> {
-                        if (i.get() > LABEL_INITIALIZING.length()) {
-                            i.set(12);
-                            timeline.playFromStart();
-                        } else {
-                            initializingLabel.setText(LABEL_INITIALIZING.substring(0, i.get()));
-                            i.set(i.get() + 1);
-                        }
-                    });
-            timeline.getKeyFrames().add(keyFrame);
-            timeline.setCycleCount(Animation.INDEFINITE);
-            timeline.play();
-        }
+        network = new Network(NETWORK, MainApp.primaryStage, this);
+
+        boolean initializingLabelAnimation = network.isUserActionNeededAtStart();
+
+        if (initializingLabelAnimation) initializingLabelTextAnimation();
+        else rootBorderPane.getChildren().remove(initializingLabel);
+
+        network.alertUserLoadFileErrorOnNeed();
 
         anteInitializeCore();
 
         if (initializingLabelAnimation) {
+
             // Fade out Initialization label (main window background).
-            FadeTransition fadeOut = new FadeTransition(Duration.millis(1000));
-            fadeOut.setNode(initializingLabel);
-            fadeOut.setFromValue(1.0);
-            fadeOut.setToValue(0.0);
-            fadeOut.setCycleCount(1);
-            fadeOut.setAutoReverse(false);
+            FadeTransition fadeOut = initializingLabelFadeOut();
             fadeOut.playFromStart();
 
-            // When fade out finished, remove label
-            // and continue initialization process.
+            // When fade out finished, remove label and continue initialization process.
             fadeOut.setOnFinished((ActionEvent event) -> {
                 rootBorderPane.getChildren().remove(initializingLabel);
                 postInitializeCore();
@@ -195,6 +176,32 @@ public class RootLayoutController {
         } else {
             postInitializeCore();
         }
+
+        /*
+        boolean initializingLabelAnimation = Pref.isDecryptFilePassPopUpAtStartOrOnOpen() ||
+                Pref.isErrorLoadingFilePopUpAtStartOrOnOpen();
+
+        if (initializingLabelAnimation) {
+            initializingLabelTextAnimation();
+        }
+
+        anteInitializeCore();
+
+        if (initializingLabelAnimation) {
+
+            // Fade out Initialization label (main window background).
+            FadeTransition fadeOut = initializingLabelFadeOut();
+            fadeOut.playFromStart();
+
+            // When fade out finished, remove label and continue initialization process.
+            fadeOut.setOnFinished((ActionEvent event) -> {
+                rootBorderPane.getChildren().remove(initializingLabel);
+                postInitializeCore();
+            });
+        } else {
+            postInitializeCore();
+        }
+        */
 
     }
 
@@ -209,8 +216,9 @@ public class RootLayoutController {
         // SRC: http://stackoverflow.com/questions/35009982/javafx-treeview-of-multiple-object-types-and-more
         // ANSWER FROM: James_D
         // GITHUB: - heterogeneous-tree-example - https://github.com/james-d/heterogeneous-tree-example
+
         //network = createNetwork();
-        network = new Network(NETWORK, MainApp.primaryStage, this);
+        //network = new Network(NETWORK, MainApp.primaryStage, this);
 
         connectionTree = new ModelTree<>(network,
                 ConnUnit::getSubUnits,
@@ -350,6 +358,56 @@ public class RootLayoutController {
                         newServerConnectionMenuItem.isDisable() && editServerConnectionMenuItem.isDisable(),
                 newServerConnectionMenuItem.disableProperty(),
                 editServerConnectionMenuItem.disableProperty()));
+
+    }
+
+    /**
+     * Initializing Label Text Animation.
+     * SRC: http://stackoverflow.com/questions/33646317/typing-animation-on-a-text-with-javafx
+     *
+     * Initializing
+     * Initializing.
+     * Initializing..
+     * Initializing...
+     */
+    private void initializingLabelTextAnimation() {
+
+        final IntegerProperty i = new SimpleIntegerProperty(12);
+        Timeline timeline = new Timeline();
+        KeyFrame keyFrame = new KeyFrame(
+                Duration.seconds(0.4),
+                event -> {
+                    if (i.get() > LABEL_INITIALIZING.length()) {
+                        i.set(12);
+                        timeline.playFromStart();
+                    } else {
+                        initializingLabel.setText(LABEL_INITIALIZING.substring(0, i.get()));
+                        i.set(i.get() + 1);
+                    }
+                });
+        timeline.getKeyFrames().add(keyFrame);
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
+
+    }
+
+    /**
+     * Initializing Label Fade Out Transition.
+     *
+     * @return FadeTransition instance
+     * on initializingLabel node.
+     */
+    private FadeTransition initializingLabelFadeOut() {
+
+        // Fade out Initialization label (main window background).
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(1000));
+        fadeOut.setNode(initializingLabel);
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0.0);
+        fadeOut.setCycleCount(1);
+        fadeOut.setAutoReverse(false);
+
+        return fadeOut;
 
     }
 
