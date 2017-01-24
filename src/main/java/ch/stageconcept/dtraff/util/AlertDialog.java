@@ -4,18 +4,19 @@ import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
 /**
- * Show alert message
+ * Alert dialog message popup
  *
  * @author Olivier Durand
  */
-public enum ErrorAlert {
+public enum AlertDialog {
 
-    INSTANCE;
+    ;
 
     /**
      * Provide alert dialog with optional showAndWait possibility.
      * Return Alert object in case of outside method behavior management needs.
      *
+     * @param stage
      * @param alertType
      * @param title
      * @param header
@@ -23,7 +24,7 @@ public enum ErrorAlert {
      * @param showAndWait
      * @return alert Alert object
      */
-    public Alert provide(Stage stage, Alert.AlertType alertType, String title, String header, String content, boolean showAndWait) {
+    public static Alert provide(Stage stage, Alert.AlertType alertType, String title, String header, String content, boolean showAndWait) {
 
         Alert alert = new Alert(alertType);
 
@@ -32,6 +33,7 @@ public enum ErrorAlert {
         alert.setContentText(content);
 
         if (showAndWait) alert.showAndWait();
+
         return alert;
     }
 }

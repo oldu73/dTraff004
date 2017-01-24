@@ -6,7 +6,7 @@ import ch.stageconcept.dtraff.connection.view.ModelTree;
 import ch.stageconcept.dtraff.main.MainApp;
 import ch.stageconcept.dtraff.preference.model.Pref;
 import ch.stageconcept.dtraff.preference.util.PrefEditor;
-import ch.stageconcept.dtraff.util.ErrorAlert;
+import ch.stageconcept.dtraff.util.AlertDialog;
 import ch.stageconcept.dtraff.xrelease.Release;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
@@ -209,7 +209,8 @@ public class RootLayoutController {
         // SRC: http://stackoverflow.com/questions/35009982/javafx-treeview-of-multiple-object-types-and-more
         // ANSWER FROM: James_D
         // GITHUB: - heterogeneous-tree-example - https://github.com/james-d/heterogeneous-tree-example
-        network = createNetwork();
+        //network = createNetwork();
+        network = new Network(NETWORK, MainApp.primaryStage, this);
 
         connectionTree = new ModelTree<>(network,
                 ConnUnit::getSubUnits,
@@ -443,7 +444,7 @@ public class RootLayoutController {
      * @param connFile
      */
     private void alertAlreadyPresent(ConnFile connFile) {
-        ErrorAlert.INSTANCE.provide(MainApp.primaryStage,
+        AlertDialog.provide(MainApp.primaryStage,
                 Alert.AlertType.INFORMATION,
                 ALINF_FILE_ALREADY_PRESENT_TITLE,
                 ALINF_FILE_ALREADY_PRESENT_HEADER,
@@ -552,7 +553,7 @@ public class RootLayoutController {
      */
     @FXML
     private void handleAbout() {
-        ErrorAlert.INSTANCE.provide(MainApp.primaryStage,
+        AlertDialog.provide(MainApp.primaryStage,
                 Alert.AlertType.INFORMATION,
                 ALINF_ABOUT_TITLE,
                 ALINF_ABOUT_HEADER,
@@ -846,7 +847,7 @@ public class RootLayoutController {
         connFile.setState(ConnFileState.BROKEN);
 
         if (Pref.INSTANCE.isErrorLoadingDataFromFilePopUpAtStartOrOnOpen()) {
-            ErrorAlert.INSTANCE.provide(MainApp.primaryStage,
+            AlertDialog.provide(MainApp.primaryStage,
                     Alert.AlertType.ERROR,
                     ALERR_LOAD_DATA_TITLE,
                     ALERR_LOAD_DATA_HEADER,
@@ -910,7 +911,7 @@ public class RootLayoutController {
 
                     //e.printStackTrace();
 
-                    Alert alert = ErrorAlert.INSTANCE.provide(MainApp.primaryStage,
+                    Alert alert = AlertDialog.provide(MainApp.primaryStage,
                             Alert.AlertType.CONFIRMATION,
                             ALCNF_BAD_PASSWORD_TITLE,
                             ALCNF_BAD_PASSWORD_HEADER,

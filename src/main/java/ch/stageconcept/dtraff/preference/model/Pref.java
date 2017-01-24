@@ -9,6 +9,8 @@ import java.util.prefs.Preferences;
  */
 public enum Pref {
 
+    //TODO Refactor by removing INSTANCE but let semicolon, method should be static after that.
+    // Check other enum as well to check if INSTANCE is really necessary!
     INSTANCE;
 
     public static final String PREFS_PATH = "/ch/stageconcept/datatraffic/pref";

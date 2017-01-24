@@ -116,6 +116,22 @@ public class ConnFile extends ConnUnit<Conn> {
        this(name, FXCollections.observableArrayList());
    }
 
+    /**
+     * Constructor.
+     *
+     * @param name
+     * @param fileName
+     * @param parent
+     * @param rootLayoutController
+     */
+    public ConnFile(String name, String fileName, Network parent, RootLayoutController rootLayoutController) {
+        this(name, FXCollections.observableArrayList());
+
+        this.fileName = fileName;
+        setParent(parent);
+        this.rootLayoutController = rootLayoutController;
+    }
+
     // ### Getters and Setters #####################################################################
 
     public Network getParent() {
@@ -185,11 +201,25 @@ public class ConnFile extends ConnUnit<Conn> {
     }
 
     /**
+     * Set to BROKEN state
+     */
+    public void setBroken() {
+        setState(ConnFileState.BROKEN);
+    }
+
+    /**
      * Test CLEAR state
      * @return true on CLEAR state, false otherwise
      */
     public boolean isClear() {
         return state.getValue().equals(ConnFileState.CLEAR);
+    }
+
+    /**
+     * Set to CLEAR state
+     */
+    public void setClear() {
+        setState(ConnFileState.CLEAR);
     }
 
     /**
@@ -201,11 +231,25 @@ public class ConnFile extends ConnUnit<Conn> {
     }
 
     /**
+     * Set to ENCRYPTED state
+     */
+    public void setEncrypted() {
+        setState(ConnFileState.ENCRYPTED);
+    }
+
+    /**
      * Test DECRYPTED state
      * @return true on DECRYPTED state, false otherwise
      */
     public boolean isDecrypted() {
         return state.getValue().equals(ConnFileState.DECRYPTED);
+    }
+
+    /**
+     * Set to DECRYPTED state
+     */
+    public void setDecrypted() {
+        setState(ConnFileState.DECRYPTED);
     }
 
     /**

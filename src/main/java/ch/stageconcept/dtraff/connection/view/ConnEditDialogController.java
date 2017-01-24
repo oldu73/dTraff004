@@ -4,7 +4,7 @@ import ch.stageconcept.dtraff.connection.model.Conn;
 import ch.stageconcept.dtraff.connection.util.Crypto;
 import ch.stageconcept.dtraff.connection.util.DbDescriptor;
 import ch.stageconcept.dtraff.connection.util.DbType;
-import ch.stageconcept.dtraff.util.ErrorAlert;
+import ch.stageconcept.dtraff.util.AlertDialog;
 import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -360,7 +360,7 @@ public class ConnEditDialogController {
             return true;
         } else {
             // Show the error message.
-            ErrorAlert.INSTANCE.provide(dialogStage, Alert.AlertType.ERROR, ALERT_INVALID_TITLE, ALERT_INVALID_HEADER, errorMessage, true);
+            AlertDialog.provide(dialogStage, Alert.AlertType.ERROR, ALERT_INVALID_TITLE, ALERT_INVALID_HEADER, errorMessage, true);
             return false;
         }
     }

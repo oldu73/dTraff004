@@ -2,6 +2,7 @@ package ch.stageconcept.dtraff.connection.model;
 
 import ch.stageconcept.dtraff.connection.util.ConnFileEditor;
 import ch.stageconcept.dtraff.connection.util.ConnFileState;
+import ch.stageconcept.dtraff.connection.util.ConnListWrapper;
 import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -10,10 +11,14 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
+import javafx.stage.Stage;
 import org.codefx.libfx.listener.handle.ListenerHandle;
 import org.codefx.libfx.listener.handle.ListenerHandles;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
 import java.io.File;
+import java.util.List;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -45,22 +50,29 @@ import java.util.prefs.Preferences;
  */
 public class Network extends ConnUnit<ConnFile> {
 
+    // Fields ##############################################################################
+
     private static final String ICON_FILENAME = "network001.png";
     public static final String PREFS_PATH = "/ch/stageconcept/datatraffic/file";
     private static final String MENU_NEW_FILE = "New File";
     private static final String MENU_OPEN_FILE = ConnFile.MENU_OPEN_FILE;
     private static final String CONNFILE_DEFAULT_NAME = "default";
 
+    private Stage stage;
     private RootLayoutController rootLayoutController;
 
     // User preferences (file node)
-    private Preferences preferences = Preferences.userRoot().node(PREFS_PATH);
+    private Preferences prefs = Preferences.userRoot().node(PREFS_PATH);
     private String[] prefKeys = null;
 
     private ListenerHandle subUnitsListenerHandle;
 
+    // #####################################################################################
+
+    // Constructors ########################################################################
+
     /**
-     * Constructor
+     * Constructor.
      * @param name
      * @param subUnits
      */
@@ -80,11 +92,37 @@ public class Network extends ConnUnit<ConnFile> {
     }
 
     /**
-     * Constructor
+     * Constructor.
      * @param name
      */
     public Network(String name) {
         this(name, FXCollections.observableArrayList());
+    }
+
+    /**
+     * Constructor.
+     * @param name
+     * @param stage
+     * @param rootLayoutController
+     */
+    public Network(String name, Stage stage, RootLayoutController rootLayoutController) {
+        this(name, FXCollections.observableArrayList());
+        this.stage = stage;
+        this.rootLayoutController = rootLayoutController;
+
+        create();
+    }
+
+    // #####################################################################################
+
+    // Getters & Setters ###################################################################
+
+    /**
+     * rootLayoutController getter
+     * @return rootLayoutController
+     */
+    public RootLayoutController getRootLayoutController() {
+        return rootLayoutController;
     }
 
     /**
@@ -95,13 +133,9 @@ public class Network extends ConnUnit<ConnFile> {
         this.rootLayoutController = rootLayoutController;
     }
 
-    /**
-     * rootLayoutController getter
-     * @return rootLayoutController
-     */
-    public RootLayoutController getRootLayoutController() {
-        return rootLayoutController;
-    }
+    // #####################################################################################
+
+    // Methods #############################################################################
 
     /**
      * Create network description in a tree data structure,
@@ -116,9 +150,12 @@ public class Network extends ConnUnit<ConnFile> {
         // True if popup may be raised
         boolean askUserToAct = false;
 
-        if (isLoadPrefKeysOk()) {
-            createSubUnitsFromPrefKeys();
-            askUserToAct = !areSubUnitsFilesOk();
+        loadPrefKeys();
+        createSubUnitsFromPrefKeys();
+
+        if (!subUnits.isEmpty()) {
+            checkSubUnitsBrokenFiles();
+            checkSubUnitsEncryptedFiles();
 
         }
 
@@ -128,16 +165,12 @@ public class Network extends ConnUnit<ConnFile> {
     /**
      * Load user preferences from BackingStore
      * to field prefKeys (String array).
-     *
-     * @return true if load is ok,
-     * false otherwise.
      */
-    private boolean isLoadPrefKeysOk() {
+    private void loadPrefKeys() {
 
-        if (preferences != null) {
+        if (prefs != null) {
             try {
-                prefKeys = preferences.keys();
-                return true;
+                prefKeys = prefs.keys();
             } catch (BackingStoreException e) {
                 //System.err.println("unable to read backing store: " + e);
                 //e.printStackTrace();
@@ -148,7 +181,6 @@ public class Network extends ConnUnit<ConnFile> {
             }
         }
 
-        return false;
     }
 
     /**
@@ -156,28 +188,96 @@ public class Network extends ConnUnit<ConnFile> {
      * from prefKeys field.
      */
     private void createSubUnitsFromPrefKeys() {
+
         if (prefKeys != null) {
 
-            for (String prefKey : prefKeys) {
-                ConnFile connFile = new ConnFile(prefKey);
+            for (String name : prefKeys) {
 
-                String fileName = preferences.get(prefKey, null);
+                String fileName = prefs.get(name, null);
 
                 if (fileName != null) {
-                    connFile.setFileName(fileName);
-
-                    connFile.setParent(this);
-                    connFile.setRootLayoutController(rootLayoutController);
-                    getSubUnits().add(connFile);
+                    ConnFile connFile = new ConnFile(name, fileName, this, rootLayoutController);
+                    subUnits.add(connFile);
                 }
             }
-
         }
+
     }
 
-    private boolean areSubUnitsFilesOk() {
+    /**
+     * Iterate through Sub Units (ConnFiles) to check if corresponding OS file is OK
+     * (exist and not a directory), if not, set ConnFile instance state to BROKEN.
+     */
+    private void checkSubUnitsBrokenFiles() {
 
-        return false;
+        subUnits.forEach(subUnit -> {
+            File file = new File(subUnit.getFileName());
+            if(!file.exists() || file.isDirectory()) {
+                subUnit.setBroken();
+            }
+        });
+
+    }
+
+    /**
+     * Iterate through Sub Units (ConnFiles) to check if corresponding OS file is encrypted
+     * (has an encrypted password field) if so, set ConnFile instance state to ENCRYPTED.
+     */
+    private void checkSubUnitsEncryptedFiles() {
+
+        subUnits.stream().filter(subUnit -> !subUnit.isBroken()).forEach(subUnit -> {
+
+            List<Conn> listConn = loadConnFromConnFile(subUnit);
+            // debug mode
+            //System.out.println("String to decrypt: " + listConn.get(0).getPassword());
+
+            // If first element (Conn) of the list is encrypted, also all others are (with same password)
+            if (listConn != null && listConn.get(0).isPasswordEncrypted()) subUnit.setEncrypted();
+
+        });
+
+    }
+
+    /**
+     * Loads connections (Conn) data from the specified ConnFile
+     * instance parameter, unmarshaled with JAXB.
+     *
+     * @param connFile
+     * @return List of Conn instances
+     */
+    public List<Conn> loadConnFromConnFile(ConnFile connFile) {
+
+        File file = new java.io.File(connFile.getFileName());
+
+        // debug mode
+        //System.out.println(file.toString());
+
+        try {
+            JAXBContext context = JAXBContext.newInstance(ConnListWrapper.class);
+
+            // debug mode
+            //System.out.println(context.toString());
+
+            Unmarshaller um = context.createUnmarshaller();
+
+            // Reading XML from the file and unmarshalling.
+            ConnListWrapper wrapper = (ConnListWrapper) um.unmarshal(file);
+
+            // debug mode
+            /*
+            for (Conn conn: wrapper.getConns()) {
+                System.out.println(conn);
+            }
+            */
+
+            return wrapper.getConns();
+
+        } catch (Exception e) { // catches ANY exception
+            //e.printStackTrace();
+        }
+
+        return null;
+
     }
 
     /**
@@ -193,7 +293,7 @@ public class Network extends ConnUnit<ConnFile> {
             }
             connFile.setParent(this);
             getSubUnits().add(connFile);
-            preferences.put(connFile.getName(), connFile.getFileName());
+            prefs.put(connFile.getName(), connFile.getFileName());
         }
     }
 
@@ -204,7 +304,7 @@ public class Network extends ConnUnit<ConnFile> {
      * @param connFile
      */
     public void closeConnFile(ConnFile connFile) {
-        preferences.remove(connFile.getName());
+        prefs.remove(connFile.getName());
         this.getSubUnits().remove(connFile);
     }
 
@@ -307,5 +407,7 @@ public class Network extends ConnUnit<ConnFile> {
         });
         */
     }
+
+    // #####################################################################################
 
 }

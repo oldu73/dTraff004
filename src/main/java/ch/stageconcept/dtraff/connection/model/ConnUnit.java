@@ -21,7 +21,7 @@ public class ConnUnit<T extends ConnUnit<?>> {
     private ObjectProperty<ImageView> icon;
     private ObjectProperty<ContextMenu> menu;
     private final Function<String, T> subUnitSupplier ;
-    private final ObservableList<T> subUnits ;
+    protected final ObservableList<T> subUnits ;
 
     public ConnUnit(String name, ObservableList<T> subUnits, Function<String, T> subUnitSupplier, String iconFileName) {
         this.subUnits = subUnits ;
