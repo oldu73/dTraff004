@@ -1,8 +1,6 @@
 package ch.stageconcept.dtraff.connection.model;
 
-import ch.stageconcept.dtraff.connection.util.ConnFileEditor;
-import ch.stageconcept.dtraff.connection.util.ConnFileState;
-import ch.stageconcept.dtraff.connection.util.ConnListWrapper;
+import ch.stageconcept.dtraff.connection.util.*;
 import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import ch.stageconcept.dtraff.preference.model.Pref;
 import ch.stageconcept.dtraff.util.AlertDialog;
@@ -10,10 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TreeItem;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.codefx.libfx.listener.handle.ListenerHandle;
 import org.codefx.libfx.listener.handle.ListenerHandles;
@@ -22,6 +17,9 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -67,6 +65,10 @@ public class Network extends ConnUnit<ConnFile> {
     private static final String ALERR_LOAD_DATA_HEADER = "Could not load data";
     private static final String ALERR_LOAD_DATA_CONTENT = "Could not load data from file(s):\n";
 
+    private static final String ALCNF_BAD_PASSWORD_TITLE = ConnFile.MENU_ENTER_PASSWORD;
+    private static final String ALCNF_BAD_PASSWORD_HEADER = "Bad password!";
+    private static final String ALCNF_BAD_PASSWORD_CONTENT = "Try again?";
+
     private Stage stage;
     private RootLayoutController rootLayoutController;
 
@@ -75,6 +77,37 @@ public class Network extends ConnUnit<ConnFile> {
     private String[] prefKeys = null;
 
     private ListenerHandle subUnitsListenerHandle;
+
+    // Predicates
+    private static final Predicate<ConnFile> predicateSubUnitAll = subUnit -> true;
+    private static final Predicate<ConnFile> predicateSubUnitBroken = subUnit -> subUnit.isBroken();
+    private static final Predicate<ConnFile> predicateSubUnitNotBroken = subUnit -> !subUnit.isBroken();
+    private static final Predicate<ConnFile> predicateSubUnitClear = subUnit -> subUnit.isClear();
+    private static final Predicate<ConnFile> predicateSubUnitNotClear = subUnit -> !subUnit.isClear();
+    private static final Predicate<ConnFile> predicateSubUnitEncrypted = subUnit -> subUnit.isEncrypted();
+    private static final Predicate<ConnFile> predicateSubUnitNotEncrypted = subUnit -> !subUnit.isEncrypted();
+    private static final Predicate<ConnFile> predicateSubUnitDecrypted = subUnit -> subUnit.isDecrypted();
+    private static final Predicate<ConnFile> predicateSubUnitNotDecrypted = subUnit -> !subUnit.isDecrypted();
+
+    // Unary Operators
+
+    /**
+     * unaryOperatorToEncrypted, UnaryOperator Functional Interface
+     *
+     * Sub Unit (ConnFile) check if corresponding OS file is encrypted
+     * (has an encrypted password field) if so, set ConnFile instance state to ENCRYPTED.
+     */
+    private final UnaryOperator<ConnFile> unaryOperatorToEncrypted = subUnit -> {
+
+        List<Conn> listConn = loadConnsFromSubUnit(subUnit);
+        // debug mode
+        //System.out.println("String to decrypt: " + listConn.get(0).getPassword());
+
+        // If first element (Conn) of the list is encrypted, also all others are (with same password)
+        if (listConn != null && listConn.get(0).isPasswordEncrypted()) subUnit.setEncrypted();
+
+        return subUnit;
+    };
 
     // #####################################################################################
 
@@ -166,7 +199,8 @@ public class Network extends ConnUnit<ConnFile> {
 
         if (!subUnits.isEmpty()) {
             setSubUnitsBroken();
-            setSubUnitsEncrypted();
+            //setSubUnitsEncrypted();
+            setSubUnits(predicateSubUnitNotBroken, unaryOperatorToEncrypted);
         }
 
     }
@@ -227,37 +261,42 @@ public class Network extends ConnUnit<ConnFile> {
     }
 
     /**
-     * Iterate through Sub Units (ConnFiles) to check if at least one is at BROKEN state.
-     * SRC: http://www.concretepage.com/java/jdk-8/java-8-stream-allmatch-anymatch-nonematch-example
+     * Set predicate filtered subUnits sub list
+     * to unaryOperator function.
      *
-     * @return true if subUnits field contains at least one BROKEN state ConnFile instance,
-     * false otherwise.
+     * @param predicate
+     * @param unaryOperator
      */
-    private boolean hasSubUnitBroken() {
-
-        // long
-        /*
-        Predicate<ConnFile> predicate = connFile -> connFile.isBroken();
-        boolean found = subUnits.stream().anyMatch(predicate);
-        return found;
-        */
-
-        // short
-        return subUnits.stream().anyMatch(connFile -> connFile.isBroken());
+    private void setSubUnits(Predicate<ConnFile> predicate, UnaryOperator<ConnFile> unaryOperator) {
+        subUnits.stream().filter(predicate).forEach(subUnit -> unaryOperator.apply(subUnit));
     }
 
     /**
-     * Get Broken Sub Units (ConnFiles).
-     * SRC: http://stackoverflow.com/questions/39950785/java-8-stream-sorting-list-of-string
+     * Iterate through Sub Units (ConnFiles) to check if at least one match predicate.
+     * SRC: http://www.concretepage.com/java/jdk-8/java-8-stream-allmatch-anymatch-nonematch-example
      *
-     * @return subUnits field sub list
-     * of BROKEN state ConnFile instances.
+     * @param predicate
+     * @return true if subUnits field contains at least one ConnFile instance that match predicate,
+     * false otherwise.
      */
-    private List<ConnFile> getBrokenSubUnits() {
+    private boolean hasSubUnit(Predicate<ConnFile> predicate) {
+        return subUnits.stream().anyMatch(predicate);
+    }
+
+    /**
+     * Get Specified (filtered with predicate parameter)
+     * Sub Unit (ConnFile) list, sorted on ConnFile.name
+     * field in alphabetical order.
+     *
+     * @param predicate
+     * @return subUnits field sub list of ConnFile instances
+     * that match predicate.
+     */
+    private List<ConnFile> getSubUnitsSubList(Predicate<ConnFile> predicate) {
         return subUnits
                 .stream()
                 .sorted((connFile1, connFile2) -> connFile1.getName().compareTo(connFile2.getName()))
-                .filter(connFile -> connFile.isBroken())
+                .filter(predicate)
                 .collect(Collectors.toList());
     }
 
@@ -289,47 +328,18 @@ public class Network extends ConnUnit<ConnFile> {
                 Alert.AlertType.ERROR,
                 ALERR_LOAD_DATA_TITLE,
                 ALERR_LOAD_DATA_HEADER,
-                ALERR_LOAD_DATA_CONTENT + namesFileNamesToString(getBrokenSubUnits()), true);
+                ALERR_LOAD_DATA_CONTENT + namesFileNamesToString(getSubUnitsSubList(predicateSubUnitBroken)), true);
 
     }
 
     /**
-     * Iterate through Sub Units (ConnFiles) to check if corresponding OS file is encrypted
-     * (has an encrypted password field) if so, set ConnFile instance state to ENCRYPTED.
-     */
-    private void setSubUnitsEncrypted() {
-
-        subUnits.stream().filter(subUnit -> !subUnit.isBroken()).forEach(subUnit -> {
-
-            List<Conn> listConn = loadConnFromConnFile(subUnit);
-            // debug mode
-            //System.out.println("String to decrypt: " + listConn.get(0).getPassword());
-
-            // If first element (Conn) of the list is encrypted, also all others are (with same password)
-            if (listConn != null && listConn.get(0).isPasswordEncrypted()) subUnit.setEncrypted();
-
-        });
-
-    }
-
-    /**
-     * Iterate through Sub Units (ConnFiles) to check if at least one is at ENCRYPTED state.
-     *
-     * @return true if subUnits field contains at least one ENCRYPTED state ConnFile instance,
-     * false otherwise.
-     */
-    private boolean hasSubUnitEncrypted() {
-        return subUnits.stream().anyMatch(connFile -> connFile.isEncrypted());
-    }
-
-    /**
-     * Loads connections (Conn) data from the specified ConnFile
-     * instance parameter, unmarshaled with JAXB.
+     * Loads list of connections (Conn) data from the specified
+     * subUnit (ConnFile) instance parameter, unmarshaled with JAXB.
      *
      * @param connFile
      * @return List of Conn instances
      */
-    private List<Conn> loadConnFromConnFile(ConnFile connFile) {
+    private List<Conn> loadConnsFromSubUnit(ConnFile connFile) {
 
         File file = new java.io.File(connFile.getFileName());
 
@@ -375,16 +385,110 @@ public class Network extends ConnUnit<ConnFile> {
      * false otherwise.
      */
     public boolean isUserActionNeededAtStart () {
-        return (hasSubUnitBroken() && Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) ||
-                (hasSubUnitEncrypted() && Pref.isDecryptFilePassPopUpAtStartOrOnOpen());
+        return (hasSubUnit(predicateSubUnitBroken) && Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) ||
+                (hasSubUnit(predicateSubUnitEncrypted) && Pref.isDecryptFilePassPopUpAtStartOrOnOpen());
     }
 
     /**
-     * On filled conditions (the "OnNeed" in method name ;-)
-     * Popup an alert message to inform user about broken files.
+     * On filled conditions (the "OnNeed" in method name ;-),
+     * popup an alert message to inform user about broken files.
      */
     public void alertUserLoadFileErrorOnNeed() {
-        if (hasSubUnitBroken() && Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) alertLoadFiles();
+        if (hasSubUnit(predicateSubUnitBroken) && Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) alertLoadFiles();
+    }
+
+    /**
+     * On filled conditions, ask user to enter password
+     * for encrypted subUnit list through popup(s).
+     */
+    public void alertUserEnterFilePasswordOnNeed() {
+
+    }
+
+    /**
+     * Set subUnit (ConnFile) to decrypted (and related fields),
+     * if password (popup) is correct.
+     *
+     * @param connFile
+     * @return true on correct password entered by user and operation
+     * succeeded, false otherwise
+     */
+    public boolean setSubUnitDecrypted(ConnFile connFile) {
+
+        String password = getSubUnitPassword(connFile);
+
+        if (password != null) {
+            connFile.setPasswordProtected(true);
+            connFile.setPassword(password);
+            connFile.setState(ConnFileState.DECRYPTED);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Ask user for password in a dialog.
+     * This password is used at subUnit (ConnFile) level
+     * to encrypt/decrypt connection (Conn) password
+     *
+     * @param connFile
+     * @return password if correct, null otherwise
+     */
+    private String getSubUnitPassword(ConnFile connFile) {
+
+        //TODO When TAB key is pressed to change focus on Cancel button and hit ENTER key
+        //Bad password popup is displayed even if password field was let empty (OK button (which is highlighted) like behavior)
+        //Also Bad Password dialog has an "Annuler" button who should be a "Cancel" button!
+
+        boolean tryAgain;
+
+        do {
+            PasswordDialog passwordDialog = new PasswordDialog(connFile.getFileName());
+            Optional<String> passwordDialogResult = passwordDialog.showAndWait();
+            // debug mode
+            //result.ifPresent(password -> System.out.println(password));
+
+            if (passwordDialogResult.isPresent()) {
+                String password = passwordDialogResult.get();
+
+                try {
+                    Crypto crypto = new Crypto(password);
+                    // If no exception thrown by line below, means that password is correct.
+                    // If first element (Conn (get(0))) of the list returned by loadConnsFromSubUnit
+                    // method is encrypted, also all others are (with same password).
+                    crypto.getDecrypted(loadConnsFromSubUnit(connFile).get(0).getPassword());
+
+                    return password;
+
+                } catch (Exception e) {
+
+                    //e.printStackTrace();
+
+                    Alert alert = AlertDialog.provide(stage,
+                            Alert.AlertType.CONFIRMATION,
+                            ALCNF_BAD_PASSWORD_TITLE,
+                            ALCNF_BAD_PASSWORD_HEADER,
+                            ALCNF_BAD_PASSWORD_CONTENT, false);
+
+                    Optional<ButtonType> badPasswordDialogResult = alert.showAndWait();
+
+                    if (badPasswordDialogResult.get() == ButtonType.OK) {
+                        // ... user chose OK
+                        tryAgain = true;
+
+                    } else {
+                        // ... user chose CANCEL or closed the dialog
+                        tryAgain = false;
+                    }
+                }
+            } else {
+                tryAgain = false;
+            }
+
+        } while (tryAgain);
+
+        return null;
     }
 
     /**
