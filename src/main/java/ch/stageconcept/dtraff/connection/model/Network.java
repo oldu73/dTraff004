@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -85,13 +86,15 @@ public class Network extends ConnUnit<ConnFile> {
 
     // Functional interface implementations, UnaryOperator, Function, ...
 
+    //TODO maybe UnaryOperator below refactoring needed because not best suited functional interface used for those cases.
+
     /**
      * Set Broken If File Not Exist Or Directory.
      *
      * Sub Unit (ConnFile) check if corresponding OS file is OK
      * (exist and not a directory), if not, set ConnFile instance state to BROKEN.
      */
-    private static final UnaryOperator<ConnFile> setBrokenIfFileNotExistOrDirectory = subUnit -> {
+    private static UnaryOperator<ConnFile> setBrokenIfFileNotExistOrDirectory = subUnit -> {
 
         File file = new File(subUnit.getFileName());
         if(!file.exists() || file.isDirectory()) subUnit.setBroken();
@@ -106,7 +109,7 @@ public class Network extends ConnUnit<ConnFile> {
      * Sub Unit (ConnFile) check if corresponding OS file is encrypted,
      * (password field is encrypted) if so, set ConnFile instance state to ENCRYPTED.
      */
-    private static final UnaryOperator<ConnFile> setEncryptedIfFilePasswordIsEncrypted = subUnit -> {
+    private static UnaryOperator<ConnFile> setEncryptedIfFilePasswordIsEncrypted = subUnit -> {
 
         List<Conn> listConn = loadConnsFromSubUnit(subUnit);
         // debug mode
@@ -126,7 +129,7 @@ public class Network extends ConnUnit<ConnFile> {
      * if password (popup) is correct.
      *
      */
-    private static final UnaryOperator<ConnFile> setDecryptedIfPasswordOk = subUnit -> {
+    private static UnaryOperator<ConnFile> setDecryptedIfPasswordOk = subUnit -> {
 
         String password = getSubUnitPassword(subUnit);
 
@@ -147,7 +150,7 @@ public class Network extends ConnUnit<ConnFile> {
      *
      * SRC: http://www.studytrails.com/java/java8/Java8_Lambdas_FunctionalProgramming/
      */
-    private static final Function<ConnFile, String> nameFileNameToString = subUnit -> subUnit.getName() + " - " + subUnit.getFileName();
+    private static Function<ConnFile, String> nameFileNameToString = subUnit -> subUnit.getName() + " - " + subUnit.getFileName();
 
     // #####################################################################################
 
@@ -239,12 +242,12 @@ public class Network extends ConnUnit<ConnFile> {
 
         if (!subUnits.isEmpty()) {
 
-            setSubUnits(connFile -> true, setBrokenIfFileNotExistOrDirectory);
+            setSubUnits(getSubUnitsSubList(connFile -> true), setBrokenIfFileNotExistOrDirectory);
 
             // For info
             //setSubUnits(isBroken.negate(), setEncryptedIfFilePasswordIsEncrypted);
 
-            setSubUnits(((Predicate<ConnFile>) ConnFile::isBroken).negate(), setEncryptedIfFilePasswordIsEncrypted);
+            setSubUnits(getSubUnitsSubList(((Predicate<ConnFile>) ConnFile::isBroken).negate()), setEncryptedIfFilePasswordIsEncrypted);
 
         }
 
@@ -293,14 +296,13 @@ public class Network extends ConnUnit<ConnFile> {
     }
 
     /**
-     * Set predicate filtered subUnits sub list
-     * to unaryOperator function.
+     * Set list to unaryOperator function.
      *
-     * @param predicate
+     * @param list
      * @param unaryOperator
      */
-    private void setSubUnits(Predicate<ConnFile> predicate, UnaryOperator<ConnFile> unaryOperator) {
-        subUnits.stream().filter(predicate).forEach(subUnit -> unaryOperator.apply(subUnit));
+    private void setSubUnits(List<ConnFile> list, UnaryOperator<ConnFile> unaryOperator) {
+        list.forEach(subUnit -> unaryOperator.apply(subUnit));
     }
 
     /**
@@ -354,7 +356,7 @@ public class Network extends ConnUnit<ConnFile> {
      * Alert popup dialog to inform user
      * with broken files.
      */
-    private void alertLoadFiles() {
+    public void alertLoadFiles() {
 
         AlertDialog.provide(stage,
                 Alert.AlertType.ERROR,
@@ -406,8 +408,6 @@ public class Network extends ConnUnit<ConnFile> {
 
     }
 
-    //TODO factorize code on three methods below
-
     /**
      * Load file error confirmation or enter encrypted file password,
      * at start is needed.
@@ -419,26 +419,36 @@ public class Network extends ConnUnit<ConnFile> {
      * false otherwise.
      */
     public boolean isUserActionNeededAtStart () {
-        return (hasSubUnit(ConnFile::isBroken) && Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) ||
-                (hasSubUnit(ConnFile::isEncrypted) && Pref.isDecryptFilePassPopUpAtStartOrOnOpen());
+        return hasBrokenAndIsPref().get() || hasEncryptedAndIsPref().get();
     }
 
     /**
-     * On filled conditions (the "OnNeed" in method name ;-),
-     * popup an alert message to inform user about broken files.
+     * Sub Units contains at least one broken file
+     * and user preference to warn at start is set
+     *
+     * @return Boolean.TRUE if above method title is correct,
+     * Boolean.FALSE otherwise
      */
-    public void alertUserLoadFileErrorOnNeed() {
-        if (hasSubUnit(ConnFile::isBroken) && Pref.isErrorLoadingFilePopUpAtStartOrOnOpen())
-            alertLoadFiles();
+    public Supplier<Boolean> hasBrokenAndIsPref() {
+        return () -> hasSubUnit(ConnFile::isBroken) && Pref.isErrorLoadingFilePopUpAtStartOrOnOpen();
     }
 
     /**
-     * On filled conditions, ask user to enter password
-     * for encrypted subUnit list through popup(s).
+     * Sub Units contains at least one encrypted file
+     * and user preference to ask pass at start is set
+     *
+     * @return Boolean.TRUE if above method title is correct,
+     * Boolean.FALSE otherwise
      */
-    public void alertUserEnterFilePasswordOnNeed() {
-        if (hasSubUnit(ConnFile::isEncrypted) && Pref.isDecryptFilePassPopUpAtStartOrOnOpen())
-            setSubUnits(ConnFile::isEncrypted, setDecryptedIfPasswordOk);
+    public Supplier<Boolean> hasEncryptedAndIsPref() {
+        return () -> hasSubUnit(ConnFile::isEncrypted) && Pref.isDecryptFilePassPopUpAtStartOrOnOpen();
+    }
+
+    /**
+     * Decrypt Sub Units passwords with user password.
+     */
+    public void decryptPasswords() {
+        setSubUnits(getSubUnitsSubList(ConnFile::isEncrypted), setDecryptedIfPasswordOk);
     }
 
     /**

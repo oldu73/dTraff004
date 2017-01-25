@@ -7,6 +7,7 @@ import ch.stageconcept.dtraff.main.MainApp;
 import ch.stageconcept.dtraff.preference.model.Pref;
 import ch.stageconcept.dtraff.preference.util.PrefEditor;
 import ch.stageconcept.dtraff.util.AlertDialog;
+import ch.stageconcept.dtraff.util.Is1st;
 import ch.stageconcept.dtraff.xrelease.Release;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
@@ -158,8 +159,10 @@ public class RootLayoutController {
         if (initializingLabelAnimation) initializingLabelTextAnimation();
         else rootBorderPane.getChildren().remove(initializingLabel);
 
-        network.alertUserLoadFileErrorOnNeed();
-        network.alertUserEnterFilePasswordOnNeed();
+        // If first (argument) == TRUE then, popup an alert message to inform user about broken files.
+        Is1st.do2nd(network.hasBrokenAndIsPref(), network::alertLoadFiles);
+        // If first (argument) == TRUE then, ask user password for encrypted network sub level list through popup(s).
+        Is1st.do2nd(network.hasEncryptedAndIsPref(), network::decryptPasswords);
 
         anteInitializeCore();
 
@@ -252,6 +255,7 @@ public class RootLayoutController {
         // debug mode
         //printChildren(connectionTreeView.getRoot());
 
+        //TODO add double click behavior on broken file to open fileChooser.
         // Double click on Network treeView
         connectionTreeView.setOnMouseClicked((event) ->
         {
