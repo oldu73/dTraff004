@@ -159,6 +159,7 @@ public class RootLayoutController {
         else rootBorderPane.getChildren().remove(initializingLabel);
 
         network.alertUserLoadFileErrorOnNeed();
+        network.alertUserEnterFilePasswordOnNeed();
 
         anteInitializeCore();
 
@@ -468,7 +469,7 @@ public class RootLayoutController {
                     preferences.remove(connFile.getName());
                     connFile.setName(name);
                     connFile.setFileName(fileName);
-                    connFile.setState(ConnFileState.CLEAR);
+                    connFile.setClear();
 
                     treatSubUnit(connFile, true);
                 }
@@ -753,7 +754,7 @@ public class RootLayoutController {
 
             // If first element (Conn) of the list is encrypted, also all others are (with same password)
             if (listConn.get(0).isPasswordEncrypted()) {
-                subUnit.setState(ConnFileState.ENCRYPTED);
+                subUnit.setEncrypted();
                 if (Pref.isDecryptFilePassPopUpAtStartOrOnOpen()) decryptConnFile(subUnit);
             }
 
@@ -902,7 +903,7 @@ public class RootLayoutController {
      */
     private void setBrokenAndAlertLoadData(ConnFile connFile, File file) {
 
-        connFile.setState(ConnFileState.BROKEN);
+        connFile.setBroken();
 
         if (Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) {
             AlertDialog.provide(MainApp.primaryStage,
@@ -925,7 +926,7 @@ public class RootLayoutController {
         if (password != null) {
             connFile.setPasswordProtected(true);
             connFile.setPassword(password);
-            connFile.setState(ConnFileState.DECRYPTED);
+            connFile.setDecrypted();
             return true;
         }
 

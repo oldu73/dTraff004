@@ -18,6 +18,7 @@ import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.prefs.BackingStoreException;
@@ -69,7 +70,7 @@ public class Network extends ConnUnit<ConnFile> {
     private static final String ALCNF_BAD_PASSWORD_HEADER = "Bad password!";
     private static final String ALCNF_BAD_PASSWORD_CONTENT = "Try again?";
 
-    private Stage stage;
+    private static Stage stage;
     private RootLayoutController rootLayoutController;
 
     // User preferences (file node)
@@ -78,26 +79,34 @@ public class Network extends ConnUnit<ConnFile> {
 
     private ListenerHandle subUnitsListenerHandle;
 
+    // For info
     // Predicates
-    private static final Predicate<ConnFile> predicateSubUnitAll = subUnit -> true;
-    private static final Predicate<ConnFile> predicateSubUnitBroken = subUnit -> subUnit.isBroken();
-    private static final Predicate<ConnFile> predicateSubUnitNotBroken = subUnit -> !subUnit.isBroken();
-    private static final Predicate<ConnFile> predicateSubUnitClear = subUnit -> subUnit.isClear();
-    private static final Predicate<ConnFile> predicateSubUnitNotClear = subUnit -> !subUnit.isClear();
-    private static final Predicate<ConnFile> predicateSubUnitEncrypted = subUnit -> subUnit.isEncrypted();
-    private static final Predicate<ConnFile> predicateSubUnitNotEncrypted = subUnit -> !subUnit.isEncrypted();
-    private static final Predicate<ConnFile> predicateSubUnitDecrypted = subUnit -> subUnit.isDecrypted();
-    private static final Predicate<ConnFile> predicateSubUnitNotDecrypted = subUnit -> !subUnit.isDecrypted();
+    //private static final Predicate<ConnFile> isBroken = subUnit -> subUnit.isBroken();
 
-    // Unary Operators
+    // Functional interface implementations, UnaryOperator, Function, ...
 
     /**
-     * unaryOperatorToEncrypted, UnaryOperator Functional Interface
+     * Set Broken If File Not Exist Or Directory.
      *
-     * Sub Unit (ConnFile) check if corresponding OS file is encrypted
-     * (has an encrypted password field) if so, set ConnFile instance state to ENCRYPTED.
+     * Sub Unit (ConnFile) check if corresponding OS file is OK
+     * (exist and not a directory), if not, set ConnFile instance state to BROKEN.
      */
-    private final UnaryOperator<ConnFile> unaryOperatorToEncrypted = subUnit -> {
+    private static final UnaryOperator<ConnFile> setBrokenIfFileNotExistOrDirectory = subUnit -> {
+
+        File file = new File(subUnit.getFileName());
+        if(!file.exists() || file.isDirectory()) subUnit.setBroken();
+
+        return subUnit;
+
+    };
+
+    /**
+     * Set Encrypted If File Password Is Encrypted.
+     *
+     * Sub Unit (ConnFile) check if corresponding OS file is encrypted,
+     * (password field is encrypted) if so, set ConnFile instance state to ENCRYPTED.
+     */
+    private static final UnaryOperator<ConnFile> setEncryptedIfFilePasswordIsEncrypted = subUnit -> {
 
         List<Conn> listConn = loadConnsFromSubUnit(subUnit);
         // debug mode
@@ -107,7 +116,38 @@ public class Network extends ConnUnit<ConnFile> {
         if (listConn != null && listConn.get(0).isPasswordEncrypted()) subUnit.setEncrypted();
 
         return subUnit;
+
     };
+
+    /**
+     * Set Decrypted If Password Ok.
+     *
+     * Set Sub Unit (ConnFile) to DECRYPTED (and related fields),
+     * if password (popup) is correct.
+     *
+     */
+    private static final UnaryOperator<ConnFile> setDecryptedIfPasswordOk = subUnit -> {
+
+        String password = getSubUnitPassword(subUnit);
+
+        if (password != null) {
+            subUnit.setPasswordProtected(true);
+            subUnit.setPassword(password);
+            subUnit.setDecrypted();
+        }
+
+        return subUnit;
+
+    };
+
+    /**
+     * Output subUnit (ConnFile) name and fileName (path) fields
+     * in format "name - fileName" (name, fileName entries
+     * separated by a space, a hyphen and a space)
+     *
+     * SRC: http://www.studytrails.com/java/java8/Java8_Lambdas_FunctionalProgramming/
+     */
+    private static final Function<ConnFile, String> nameFileNameToString = subUnit -> subUnit.getName() + " - " + subUnit.getFileName();
 
     // #####################################################################################
 
@@ -198,9 +238,14 @@ public class Network extends ConnUnit<ConnFile> {
         createSubUnitsFromPrefKeys();
 
         if (!subUnits.isEmpty()) {
-            setSubUnitsBroken();
-            //setSubUnitsEncrypted();
-            setSubUnits(predicateSubUnitNotBroken, unaryOperatorToEncrypted);
+
+            setSubUnits(connFile -> true, setBrokenIfFileNotExistOrDirectory);
+
+            // For info
+            //setSubUnits(isBroken.negate(), setEncryptedIfFilePasswordIsEncrypted);
+
+            setSubUnits(((Predicate<ConnFile>) ConnFile::isBroken).negate(), setEncryptedIfFilePasswordIsEncrypted);
+
         }
 
     }
@@ -248,19 +293,6 @@ public class Network extends ConnUnit<ConnFile> {
     }
 
     /**
-     * Iterate through Sub Units (ConnFiles) to check if corresponding OS file is OK
-     * (exist and not a directory), if not, set ConnFile instance state to BROKEN.
-     */
-    private void setSubUnitsBroken() {
-
-        subUnits.forEach(subUnit -> {
-            File file = new File(subUnit.getFileName());
-            if(!file.exists() || file.isDirectory()) subUnit.setBroken();
-        });
-
-    }
-
-    /**
      * Set predicate filtered subUnits sub list
      * to unaryOperator function.
      *
@@ -304,7 +336,7 @@ public class Network extends ConnUnit<ConnFile> {
      * Get names and file names (path) from ConnFile instances list
      * given by parameter to format them in a string output.
      * Name, file name represent an entry separated by a space, a hyphen and a space
-     * and each entry is separated by a new line.
+     * (cf. nameFileNameToString function), and each entry is separated by a new line.
      *
      * SRC: https://ivarconr.wordpress.com/2013/11/20/java-8-joining-strings-with-stream-api/
      *
@@ -314,7 +346,7 @@ public class Network extends ConnUnit<ConnFile> {
     private String namesFileNamesToString(List<ConnFile> subUnits) {
         return subUnits
                 .stream()
-                .map(connFile -> connFile.getName() + " - " + connFile.getFileName())
+                .map(subUnit -> nameFileNameToString.apply(subUnit))
                 .collect(Collectors.joining("\n"));
     }
 
@@ -328,7 +360,7 @@ public class Network extends ConnUnit<ConnFile> {
                 Alert.AlertType.ERROR,
                 ALERR_LOAD_DATA_TITLE,
                 ALERR_LOAD_DATA_HEADER,
-                ALERR_LOAD_DATA_CONTENT + namesFileNamesToString(getSubUnitsSubList(predicateSubUnitBroken)), true);
+                ALERR_LOAD_DATA_CONTENT + namesFileNamesToString(getSubUnitsSubList(ConnFile::isBroken)), true);
 
     }
 
@@ -339,7 +371,7 @@ public class Network extends ConnUnit<ConnFile> {
      * @param connFile
      * @return List of Conn instances
      */
-    private List<Conn> loadConnsFromSubUnit(ConnFile connFile) {
+    private static List<Conn> loadConnsFromSubUnit(ConnFile connFile) {
 
         File file = new java.io.File(connFile.getFileName());
 
@@ -374,6 +406,8 @@ public class Network extends ConnUnit<ConnFile> {
 
     }
 
+    //TODO factorize code on three methods below
+
     /**
      * Load file error confirmation or enter encrypted file password,
      * at start is needed.
@@ -385,8 +419,8 @@ public class Network extends ConnUnit<ConnFile> {
      * false otherwise.
      */
     public boolean isUserActionNeededAtStart () {
-        return (hasSubUnit(predicateSubUnitBroken) && Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) ||
-                (hasSubUnit(predicateSubUnitEncrypted) && Pref.isDecryptFilePassPopUpAtStartOrOnOpen());
+        return (hasSubUnit(ConnFile::isBroken) && Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) ||
+                (hasSubUnit(ConnFile::isEncrypted) && Pref.isDecryptFilePassPopUpAtStartOrOnOpen());
     }
 
     /**
@@ -394,7 +428,8 @@ public class Network extends ConnUnit<ConnFile> {
      * popup an alert message to inform user about broken files.
      */
     public void alertUserLoadFileErrorOnNeed() {
-        if (hasSubUnit(predicateSubUnitBroken) && Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) alertLoadFiles();
+        if (hasSubUnit(ConnFile::isBroken) && Pref.isErrorLoadingFilePopUpAtStartOrOnOpen())
+            alertLoadFiles();
     }
 
     /**
@@ -402,29 +437,8 @@ public class Network extends ConnUnit<ConnFile> {
      * for encrypted subUnit list through popup(s).
      */
     public void alertUserEnterFilePasswordOnNeed() {
-
-    }
-
-    /**
-     * Set subUnit (ConnFile) to decrypted (and related fields),
-     * if password (popup) is correct.
-     *
-     * @param connFile
-     * @return true on correct password entered by user and operation
-     * succeeded, false otherwise
-     */
-    public boolean setSubUnitDecrypted(ConnFile connFile) {
-
-        String password = getSubUnitPassword(connFile);
-
-        if (password != null) {
-            connFile.setPasswordProtected(true);
-            connFile.setPassword(password);
-            connFile.setState(ConnFileState.DECRYPTED);
-            return true;
-        }
-
-        return false;
+        if (hasSubUnit(ConnFile::isEncrypted) && Pref.isDecryptFilePassPopUpAtStartOrOnOpen())
+            setSubUnits(ConnFile::isEncrypted, setDecryptedIfPasswordOk);
     }
 
     /**
@@ -435,7 +449,7 @@ public class Network extends ConnUnit<ConnFile> {
      * @param connFile
      * @return password if correct, null otherwise
      */
-    private String getSubUnitPassword(ConnFile connFile) {
+    private static String getSubUnitPassword(ConnFile connFile) {
 
         //TODO When TAB key is pressed to change focus on Cancel button and hit ENTER key
         //Bad password popup is displayed even if password field was let empty (OK button (which is highlighted) like behavior)
@@ -444,7 +458,7 @@ public class Network extends ConnUnit<ConnFile> {
         boolean tryAgain;
 
         do {
-            PasswordDialog passwordDialog = new PasswordDialog(connFile.getFileName());
+            PasswordDialog passwordDialog = new PasswordDialog(nameFileNameToString.apply(connFile));
             Optional<String> passwordDialogResult = passwordDialog.showAndWait();
             // debug mode
             //result.ifPresent(password -> System.out.println(password));
@@ -489,6 +503,7 @@ public class Network extends ConnUnit<ConnFile> {
         } while (tryAgain);
 
         return null;
+
     }
 
     /**
@@ -500,7 +515,7 @@ public class Network extends ConnUnit<ConnFile> {
         connFile.setRootLayoutController(rootLayoutController);
         if (ConnFileEditor.INSTANCE.supply(connFile)) {
             if (connFile.isPasswordProtected()) {
-                connFile.setState(ConnFileState.DECRYPTED);
+                connFile.setDecrypted();
             }
             connFile.setParent(this);
             getSubUnits().add(connFile);

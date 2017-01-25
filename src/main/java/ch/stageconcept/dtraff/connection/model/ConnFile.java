@@ -178,7 +178,7 @@ public class ConnFile extends ConnUnit<Conn> {
         return state;
     }
 
-    public void setState(ConnFileState state) {
+    private void setState(ConnFileState state) {
         this.state.set(state);
     }
 
