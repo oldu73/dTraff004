@@ -34,6 +34,8 @@ import java.util.Optional;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
+//TODO refactor (clean) doc
+
 /**
  * The controller for the root layout. The root layout provides the basic
  * application layout containing a menu bar and space where other JavaFX
@@ -46,11 +48,11 @@ public class RootLayoutController {
     // Attributes
     // #####################################################################
 
-    // Network treeView root denomination
+    // ConnRoot treeView root denomination
     private static final String NETWORK = "Network";
 
-    // Network treeView CSS resource
-    private static final String NETWORK_TREE_VIEW_CSS = "/networkTreeView.css";
+    // ConnRoot treeView CSS resource
+    private static final String CONNROOT_TREEVIEW_CSS = "/connRootTreeView.css";
 
     // Initializing static text
     private static final String LABEL_INITIALIZING = "Initializing...";
@@ -105,10 +107,10 @@ public class RootLayoutController {
     @FXML
     private MenuItem editPreferencesMenuItem;
 
-    private Network network;    // Network description to be used in a treeView : Network (root node) - ConnFile - Conn - Database - (...)
+    private ConnRoot connRoot;    // ConnRoot description to be used in a treeView : ConnRoot (root node) - ConnFile - Conn - Database - (...)
     private ModelTree<ConnUnit<?>> connectionTree;
     private TreeView<ConnUnit<?>> connectionTreeView;
-    private Preferences preferences = Preferences.userRoot().node(Network.PREFS_PATH);  // User preferences
+    private Preferences preferences = Preferences.userRoot().node(ConnRoot.PREFS_PATH);  // User preferences
     private ObjectProperty<ConnFileState> selectedConnFileState = new SimpleObjectProperty<>();
 
     // Getters and Setters
@@ -138,6 +140,7 @@ public class RootLayoutController {
 
     /**
      * Initialization called from outside.
+     *
      * Implemented in order to wait until Main application
      * window appear before launching initialization process.
      * The goal to reach is, about ConnFile objects, to warn user about broken one
@@ -145,29 +148,24 @@ public class RootLayoutController {
      */
     public void subInitialize() {
 
-        //TODO Initializing... message (should not appear (not clean)) if warn error loading file at start pref set but everything OK.
+        connRoot = new ConnRoot(NETWORK, MainApp.primaryStage, this);
 
-        // JavaFX TreeView of multiple object types? (and more)
-        // SRC: http://stackoverflow.com/questions/35009982/javafx-treeview-of-multiple-object-types-and-more
-        // ANSWER FROM: James_D
-        // GITHUB: - heterogeneous-tree-example - https://github.com/james-d/heterogeneous-tree-example
-
-        network = new Network(NETWORK, MainApp.primaryStage, this);
-
-        boolean initializingLabelAnimation = network.isUserActionNeededAtStart();
+        boolean initializingLabelAnimation = connRoot.isUserActionNeededAtStart();
 
         if (initializingLabelAnimation) initializingLabelTextAnimation();
         else rootBorderPane.getChildren().remove(initializingLabel);
 
-        // If first (argument) == TRUE then, popup an alert message to inform user about broken files.
-        Is1st.do2nd(network.hasBrokenAndIsPref(), network::alertLoadFiles);
-        // If first (argument) == TRUE then, ask user password for encrypted network sub level list through popup(s).
-        Is1st.do2nd(network.hasEncryptedAndIsPref(), network::decryptPasswords);
+        // If connRoot has broken file and user pref is set then,
+        // popup an alert message to inform user about broken files.
+        Is1st.do2nd(connRoot.hasBrokenAndIsPref(), connRoot::alertLoadFiles);
 
-        anteInitializeCore();
+        // If connRoot has encrypted file and user pref is set then,
+        // ask user password for encrypted file(s) through popup(s).
+        Is1st.do2nd(connRoot.hasEncryptedAndIsPref(), connRoot::decryptPasswords);
+
+        anteInitialize();
 
         if (initializingLabelAnimation) {
-
             // Fade out Initialization label (main window background).
             FadeTransition fadeOut = initializingLabelFadeOut();
             fadeOut.playFromStart();
@@ -175,88 +173,61 @@ public class RootLayoutController {
             // When fade out finished, remove label and continue initialization process.
             fadeOut.setOnFinished((ActionEvent event) -> {
                 rootBorderPane.getChildren().remove(initializingLabel);
-                postInitializeCore();
+                postInitialize();
             });
         } else {
-            postInitializeCore();
+            postInitialize();
         }
-
-        /*
-        boolean initializingLabelAnimation = Pref.isDecryptFilePassPopUpAtStartOrOnOpen() ||
-                Pref.isErrorLoadingFilePopUpAtStartOrOnOpen();
-
-        if (initializingLabelAnimation) {
-            initializingLabelTextAnimation();
-        }
-
-        anteInitializeCore();
-
-        if (initializingLabelAnimation) {
-
-            // Fade out Initialization label (main window background).
-            FadeTransition fadeOut = initializingLabelFadeOut();
-            fadeOut.playFromStart();
-
-            // When fade out finished, remove label and continue initialization process.
-            fadeOut.setOnFinished((ActionEvent event) -> {
-                rootBorderPane.getChildren().remove(initializingLabel);
-                postInitializeCore();
-            });
-        } else {
-            postInitializeCore();
-        }
-        */
 
     }
 
     /**
-     * Ante Initialisation main process.
-     * Show Initialization label on main
-     * window background.
+     * Ante initialize
+     *
+     * With initialization label on main
+     * window background displayed (and animated).
      */
-    private void anteInitializeCore() {
+    private void anteInitialize() {
 
-        // JavaFX TreeView of multiple object types? (and more)
-        // SRC: http://stackoverflow.com/questions/35009982/javafx-treeview-of-multiple-object-types-and-more
-        // ANSWER FROM: James_D
-        // GITHUB: - heterogeneous-tree-example - https://github.com/james-d/heterogeneous-tree-example
-
-        //network = createNetwork();
-        //network = new Network(NETWORK, MainApp.primaryStage, this);
-
-        connectionTree = new ModelTree<>(network,
+        connectionTree = new ModelTree<>(connRoot,
                 ConnUnit::getSubUnits,
                 ConnUnit::nameProperty,
                 ConnUnit::iconProperty,
                 ConnUnit::menuProperty,
                 unit -> PseudoClass.getPseudoClass(unit.getClass().getSimpleName().toLowerCase()));
 
+        //TODO on close/delete connRoot subUnits.. maintain treeView and related ObservableList synchronized.
+
         connectionTreeView = connectionTree.getTreeView();
 
-        network.sortSubUnitsOnChangeListener();
+        connRoot.sortSubUnitsOnChangeListener();
         // Initial sort
-        network.sortSubUnits();
+        connRoot.sortSubUnits();
 
         // CSS pseudo class treeView style.
         // !WARNING! In order to use file that reside in resources folder, don’t forget to add a slash before file name!
-        connectionTreeView.getStylesheets().add(getClass().getResource(NETWORK_TREE_VIEW_CSS).toExternalForm());
+        connectionTreeView.getStylesheets().add(getClass().getResource(CONNROOT_TREEVIEW_CSS).toExternalForm());
 
         connectionTreeView.getRoot().setExpanded(true);
+
     }
 
     /**
-     * Post Initialisation main process.
-     * After Initialization label on main
-     * window background disappear.
+     * Post initialize
+     *
+     * After initialization label on main
+     * window background disappear (fade out).
      */
-    private void postInitializeCore() {
+    private void postInitialize() {
+
         rootBorderPane.setLeft(connectionTreeView);
 
         // debug mode
         //printChildren(connectionTreeView.getRoot());
 
         //TODO add double click behavior on broken file to open fileChooser.
-        // Double click on Network treeView
+        //TODO refactor string format (cf. ConnRoot namesFileNamesToString) in enter password dialog.
+        // Double click on ConnRoot treeView
         connectionTreeView.setOnMouseClicked((event) ->
         {
             if(event.getClickCount() == 2 &&
@@ -278,7 +249,7 @@ public class RootLayoutController {
         newServerConnectionMenuItem.setDisable(true);
         fileEnterPasswordMenuItem.setDisable(true);
 
-        // Some File - menus disable property setting if the Network treeView
+        // Some File - menus disable property setting if the ConnRoot treeView
         // selected item is not a ConnFile object and other menu specific related conditions
         connectionTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.getValue() instanceof ConnFile) {
@@ -288,7 +259,7 @@ public class RootLayoutController {
                 // debug mode
                 //System.out.print("1 ");
 
-                // ### File - Server Connection - New: Disable if the Network treeView
+                // ### File - Server Connection - New: Disable if the ConnRoot treeView
                 // selected item is not a clear or decrypted ConnFile object
                 if (((ConnFile) newValue.getValue()).isClear() ||
                         ((ConnFile) newValue.getValue()).isDecrypted()) {
@@ -306,7 +277,7 @@ public class RootLayoutController {
                 }
                 // ############################################################
 
-                // ### File - Enter Password: Disable if the Network treeView
+                // ### File - Enter Password: Disable if the ConnRoot treeView
                 // selected item is not an encrypted ConnFile object
                 if (((ConnFile) newValue.getValue()).isEncrypted()) {
                     fileEnterPasswordMenuItem.setDisable(false);
@@ -316,7 +287,7 @@ public class RootLayoutController {
                 // ############################################################
 
             } else {
-                // Network treeView selected item is NOT a ConnFile object
+                // ConnRoot treeView selected item is NOT a ConnFile object
                 newServerConnectionMenuItem.setDisable(true);
                 fileEnterPasswordMenuItem.setDisable(true);
 
@@ -328,7 +299,7 @@ public class RootLayoutController {
 
         // After double click on an encrypted file to enter correct password,
         // the serverConnectionMenuItem remain disabled until treeView selection changed!
-        // So, the bellowing lines deserve to track ConnFile (in Network treeView)
+        // So, the bellowing lines deserve to track ConnFile (in ConnRoot treeView)
         // selected object state changes in order to update the newServerConnectionMenuItem disabled status.
         selectedConnFileState.addListener((observable, oldValue, newValue) -> {
             if (oldValue != null && (oldValue.equals(ConnFileState.ENCRYPTED) && newValue.equals(ConnFileState.DECRYPTED))) {
@@ -352,7 +323,7 @@ public class RootLayoutController {
                 connectionTreeView.getSelectionModel().selectedItemProperty()));
         */
 
-        // Disable tool bar menu File - Server Connection - Edit if no item or not a Conn object instance are selected in Network treeView
+        // Disable tool bar menu File - Server Connection - Edit if no item or not a Conn object instance are selected in ConnRoot treeView
         editServerConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
                         connectionTreeView.getSelectionModel().getSelectedItem() == null ||
                                 !(connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof Conn),
@@ -421,7 +392,7 @@ public class RootLayoutController {
      */
     @FXML
     private void handleFileNew() {
-        network.newConnFile();
+        connRoot.newConnFile();
     }
 
     /**
@@ -478,9 +449,9 @@ public class RootLayoutController {
                     treatSubUnit(connFile, true);
                 }
 
-                // Network treeView entry modification in place, so no list change triggered
+                // ConnRoot treeView entry modification in place, so no list change triggered
                 // therefore the sort method should be called "manually".
-                network.sortSubUnits();
+                connRoot.sortSubUnits();
 
                 // ######################
 
@@ -529,12 +500,12 @@ public class RootLayoutController {
 
             if (getConnFile(name) != null) alertAlreadyPresent(getConnFile(name));
             else {
-                // Open ConnFile (file) and create new Network treeView entry
+                // Open ConnFile (file) and create new ConnRoot treeView entry
                 ConnFile connFile = new ConnFile(name);
                 connFile.setFileName(fileName);
-                connFile.setParent(network);
+                connFile.setParent(connRoot);
                 connFile.setRootLayoutController(this);
-                network.getSubUnits().add(connFile);
+                connRoot.getSubUnits().add(connFile);
                 treatSubUnit(connFile, true);
             }
         }
@@ -632,7 +603,7 @@ public class RootLayoutController {
     }
 
     /**
-     * Get Network treeView selected ConnFile object
+     * Get ConnRoot treeView selected ConnFile object
      *
      * @return If selected item is an instance of ConnFile, return this object,
      * null otherwise
@@ -654,15 +625,15 @@ public class RootLayoutController {
 
     /**
      * Check if a ConnFile object with given String name parameter
-     * is present in Network treeView.
+     * is present in ConnRoot treeView.
      *
      * @param name
-     * @return ConnFile object if one with name attribute exist in Network treeView,
+     * @return ConnFile object if one with name attribute exist in ConnRoot treeView,
      * null otherwise.
      */
     public ConnFile getConnFile(String name) {
         // SRC: http://stackoverflow.com/questions/23407014/return-from-lambda-foreach-in-java
-        return network
+        return connRoot
                 .getSubUnits()
                 .stream()
                 .filter(connFile -> connFile.getName().contains(name))
@@ -670,15 +641,15 @@ public class RootLayoutController {
     }
 
     /**
-     * Create network description in a tree data structure,
-     * to be used in a treeView : Network (root node) - ConnFile - Conn - Database - (...)
+     * Create connRoot description in a tree data structure,
+     * to be used in a treeView : ConnRoot (root node) - ConnFile - Conn - Database - (...)
      */
-    private Network createNetwork() {
+    private ConnRoot createNetwork() {
 
-        Network network = new Network(NETWORK);
+        ConnRoot connRoot = new ConnRoot(NETWORK);
         String[] prefKeys = null;
 
-        network.setRootLayoutController(this);
+        connRoot.setRootLayoutController(this);
 
        // ### 1. Get preference keys.
        if (preferences != null) {
@@ -712,26 +683,26 @@ public class RootLayoutController {
                        setBrokenAndAlertLoadData(connFile, file);
                    }
 
-                   connFile.setParent(network);
+                   connFile.setParent(connRoot);
                    connFile.setRootLayoutController(this);
-                   network.getSubUnits().add(connFile);
+                   connRoot.getSubUnits().add(connFile);
                }
            }
 
        }
        // #########################################################################
 
-       // ### 3. Iterate through network subunits (ConnFile objects) to treat and populate
+       // ### 3. Iterate through connRoot subunits (ConnFile objects) to treat and populate
        // Conn objects list.
-       if (!network.getSubUnits().isEmpty()) network.getSubUnits().forEach((subUnit) -> {
+       if (!connRoot.getSubUnits().isEmpty()) connRoot.getSubUnits().forEach((subUnit) -> {
            if (!subUnit.isBroken()) treatSubUnit(subUnit, false);
        });
        // #########################################################################
 
        // Some sample data, debug mode
-       //buildSampleData(network);
+       //buildSampleData(connRoot);
 
-       return network;
+       return connRoot;
     }
 
     /**
@@ -806,9 +777,9 @@ public class RootLayoutController {
      * Populate tree with sample data,
      * for testing purpose.
      *
-     * @param network
+     * @param connRoot
      */
-    private void buildSampleData(Network network) {
+    private void buildSampleData(ConnRoot connRoot) {
         // Some sample data, debug mode
         ConnFile file1 = new ConnFile("file1");
         ConnFile file2 = new ConnFile("file2");
@@ -838,7 +809,7 @@ public class RootLayoutController {
         file2.getSubUnits().addAll(connection2, connection3);
         file3.getSubUnits().addAll(connection4, connection5);
 
-        network.getSubUnits().addAll(file1, file2, file3);
+        connRoot.getSubUnits().addAll(file1, file2, file3);
     }
 
     /**

@@ -15,24 +15,23 @@ import org.codefx.libfx.listener.handle.ListenerHandles;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
-import java.io.File;
+import java.io.*;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
+import java.util.function.*;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
+//TODO refactor (clean) doc
+
 /**
- * Root class for Network.
+ * Root class.
  *
  * The treeView structure:
  * #######################
  *
- * Network
+ * ConnRoot
  * |
  * +-- ConnFile A
  * |    |-- Conn A
@@ -46,13 +45,15 @@ import java.util.stream.Collectors;
  *
  * #######################
  *
+ * JavaFX TreeView of multiple object types? (and more)
  * SRC: http://stackoverflow.com/questions/35009982/javafx-treeview-of-multiple-object-types-and-more
- * SRC: https://github.com/james-d/heterogeneous-tree-example
+ * ANSWER FROM: James_D
+ * GITHUB: - heterogeneous-tree-example - https://github.com/james-d/heterogeneous-tree-example
  *
  * @author james-d
  * Adapted by Olivier Durand
  */
-public class Network extends ConnUnit<ConnFile> {
+public class ConnRoot extends ConnUnit<ConnFile> {
 
     // Fields ##############################################################################
 
@@ -80,57 +81,58 @@ public class Network extends ConnUnit<ConnFile> {
 
     private ListenerHandle subUnitsListenerHandle;
 
-    // For info
-    // Predicates
-    //private static final Predicate<ConnFile> isBroken = subUnit -> subUnit.isBroken();
-
-    // Functional interface implementations, UnaryOperator, Function, ...
-
-    //TODO maybe UnaryOperator below refactoring needed because not best suited functional interface used for those cases.
+    // Functional interface implementations, Predicate, Consumer, Function, ...
 
     /**
-     * Set Broken If File Not Exist Or Directory.
-     *
-     * Sub Unit (ConnFile) check if corresponding OS file is OK
-     * (exist and not a directory), if not, set ConnFile instance state to BROKEN.
+     * Check if file exist and is not a directory
      */
-    private static UnaryOperator<ConnFile> setBrokenIfFileNotExistOrDirectory = subUnit -> {
+    private static Predicate<File> fileExistAndIsNotDirectory = file -> file.exists() && !file.isDirectory();
 
-        File file = new File(subUnit.getFileName());
-        if(!file.exists() || file.isDirectory()) subUnit.setBroken();
-
-        return subUnit;
-
+    /**
+     * Check if file (exist and is not a directory) is not empty
+     */
+    private static Predicate<File> fileExistIsNotDirectoryAndNotEmpty = file -> {
+        if (fileExistAndIsNotDirectory.test(file)) {
+            BufferedReader br = null;
+            try {
+                br = new BufferedReader(new FileReader(file.getPath()));
+            } catch (FileNotFoundException e) {
+                //e.printStackTrace();
+                return false;
+            }
+            try {
+                if (br.readLine() != null) {
+                    return true;
+                }
+            } catch (IOException e) {
+                //e.printStackTrace();
+            }
+        }
+        return false;
     };
 
     /**
-     * Set Encrypted If File Password Is Encrypted.
-     *
-     * Sub Unit (ConnFile) check if corresponding OS file is encrypted,
-     * (password field is encrypted) if so, set ConnFile instance state to ENCRYPTED.
+     * Set broken if OS file nonexistent or directory
      */
-    private static UnaryOperator<ConnFile> setEncryptedIfFilePasswordIsEncrypted = subUnit -> {
+    private static Consumer<ConnFile> setBrokenIfFileNotExistOrDirectory = subUnit -> {
+        File file = new File(subUnit.getFileName());
+        if(!fileExistAndIsNotDirectory.test(file)) subUnit.setBroken();
+    };
 
+    /**
+     * Set encrypted if OS file password field is encrypted
+     */
+    private static Consumer<ConnFile> setEncryptedIfFilePasswordIsEncrypted = subUnit -> {
         List<Conn> listConn = loadConnsFromSubUnit(subUnit);
-        // debug mode
-        //System.out.println("String to decrypt: " + listConn.get(0).getPassword());
 
         // If first element (Conn) of the list is encrypted, also all others are (with same password)
         if (listConn != null && listConn.get(0).isPasswordEncrypted()) subUnit.setEncrypted();
-
-        return subUnit;
-
     };
 
     /**
-     * Set Decrypted If Password Ok.
-     *
-     * Set Sub Unit (ConnFile) to DECRYPTED (and related fields),
-     * if password (popup) is correct.
-     *
+     * Set decrypted if password (popup) ok
      */
-    private static UnaryOperator<ConnFile> setDecryptedIfPasswordOk = subUnit -> {
-
+    private static Consumer<ConnFile> setDecryptedIfPasswordOk = subUnit -> {
         String password = getSubUnitPassword(subUnit);
 
         if (password != null) {
@@ -138,9 +140,6 @@ public class Network extends ConnUnit<ConnFile> {
             subUnit.setPassword(password);
             subUnit.setDecrypted();
         }
-
-        return subUnit;
-
     };
 
     /**
@@ -161,7 +160,7 @@ public class Network extends ConnUnit<ConnFile> {
      * @param name
      * @param subUnits
      */
-    public Network(String name, ObservableList<ConnFile> subUnits) {
+    public ConnRoot(String name, ObservableList<ConnFile> subUnits) {
         super(name, subUnits, ConnFile::new, ICON_FILENAME);
 
         ContextMenu contextMenu = new ContextMenu();
@@ -180,7 +179,7 @@ public class Network extends ConnUnit<ConnFile> {
      * Constructor.
      * @param name
      */
-    public Network(String name) {
+    public ConnRoot(String name) {
         this(name, FXCollections.observableArrayList());
     }
 
@@ -190,7 +189,7 @@ public class Network extends ConnUnit<ConnFile> {
      * @param stage
      * @param rootLayoutController
      */
-    public Network(String name, Stage stage, RootLayoutController rootLayoutController) {
+    public ConnRoot(String name, Stage stage, RootLayoutController rootLayoutController) {
         this(name, FXCollections.observableArrayList());
         this.stage = stage;
         this.rootLayoutController = rootLayoutController;
@@ -218,39 +217,54 @@ public class Network extends ConnUnit<ConnFile> {
         this.rootLayoutController = rootLayoutController;
     }
 
+    /**
+     * subUnits contains at least one broken file
+     * and user preference to warn at start is set
+     *
+     * @return Boolean.TRUE if subUnits has broken,
+     * Boolean.FALSE otherwise
+     */
+    public Supplier<Boolean> hasBrokenAndIsPref() {
+        return () -> hasSubUnit(ConnFile::isBroken) && Pref.isErrorLoadingFilePopUpAtStartOrOnOpen();
+    }
+
+    /**
+     * subUnits contains at least one encrypted file
+     * and user preference to ask pass at start is set
+     *
+     * @return Boolean.TRUE if subUnits has encrypted,
+     * Boolean.FALSE otherwise
+     */
+    public Supplier<Boolean> hasEncryptedAndIsPref() {
+        return () -> hasSubUnit(ConnFile::isEncrypted) && Pref.isDecryptFilePassPopUpAtStartOrOnOpen();
+    }
+
     // #####################################################################################
 
     // Methods #############################################################################
 
     /**
-     * Create network first sub level structure ConnFile instances list (subUnits),
-     * to be used in a treeView : Network (root node) - ConnFile - Conn - Database - (...)
+     * Create ConnRoot first sub level structure ConnFile list (subUnits),
+     * to be used in a treeView : ConnRoot (root node) - ConnFiles - Conns - Databases - (...)
      *
      * Process:
      * ========
      *
      * - 1. Load user preferences keys
-     * - 2. Create Sub Units list from keys
-     * - 3. If list not empty
-     *      - 4. Set nonexistent file in list to broken
-     *      - 5. Set password protected file in list to encrypted
+     * - 2. Create subUnits from keys
+     * - 3. If subUnits not empty, for subUnits:
+     *      - 4. Set nonexistent files to broken
+     *      - 5. Set password protected files to encrypted
      */
     private void createSubUnits() {
-
         loadPrefKeys();
         createSubUnitsFromPrefKeys();
 
         if (!subUnits.isEmpty()) {
-
             setSubUnits(getSubUnitsSubList(connFile -> true), setBrokenIfFileNotExistOrDirectory);
-
-            // For info
-            //setSubUnits(isBroken.negate(), setEncryptedIfFilePasswordIsEncrypted);
-
-            setSubUnits(getSubUnitsSubList(((Predicate<ConnFile>) ConnFile::isBroken).negate()), setEncryptedIfFilePasswordIsEncrypted);
-
+            setSubUnits(getSubUnitsSubList(((Predicate<ConnFile>) ConnFile::isBroken).negate()),
+                    setEncryptedIfFilePasswordIsEncrypted);
         }
-
     }
 
     /**
@@ -275,7 +289,7 @@ public class Network extends ConnUnit<ConnFile> {
     }
 
     /**
-     * Create Network Sub Units (ConnFile)
+     * Create ConnRoot Sub Units (ConnFile)
      * from prefKeys field.
      */
     private void createSubUnitsFromPrefKeys() {
@@ -296,13 +310,13 @@ public class Network extends ConnUnit<ConnFile> {
     }
 
     /**
-     * Set list to unaryOperator function.
+     * Set list to consumer function.
      *
      * @param list
-     * @param unaryOperator
+     * @param consumer
      */
-    private void setSubUnits(List<ConnFile> list, UnaryOperator<ConnFile> unaryOperator) {
-        list.forEach(subUnit -> unaryOperator.apply(subUnit));
+    private void setSubUnits(List<ConnFile> list, Consumer<ConnFile> consumer) {
+        list.forEach(subUnit -> consumer.accept(subUnit));
     }
 
     /**
@@ -423,28 +437,6 @@ public class Network extends ConnUnit<ConnFile> {
     }
 
     /**
-     * Sub Units contains at least one broken file
-     * and user preference to warn at start is set
-     *
-     * @return Boolean.TRUE if above method title is correct,
-     * Boolean.FALSE otherwise
-     */
-    public Supplier<Boolean> hasBrokenAndIsPref() {
-        return () -> hasSubUnit(ConnFile::isBroken) && Pref.isErrorLoadingFilePopUpAtStartOrOnOpen();
-    }
-
-    /**
-     * Sub Units contains at least one encrypted file
-     * and user preference to ask pass at start is set
-     *
-     * @return Boolean.TRUE if above method title is correct,
-     * Boolean.FALSE otherwise
-     */
-    public Supplier<Boolean> hasEncryptedAndIsPref() {
-        return () -> hasSubUnit(ConnFile::isEncrypted) && Pref.isDecryptFilePassPopUpAtStartOrOnOpen();
-    }
-
-    /**
      * Decrypt Sub Units passwords with user password.
      */
     public void decryptPasswords() {
@@ -462,7 +454,8 @@ public class Network extends ConnUnit<ConnFile> {
     private static String getSubUnitPassword(ConnFile connFile) {
 
         //TODO When TAB key is pressed to change focus on Cancel button and hit ENTER key
-        //Bad password popup is displayed even if password field was let empty (OK button (which is highlighted) like behavior)
+        //Bad password popup is displayed even if password field was let empty and hit enter key (not click)
+        // on cancel button, (OK button (which is highlighted) like behavior).
         //Also Bad Password dialog has an "Annuler" button who should be a "Cancel" button!
 
         boolean tryAgain;
@@ -516,6 +509,7 @@ public class Network extends ConnUnit<ConnFile> {
 
     }
 
+    //TODO refactor (at least, review): newConnFile
     /**
      * New ConnFile object.
      * Create new File entry to Connections treeView.
@@ -533,6 +527,7 @@ public class Network extends ConnUnit<ConnFile> {
         }
     }
 
+    //TODO refactor (at least, review): closeConnFile
     /**
      * Close ConnFile object.
      * Remove File entry from Connections treeView.
@@ -544,6 +539,7 @@ public class Network extends ConnUnit<ConnFile> {
         this.getSubUnits().remove(connFile);
     }
 
+    //TODO refactor (at least, review): sortSubUnits
     /**
      * Sort subUnits, alphabetical/numerical order.
      */
@@ -582,7 +578,7 @@ public class Network extends ConnUnit<ConnFile> {
 
             //rootLayoutController.getConnectionTreeView().refresh();
         } catch (StackOverflowError e) {
-            System.err.println("The method Network.sortSubUnits() raise a StackOverflowError exception!");
+            System.err.println("The method ConnRoot.sortSubUnits() raise a StackOverflowError exception!");
         }
 
         subUnitsListenerHandle.attach();
@@ -602,6 +598,7 @@ public class Network extends ConnUnit<ConnFile> {
         */
     }
 
+    //TODO refactor (at least, review): sortSubUnitsOnChangeListener
     /**
      * Sort subUnits on list change.
      *
@@ -643,6 +640,51 @@ public class Network extends ConnUnit<ConnFile> {
         });
         */
     }
+
+    /**
+     * ?
+     *
+     * @param ?
+     * @return ?
+     */
+    public void populateSubUnits() {
+
+    }
+
+    //TODO refactor as Predicate and add javadoc
+    private boolean isSubUnitReadyToPopulate(ConnFile subUnit) {
+        if (subUnit != null &&
+                !(subUnit.isBroken() || subUnit.isEncrypted()) &&
+                !(subUnit.getName() == null || subUnit.getName().length() == 0) &&
+                !(subUnit.getFileName() == null || subUnit.getFileName().length() == 0) &&
+                fileExistIsNotDirectoryAndNotEmpty.test(new File(subUnit.getFileName())))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * ?
+     *
+     * @param ?
+     * @return ?
+     */
+    private void populateSubUnit(ConnFile subUnit) {
+        if (isSubUnitReadyToPopulate(subUnit)) {
+            List<Conn> list = loadConnsFromSubUnit(subUnit);
+
+        }
+    }
+
+    //TODO (add/create?) javadoc method header template like below:
+    /**
+     * ?
+     *
+     * @param ?
+     * @return ?
+     */
 
     // #####################################################################################
 

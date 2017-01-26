@@ -19,7 +19,7 @@ import javax.xml.bind.Marshaller;
 import java.io.File;
 import java.io.IOException;
 
-//TODO javadoc (cf. Network class header documentation)
+//TODO javadoc (cf. ConnRoot class header documentation)
 
 public class ConnFile extends ConnUnit<Conn> {
 
@@ -39,7 +39,7 @@ public class ConnFile extends ConnUnit<Conn> {
     private static final String DIALOG_NEW_CONNECTION_TITLE = MENU_NEW_CONNECTION;
 
     // Reference to parent object
-    private final ObjectProperty<Network> parent;
+    private final ObjectProperty<ConnRoot> parent;
 
     private String fileName;    // path
     private boolean isPasswordProtected = false;
@@ -124,7 +124,7 @@ public class ConnFile extends ConnUnit<Conn> {
      * @param parent
      * @param rootLayoutController
      */
-    public ConnFile(String name, String fileName, Network parent, RootLayoutController rootLayoutController) {
+    public ConnFile(String name, String fileName, ConnRoot parent, RootLayoutController rootLayoutController) {
         this(name, FXCollections.observableArrayList());
 
         this.fileName = fileName;
@@ -134,15 +134,15 @@ public class ConnFile extends ConnUnit<Conn> {
 
     // ### Getters and Setters #####################################################################
 
-    public Network getParent() {
+    public ConnRoot getParent() {
         return parent.get();
     }
 
-    public ObjectProperty<Network> parentProperty() {
+    public ObjectProperty<ConnRoot> parentProperty() {
         return parent;
     }
 
-    public void setParent(Network parent) {
+    public void setParent(ConnRoot parent) {
         this.parent.set(parent);
     }
 

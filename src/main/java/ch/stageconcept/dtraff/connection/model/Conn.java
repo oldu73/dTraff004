@@ -19,7 +19,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-//TODO javadoc (cf. Network class header documentation)
+//TODO javadoc (cf. ConnRoot class header documentation)
 
 /**
  * Model class for a server connection represented in a treeView.

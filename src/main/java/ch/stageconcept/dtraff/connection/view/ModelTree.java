@@ -16,7 +16,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.ImageView;
 
-//TODO javadoc (cf. connection.model.Network class header documentation)
+//TODO javadoc (cf. connection.model.ConnRoot class header documentation)
 
 public class ModelTree<T> {
 
