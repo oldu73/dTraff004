@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 
 //TODO refactor (clean) doc
 
+//TODO Manage empty file (state, icon, ...). What about empty encrypted file?
+
 /**
  * Root class.
  *
@@ -84,39 +86,59 @@ public class ConnRoot extends ConnUnit<ConnFile> {
     // Functional interface implementations, Predicate, Consumer, Function, ...
 
     /**
-     * Check if file exist and is not a directory
+     * Check if subUnit.fileName represent a valid OS file:
+     * - exist
+     * - is not a directory
      */
-    private static Predicate<File> fileExistAndIsNotDirectory = file -> file.exists() && !file.isDirectory();
+    private static Predicate<ConnFile> isFileInSubUnitOk = subUnit -> {
+
+        File file = new File(subUnit.getFileName());
+        return file.exists() && !file.isDirectory();
+
+    };
 
     /**
-     * Check if file (exist and is not a directory) is not empty
+     * Check if subUnit.fileName represent a not empty OS file
+     * SRC: http://stackoverflow.com/questions/7190618/most-efficient-way-to-check-if-a-file-is-empty-in-java-on-windows
      */
-    private static Predicate<File> fileExistIsNotDirectoryAndNotEmpty = file -> {
-        if (fileExistAndIsNotDirectory.test(file)) {
-            BufferedReader br = null;
-            try {
-                br = new BufferedReader(new FileReader(file.getPath()));
-            } catch (FileNotFoundException e) {
-                //e.printStackTrace();
-                return false;
-            }
-            try {
-                if (br.readLine() != null) {
-                    return true;
-                }
-            } catch (IOException e) {
-                //e.printStackTrace();
-            }
+    private static Predicate<ConnFile> isFileInSubUnitNotEmpty = subUnit -> {
+
+        BufferedReader br = null;
+
+        try {
+            br = new BufferedReader(new FileReader(subUnit.getFileName()));
+        } catch (FileNotFoundException e) {
+            //e.printStackTrace();
+            return false;
         }
+
+        try {
+            if (br.readLine() != null) {
+                return true;
+            }
+        } catch (IOException e) {
+            //e.printStackTrace();
+        }
+
         return false;
     };
+
+    /**
+     * Is subUnit OS file's fileName represented, ready to populate
+     * subUnit.subUnits (Conns)?
+     */
+    private static Predicate<ConnFile> isFileInSubUnitReadyToPopulate = subUnit ->
+            subUnit != null &&
+                    !(subUnit.isBroken() || subUnit.isEncrypted()) &&
+                    !(subUnit.getName() == null || subUnit.getName().length() == 0) &&
+                    !(subUnit.getFileName() == null || subUnit.getFileName().length() == 0) &&
+                    isFileInSubUnitOk.and(isFileInSubUnitNotEmpty).test(subUnit);
 
     /**
      * Set broken if OS file nonexistent or directory
      */
     private static Consumer<ConnFile> setBrokenIfFileNotExistOrDirectory = subUnit -> {
-        File file = new File(subUnit.getFileName());
-        if(!fileExistAndIsNotDirectory.test(file)) subUnit.setBroken();
+        if(!isFileInSubUnitOk.test(subUnit)) subUnit.setBroken();
     };
 
     /**
@@ -651,20 +673,6 @@ public class ConnRoot extends ConnUnit<ConnFile> {
 
     }
 
-    //TODO refactor as Predicate and add javadoc
-    private boolean isSubUnitReadyToPopulate(ConnFile subUnit) {
-        if (subUnit != null &&
-                !(subUnit.isBroken() || subUnit.isEncrypted()) &&
-                !(subUnit.getName() == null || subUnit.getName().length() == 0) &&
-                !(subUnit.getFileName() == null || subUnit.getFileName().length() == 0) &&
-                fileExistIsNotDirectoryAndNotEmpty.test(new File(subUnit.getFileName())))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
     /**
      * ?
      *
@@ -672,7 +680,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      * @return ?
      */
     private void populateSubUnit(ConnFile subUnit) {
-        if (isSubUnitReadyToPopulate(subUnit)) {
+        if (isFileInSubUnitReadyToPopulate.test(subUnit)) {
             List<Conn> list = loadConnsFromSubUnit(subUnit);
 
         }
