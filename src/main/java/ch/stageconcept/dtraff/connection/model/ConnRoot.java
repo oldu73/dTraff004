@@ -459,10 +459,21 @@ public class ConnRoot extends ConnUnit<ConnFile> {
     }
 
     /**
-     * Decrypt Sub Units passwords with user password.
+     * Decrypt subUnits passwords with user password.
      */
     public void decryptPasswords() {
         setSubUnits(getSubUnitsSubList(ConnFile::isEncrypted), setDecryptedIfPasswordOk);
+    }
+
+    /**
+     * Decrypt subUnit password with user password.
+     *
+     * @return this (ConnRoot instance) to allow method chaining
+     * SRC: http://stackoverflow.com/questions/21180269/how-to-achieve-method-chaining-in-java
+     */
+    public ConnRoot decryptPassword(ConnFile connFile) {
+        if (connFile.isEncrypted()) setDecryptedIfPasswordOk.accept(connFile);
+        return this;
     }
 
     /**
@@ -575,7 +586,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
             System.out.println("subUnit1: " + subUnit);
         });
         System.out.println("/////////");
-        rootLayoutController.getConnectionTreeView().getRoot().getChildren().forEach((subUnit) -> {
+        rootLayoutController.getConnTreeView().getRoot().getChildren().forEach((subUnit) -> {
             System.out.println("subUnit2: " + subUnit);
         });
         System.out.println("/////////");
@@ -594,11 +605,11 @@ public class ConnRoot extends ConnUnit<ConnFile> {
             //TODO Improve comparator: - test1, test10, test2, test3.. in the list is not so nice
             // (because of one, one zero for test1, test10)
 
-            rootLayoutController.getConnectionTreeView().getRoot().getChildren()
+            rootLayoutController.getConnTreeView().getRoot().getChildren()
                     .sort((TreeItem<? super ConnFile> cf1, TreeItem<? super ConnFile> cf2) ->
                             ((ConnFile)(cf1.getValue())).getName().compareTo(((ConnFile)(cf2.getValue())).getName()));
 
-            //rootLayoutController.getConnectionTreeView().refresh();
+            //rootLayoutController.getConnTreeView().refresh();
         } catch (StackOverflowError e) {
             System.err.println("The method ConnRoot.sortSubUnits() raise a StackOverflowError exception!");
         }
@@ -613,7 +624,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
             System.out.println("subUnit1: " + subUnit);
         });
         System.out.println("/////////");
-        rootLayoutController.getConnectionTreeView().getRoot().getChildren().forEach((subUnit) -> {
+        rootLayoutController.getConnTreeView().getRoot().getChildren().forEach((subUnit) -> {
             System.out.println("subUnit2: " + subUnit);
         });
         System.out.println("/////////");
@@ -664,35 +675,28 @@ public class ConnRoot extends ConnUnit<ConnFile> {
     }
 
     /**
-     * ?
-     *
-     * @param ?
-     * @return ?
+     * Populate subUnits
      */
     public void populateSubUnits() {
-
+        subUnits.forEach(connFile -> populateSubUnit(connFile));
     }
 
     /**
-     * ?
+     * Populate subUnit
      *
-     * @param ?
-     * @return ?
+     * @param subUnit
      */
-    private void populateSubUnit(ConnFile subUnit) {
+    public void populateSubUnit(ConnFile subUnit) {
         if (isFileInSubUnitReadyToPopulate.test(subUnit)) {
             List<Conn> list = loadConnsFromSubUnit(subUnit);
 
+            if (list != null) {
+                // Set Conn object reference to his ConnFile parent object
+                list.forEach(conn -> conn.setParent(subUnit));
+                subUnit.getSubUnits().addAll(list);
+            }
         }
     }
-
-    //TODO (add/create?) javadoc method header template like below:
-    /**
-     * ?
-     *
-     * @param ?
-     * @return ?
-     */
 
     // #####################################################################################
 

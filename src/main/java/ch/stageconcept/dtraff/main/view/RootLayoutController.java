@@ -22,6 +22,7 @@ import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
@@ -52,6 +53,7 @@ public class RootLayoutController {
     private static final String NETWORK = "Network";
 
     // ConnRoot treeView CSS resource
+    // !WARNING! In order to use file that reside in resources folder, don’t forget to add a slash before file name!
     private static final String CONNROOT_TREEVIEW_CSS = "/connRootTreeView.css";
 
     // Initializing static text
@@ -108,8 +110,8 @@ public class RootLayoutController {
     private MenuItem editPreferencesMenuItem;
 
     private ConnRoot connRoot;    // ConnRoot description to be used in a treeView : ConnRoot (root node) - ConnFile - Conn - Database - (...)
-    private ModelTree<ConnUnit<?>> connectionTree;
-    private TreeView<ConnUnit<?>> connectionTreeView;
+    private ModelTree<ConnUnit<?>> connTree;
+    private TreeView<ConnUnit<?>> connTreeView;
     private Preferences preferences = Preferences.userRoot().node(ConnRoot.PREFS_PATH);  // User preferences
     private ObjectProperty<ConnFileState> selectedConnFileState = new SimpleObjectProperty<>();
 
@@ -124,8 +126,8 @@ public class RootLayoutController {
         return initializingLabel;
     }
 
-    public TreeView<ConnUnit<?>> getConnectionTreeView() {
-        return connectionTreeView;
+    public TreeView<ConnUnit<?>> getConnTreeView() {
+        return connTreeView;
     }
 
 // Methods
@@ -189,7 +191,9 @@ public class RootLayoutController {
      */
     private void anteInitialize() {
 
-        connectionTree = new ModelTree<>(connRoot,
+        connRoot.populateSubUnits();
+
+        connTree = new ModelTree<>(connRoot,
                 ConnUnit::getSubUnits,
                 ConnUnit::nameProperty,
                 ConnUnit::iconProperty,
@@ -198,18 +202,36 @@ public class RootLayoutController {
 
         //TODO on close/delete connRoot subUnits.. maintain treeView and related ObservableList synchronized.
 
-        connectionTreeView = connectionTree.getTreeView();
+        connTreeView = connTree.getTreeView();
 
+        //TODO check if sorting processes refactor is needed.
         connRoot.sortSubUnitsOnChangeListener();
         // Initial sort
         connRoot.sortSubUnits();
 
         // CSS pseudo class treeView style.
-        // !WARNING! In order to use file that reside in resources folder, don’t forget to add a slash before file name!
-        connectionTreeView.getStylesheets().add(getClass().getResource(CONNROOT_TREEVIEW_CSS).toExternalForm());
+        connTreeView.getStylesheets().add(getClass().getResource(CONNROOT_TREEVIEW_CSS).toExternalForm());
 
-        connectionTreeView.getRoot().setExpanded(true);
+        connTreeView.getRoot().setExpanded(true);
 
+    }
+
+    private void connTreeViewOnMouseClicked(MouseEvent event) {
+
+        //TODO add double click behavior on broken file to open fileChooser.
+        //TODO revise not wanted behavior: - double click on expand icon but not selected item, trigger double click action on other selected item.
+
+        // Double click on ConnRoot treeView
+        if(event.getClickCount() == 2 &&
+                connTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile) {
+
+            ConnFile connFile = (ConnFile) connTreeView.getSelectionModel().getSelectedItem().getValue();
+
+            if (connFile.isBroken()) {
+                System.out.println("Broken -> file chooser!");
+            }
+            else if (connFile.isEncrypted()) connRoot.decryptPassword(connFile).populateSubUnit(connFile);
+        }
     }
 
     /**
@@ -220,25 +242,20 @@ public class RootLayoutController {
      */
     private void postInitialize() {
 
-        rootBorderPane.setLeft(connectionTreeView);
+        rootBorderPane.setLeft(connTreeView);
 
-        // debug mode
-        //printChildren(connectionTreeView.getRoot());
-
-        //TODO add double click behavior on broken file to open fileChooser.
-        //TODO refactor string format (cf. ConnRoot namesFileNamesToString) in enter password dialog.
-        // Double click on ConnRoot treeView
-        connectionTreeView.setOnMouseClicked((event) ->
+        //TODO refactor with connTreeViewOnMouseClicked method see above!
+        connTreeView.setOnMouseClicked((event) ->
         {
             if(event.getClickCount() == 2 &&
-                    connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile) {
+                    connTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile) {
 
-                //TreeItem<?> item = connectionTreeView.getSelectionModel().getSelectedItem();
-                ConnFile connFile = (ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue();
+                ConnFile connFile = (ConnFile) connTreeView.getSelectionModel().getSelectedItem().getValue();
 
-                if (connFile.isEncrypted() && decryptConnFile(connFile)) {
-                    populateSubunit(connFile, loadConnDataFromConnFile(connFile));
+                if (connFile.isBroken()) {
+                    System.out.println("Broken -> file chooser!");
                 }
+                else if (connFile.isEncrypted()) connRoot.decryptPassword(connFile).populateSubUnit(connFile);
             }
         });
 
@@ -251,7 +268,7 @@ public class RootLayoutController {
 
         // Some File - menus disable property setting if the ConnRoot treeView
         // selected item is not a ConnFile object and other menu specific related conditions
-        connectionTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+        connTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.getValue() instanceof ConnFile) {
                 // Following line is related on double click (see above and below)
                 selectedConnFileState.bind(((ConnFile) newValue.getValue()).stateProperty());
@@ -315,19 +332,19 @@ public class RootLayoutController {
         /*
         // Old version with BooleanBinding
         newServerConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
-                        connectionTreeView.getSelectionModel().getSelectedItem() == null ||
-                                !(connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile) ||
-                                (connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile &&
-                                        (((ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue()).isBroken() ||
-                                                ((ConnFile) connectionTreeView.getSelectionModel().getSelectedItem().getValue()).isEncrypted())),
-                connectionTreeView.getSelectionModel().selectedItemProperty()));
+                        connTreeView.getSelectionModel().getSelectedItem() == null ||
+                                !(connTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile) ||
+                                (connTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile &&
+                                        (((ConnFile) connTreeView.getSelectionModel().getSelectedItem().getValue()).isBroken() ||
+                                                ((ConnFile) connTreeView.getSelectionModel().getSelectedItem().getValue()).isEncrypted())),
+                connTreeView.getSelectionModel().selectedItemProperty()));
         */
 
         // Disable tool bar menu File - Server Connection - Edit if no item or not a Conn object instance are selected in ConnRoot treeView
         editServerConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
-                        connectionTreeView.getSelectionModel().getSelectedItem() == null ||
-                                !(connectionTreeView.getSelectionModel().getSelectedItem().getValue() instanceof Conn),
-                connectionTreeView.getSelectionModel().selectedItemProperty()));
+                        connTreeView.getSelectionModel().getSelectedItem() == null ||
+                                !(connTreeView.getSelectionModel().getSelectedItem().getValue() instanceof Conn),
+                connTreeView.getSelectionModel().selectedItemProperty()));
 
         // Disable tool bar menu File - Server Connection if File - Server Connection - New and Edit are disabled
         serverConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
@@ -559,7 +576,7 @@ public class RootLayoutController {
     private void handleEditConnection() {
         // The tool bar menu is disabled if none or not a Conn is selected in Connection treeView,
         // so the item could only be a Conn -> (cast)
-        Conn conn = (Conn) connectionTreeView.getSelectionModel().getSelectedItem().getValue();
+        Conn conn = (Conn) connTreeView.getSelectionModel().getSelectedItem().getValue();
         conn.editConnection();
 
         //TODO Find a solution for the ConnEditDialogController Test Conn button side effect that update the edited conn:
@@ -611,7 +628,7 @@ public class RootLayoutController {
     private ConnFile getSelectedConnFile() {
 
         try {
-            Object selectedObject = connectionTreeView.getSelectionModel().getSelectedItem().getValue();
+            Object selectedObject = connTreeView.getSelectionModel().getSelectedItem().getValue();
 
             if (selectedObject instanceof ConnFile) {
                 return (ConnFile) selectedObject;
