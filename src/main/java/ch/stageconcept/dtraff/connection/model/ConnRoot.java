@@ -8,6 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.codefx.libfx.listener.handle.ListenerHandle;
@@ -188,7 +189,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
         ContextMenu contextMenu = new ContextMenu();
 
         MenuItem newFileMenuItem = new MenuItem(MENU_NEW_FILE);
-        newFileMenuItem.setOnAction((ActionEvent t) -> newConnFile());
+        newFileMenuItem.setOnAction(newConnFile());
 
         MenuItem openFileMenuItem = new MenuItem(MENU_OPEN_FILE);
         openFileMenuItem.setOnAction((ActionEvent t) -> getRootLayoutController().openConnFile());
@@ -542,22 +543,24 @@ public class ConnRoot extends ConnUnit<ConnFile> {
 
     }
 
-    //TODO refactor (at least, review): newConnFile
+    //TODO refactor (at least, review (name newConnFile vs newSubUnit?)): newConnFile
     /**
      * New ConnFile object.
      * Create new File entry to Connections treeView.
      */
-    public void newConnFile() {
-        ConnFile connFile = new ConnFile(CONNFILE_DEFAULT_NAME);
-        connFile.setRootLayoutController(rootLayoutController);
-        if (ConnFileEditor.INSTANCE.supply(connFile)) {
-            if (connFile.isPasswordProtected()) {
-                connFile.setDecrypted();
+    public EventHandler<ActionEvent> newConnFile() {
+        return event -> {
+            ConnFile connFile = new ConnFile(CONNFILE_DEFAULT_NAME);
+            connFile.setRootLayoutController(rootLayoutController);
+            if (ConnFileEditor.INSTANCE.supply(connFile)) {
+                if (connFile.isPasswordProtected()) {
+                    connFile.setDecrypted();
+                }
+                connFile.setParent(this);
+                getSubUnits().add(connFile);
+                prefs.put(connFile.getName(), connFile.getFileName());
             }
-            connFile.setParent(this);
-            getSubUnits().add(connFile);
-            prefs.put(connFile.getName(), connFile.getFileName());
-        }
+        };
     }
 
     //TODO refactor (at least, review): closeConnFile

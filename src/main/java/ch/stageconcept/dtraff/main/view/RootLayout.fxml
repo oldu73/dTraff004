@@ -15,7 +15,7 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-                  <MenuItem fx:id="fileNewMenuItem" mnemonicParsing="false" onAction="#handleFileNew" text="New" />
+                  <MenuItem fx:id="fileNewMenuItem" mnemonicParsing="false" text="New" />
                   <MenuItem fx:id="fileOpenMenuItem" mnemonicParsing="false" onAction="#handleFileOpen" text="Open" />
                   <MenuItem fx:id="fileEnterPasswordMenuItem" mnemonicParsing="false" onAction="#handleFileEnterPassword" text="Enter Password" />
                   <MenuItem fx:id="fileCloseMenuItem" mnemonicParsing="false" onAction="#handleFileClose" text="Close" />

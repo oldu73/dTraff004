@@ -20,7 +20,9 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Group;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -184,177 +186,6 @@ public class RootLayoutController {
     }
 
     /**
-     * Ante initialize
-     *
-     * With initialization label on main
-     * window background displayed (and animated).
-     */
-    private void anteInitialize() {
-
-        connRoot.populateSubUnits();
-
-        connTree = new ModelTree<>(connRoot,
-                ConnUnit::getSubUnits,
-                ConnUnit::nameProperty,
-                ConnUnit::iconProperty,
-                ConnUnit::menuProperty,
-                unit -> PseudoClass.getPseudoClass(unit.getClass().getSimpleName().toLowerCase()));
-
-        //TODO on close/delete connRoot subUnits.. maintain treeView and related ObservableList synchronized.
-
-        connTreeView = connTree.getTreeView();
-
-        //TODO check if sorting processes refactor is needed.
-        connRoot.sortSubUnitsOnChangeListener();
-        // Initial sort
-        connRoot.sortSubUnits();
-
-        // CSS pseudo class treeView style.
-        connTreeView.getStylesheets().add(getClass().getResource(CONNROOT_TREEVIEW_CSS).toExternalForm());
-
-        connTreeView.getRoot().setExpanded(true);
-
-    }
-
-    private void connTreeViewOnMouseClicked(MouseEvent event) {
-
-        //TODO add double click behavior on broken file to open fileChooser.
-        //TODO revise not wanted behavior: - double click on expand icon but not selected item, trigger double click action on other selected item.
-
-        // Double click on ConnRoot treeView
-        if(event.getClickCount() == 2 &&
-                connTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile) {
-
-            ConnFile connFile = (ConnFile) connTreeView.getSelectionModel().getSelectedItem().getValue();
-
-            if (connFile.isBroken()) {
-                System.out.println("Broken -> file chooser!");
-            }
-            else if (connFile.isEncrypted()) connRoot.decryptPassword(connFile).populateSubUnit(connFile);
-        }
-    }
-
-    /**
-     * Post initialize
-     *
-     * After initialization label on main
-     * window background disappear (fade out).
-     */
-    private void postInitialize() {
-
-        rootBorderPane.setLeft(connTreeView);
-
-        //TODO refactor with connTreeViewOnMouseClicked method see above!
-        connTreeView.setOnMouseClicked((event) ->
-        {
-            if(event.getClickCount() == 2 &&
-                    connTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile) {
-
-                ConnFile connFile = (ConnFile) connTreeView.getSelectionModel().getSelectedItem().getValue();
-
-                if (connFile.isBroken()) {
-                    System.out.println("Broken -> file chooser!");
-                }
-                else if (connFile.isEncrypted()) connRoot.decryptPassword(connFile).populateSubUnit(connFile);
-            }
-        });
-
-        // ### Tool bar menu ###
-        // #####################
-
-        // Some File - menus disable property initial state
-        newServerConnectionMenuItem.setDisable(true);
-        fileEnterPasswordMenuItem.setDisable(true);
-
-        // Some File - menus disable property setting if the ConnRoot treeView
-        // selected item is not a ConnFile object and other menu specific related conditions
-        connTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.getValue() instanceof ConnFile) {
-                // Following line is related on double click (see above and below)
-                selectedConnFileState.bind(((ConnFile) newValue.getValue()).stateProperty());
-
-                // debug mode
-                //System.out.print("1 ");
-
-                // ### File - Server Connection - New: Disable if the ConnRoot treeView
-                // selected item is not a clear or decrypted ConnFile object
-                if (((ConnFile) newValue.getValue()).isClear() ||
-                        ((ConnFile) newValue.getValue()).isDecrypted()) {
-                    newServerConnectionMenuItem.setDisable(false);
-
-                    // debug mode
-                    //System.out.print("2 ");
-
-                } else {
-                    newServerConnectionMenuItem.setDisable(true);
-
-                    // debug mode
-                    //System.out.print("3 ");
-
-                }
-                // ############################################################
-
-                // ### File - Enter Password: Disable if the ConnRoot treeView
-                // selected item is not an encrypted ConnFile object
-                if (((ConnFile) newValue.getValue()).isEncrypted()) {
-                    fileEnterPasswordMenuItem.setDisable(false);
-                } else {
-                    fileEnterPasswordMenuItem.setDisable(true);
-                }
-                // ############################################################
-
-            } else {
-                // ConnRoot treeView selected item is NOT a ConnFile object
-                newServerConnectionMenuItem.setDisable(true);
-                fileEnterPasswordMenuItem.setDisable(true);
-
-                // debug mode
-                //System.out.print("4 ");
-
-            }
-        });
-
-        // After double click on an encrypted file to enter correct password,
-        // the serverConnectionMenuItem remain disabled until treeView selection changed!
-        // So, the bellowing lines deserve to track ConnFile (in ConnRoot treeView)
-        // selected object state changes in order to update the newServerConnectionMenuItem disabled status.
-        selectedConnFileState.addListener((observable, oldValue, newValue) -> {
-            if (oldValue != null && (oldValue.equals(ConnFileState.ENCRYPTED) && newValue.equals(ConnFileState.DECRYPTED))) {
-                newServerConnectionMenuItem.setDisable(false);
-                fileEnterPasswordMenuItem.setDisable(true);
-
-                // debug mode
-                //System.out.print("5 ");
-
-            }
-        });
-
-        /*
-        // Old version with BooleanBinding
-        newServerConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
-                        connTreeView.getSelectionModel().getSelectedItem() == null ||
-                                !(connTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile) ||
-                                (connTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile &&
-                                        (((ConnFile) connTreeView.getSelectionModel().getSelectedItem().getValue()).isBroken() ||
-                                                ((ConnFile) connTreeView.getSelectionModel().getSelectedItem().getValue()).isEncrypted())),
-                connTreeView.getSelectionModel().selectedItemProperty()));
-        */
-
-        // Disable tool bar menu File - Server Connection - Edit if no item or not a Conn object instance are selected in ConnRoot treeView
-        editServerConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
-                        connTreeView.getSelectionModel().getSelectedItem() == null ||
-                                !(connTreeView.getSelectionModel().getSelectedItem().getValue() instanceof Conn),
-                connTreeView.getSelectionModel().selectedItemProperty()));
-
-        // Disable tool bar menu File - Server Connection if File - Server Connection - New and Edit are disabled
-        serverConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
-                        newServerConnectionMenuItem.isDisable() && editServerConnectionMenuItem.isDisable(),
-                newServerConnectionMenuItem.disableProperty(),
-                editServerConnectionMenuItem.disableProperty()));
-
-    }
-
-    /**
      * Initializing Label Text Animation.
      * SRC: http://stackoverflow.com/questions/33646317/typing-animation-on-a-text-with-javafx
      *
@@ -405,11 +236,169 @@ public class RootLayoutController {
     }
 
     /**
-     * Called when the user selects the tool bar File - New menu.
+     * Ante initialize
+     *
+     * Eventually with initialization label on main
+     * window background displayed (and animated).
      */
-    @FXML
-    private void handleFileNew() {
-        connRoot.newConnFile();
+    private void anteInitialize() {
+
+        connRoot.populateSubUnits();
+
+        connTree = new ModelTree<>(connRoot,
+                ConnUnit::getSubUnits,
+                ConnUnit::nameProperty,
+                ConnUnit::iconProperty,
+                ConnUnit::menuProperty,
+                unit -> PseudoClass.getPseudoClass(unit.getClass().getSimpleName().toLowerCase()));
+
+        //TODO on close/delete connRoot subUnits.. maintain treeView and related ObservableList synchronized.
+
+        connTreeView = connTree.getTreeView();
+
+        //TODO check if sorting processes refactor is needed.
+        connRoot.sortSubUnitsOnChangeListener();
+        // Initial sort
+        connRoot.sortSubUnits();
+
+        // CSS pseudo class treeView style.
+        connTreeView.getStylesheets().add(getClass().getResource(CONNROOT_TREEVIEW_CSS).toExternalForm());
+
+        connTreeView.getRoot().setExpanded(true);
+
+    }
+
+    /**
+     * Post initialize
+     *
+     * After initialization label on main
+     * window background disappear (fade out).
+     */
+    private void postInitialize() {
+
+        // Set connTreeView on the left part of the rootBorderPane
+        rootBorderPane.setLeft(connTreeView);
+
+        // Handle double click behavior on a broken or encrypted ConnFile instance
+        connTreeView.setOnMouseClicked(connTreeViewOnMouseClicked());
+
+        // ### Tool bar menu ###
+        // #####################
+
+        // ### Enable/Disable
+        menusDisable();
+
+        // ### Action
+        menusAction();
+
+        // #####################
+
+    }
+
+    /**
+     * Action on a conTreeView ConnFile instance double click :
+     * - if broken -> file chooser
+     * - if encrypted -> try to decrypt and on succeeded -> populate subUnit
+     *
+     * @return MouseEvent Handler
+     */
+    private EventHandler<? super MouseEvent> connTreeViewOnMouseClicked() {
+        return event -> {
+            if (event.getClickCount() == 2 &&   // double click
+                    !event.getTarget().getClass().equals(Group.class) &&    // not on expand/collapse icon
+                    connTreeView.getSelectionModel().getSelectedItem().getValue() instanceof ConnFile)  // and selected is a ConnFile instance
+            {
+                ConnFile connFile = (ConnFile) connTreeView.getSelectionModel().getSelectedItem().getValue();
+
+                if (connFile.isBroken()) {
+                    //TODO add double click behavior on broken file to open fileChooser.
+                    System.out.println("Broken -> file chooser!");
+                }
+                else if (connFile.isEncrypted()) connRoot.decryptPassword(connFile).populateSubUnit(connFile);
+            }
+        };
+    }
+
+    /**
+     * Main menus disable process.
+     */
+    private void menusDisable() {
+
+        // Some File - menus disable property initial state
+        setMenusDisable(true, newServerConnectionMenuItem, fileEnterPasswordMenuItem);
+
+        // Some File - menus disable property setting if the ConnRoot treeView
+        // selected item is not a ConnFile object and other menu specific related conditions
+        connTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.getValue() instanceof ConnFile) {
+
+                ConnFile selectedConnFile = (ConnFile) newValue.getValue();
+
+                // Following line is related to double click action that may
+                // change selected ConnFile state. Therefor menus disable property
+                // should follow directly (as soon as state change) even if connTreeView
+                // selected item doesn't change.
+                selectedConnFileState.bind(selectedConnFile.stateProperty());
+
+                // ### File - Server Connection - New: Disable if the ConnRoot treeView
+                // selected item is not a clear or decrypted ConnFile object
+                newServerConnectionMenuItem.setDisable(!(selectedConnFile.isClear() || selectedConnFile.isDecrypted()));
+
+                // ### File - Enter Password: Disable if the ConnRoot treeView
+                // selected item is not an encrypted ConnFile object
+                fileEnterPasswordMenuItem.setDisable(!selectedConnFile.isEncrypted());
+
+            } else setMenusDisable(true, newServerConnectionMenuItem, fileEnterPasswordMenuItem);  // connTreeView selected item is NOT a ConnFile instance
+        });
+
+        // After double click on an encrypted file to enter correct password,
+        // the serverConnectionMenuItem remain disabled until treeView selection changed!
+        // So, the bellowing lines deserve to track ConnFile (in connTreeView)
+        // selected object state changes in order to update the newServerConnectionMenuItem disabled status.
+        selectedConnFileState.addListener((observable, oldValue, newValue) -> {
+            if (oldValue != null && (oldValue.equals(ConnFileState.ENCRYPTED) && newValue.equals(ConnFileState.DECRYPTED))) {
+                newServerConnectionMenuItem.setDisable(false);
+                fileEnterPasswordMenuItem.setDisable(true);
+            }
+        });
+
+        // Disable tool bar menu File - Server Connection - Edit if no item or not a Conn object instance are selected in ConnRoot treeView
+        editServerConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
+                        connTreeView.getSelectionModel().getSelectedItem() == null ||
+                                !(connTreeView.getSelectionModel().getSelectedItem().getValue() instanceof Conn),
+                connTreeView.getSelectionModel().selectedItemProperty()));
+
+        // Disable tool bar menu File - Server Connection if File - Server Connection - New and Edit are disabled
+        serverConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
+                        newServerConnectionMenuItem.isDisable() && editServerConnectionMenuItem.isDisable(),
+                newServerConnectionMenuItem.disableProperty(),
+                editServerConnectionMenuItem.disableProperty()));
+
+    }
+
+    /**
+     * Set disable property of each menu in list
+     * (JavaFX MenuItem variable length argument lists),
+     * to disable argument value (true/false).
+     *
+     * SRC, varargs(variable length argument lists):
+     * http://www.deitel.com/articles/java_tutorials/20060106/VariableLengthArgumentLists.html
+     *
+     * @param disable
+     * @param menus
+     */
+    private void setMenusDisable(boolean disable, MenuItem... menus) {
+        for (MenuItem menu : menus) menu.setDisable(disable);
+    }
+
+    /**
+     * Main menus action process.
+     */
+    private void menusAction() {
+
+        // Action when the user selects the tool bar File - New menu.
+        fileNewMenuItem.setOnAction(connRoot.newConnFile());
+
     }
 
     /**

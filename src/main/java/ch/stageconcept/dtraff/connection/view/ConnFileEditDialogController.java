@@ -137,6 +137,8 @@ public class ConnFileEditDialogController {
             folderField.setText(null);
         }
 
+        System.out.println("Back from browsing..");
+
     }
 
     /**
