@@ -262,6 +262,18 @@ public class ConnRoot extends ConnUnit<ConnFile> {
         return () -> hasSubUnit(ConnFile::isEncrypted) && Pref.isDecryptFilePassPopUpAtStartOrOnOpen();
     }
 
+    /**
+     * subUnits contains at least one empty file, clear or decrypted
+     * and user preference to alert for empty files on exit is set
+     *
+     * @return Boolean.TRUE if subUnits has empty clear/decrypted,
+     * Boolean.FALSE otherwise
+     */
+    public Supplier<Boolean> hasEmptyAndIsPref() {
+        //TODO implement alert for empty files on exit user preference
+        return () -> (hasSubUnit(ConnFile::isEmptyClear) || hasSubUnit(ConnFile::isEmptyDecrypted)) && true;
+    }
+
     // #####################################################################################
 
     // Methods #############################################################################
@@ -400,6 +412,26 @@ public class ConnRoot extends ConnUnit<ConnFile> {
                 ALERR_LOAD_DATA_TITLE,
                 ALERR_LOAD_DATA_HEADER,
                 ALERR_LOAD_DATA_CONTENT + namesFileNamesToString(getSubUnitsSubList(ConnFile::isBroken)), true);
+
+    }
+
+    //TODO javadoc
+    public void alertEmptyFiles() {
+        //TODO add alertEmptyFiles on exit pref, with don't warn again check box in exit dialog lower left corner.
+
+        //TODO exit empty file warning static texts
+
+        AlertDialog.provide(stage,
+                Alert.AlertType.ERROR,
+                ALERR_LOAD_DATA_TITLE,
+                ALERR_LOAD_DATA_HEADER,
+                ALERR_LOAD_DATA_CONTENT
+                        + namesFileNamesToString(getSubUnitsSubList(((Predicate<ConnFile>) ConnFile::isEmptyClear)
+                                .or(ConnFile::isEmptyDecrypted))), true);
+
+        // SRC: https://www.leveluplunch.com/java/examples/java-util-function-predicate-example/
+
+        //TODO remove empty file user preference entries
 
     }
 
@@ -553,9 +585,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
             ConnFile connFile = new ConnFile(CONNFILE_DEFAULT_NAME);
             connFile.setRootLayoutController(rootLayoutController);
             if (ConnFileEditor.INSTANCE.supply(connFile)) {
-                if (connFile.isPasswordProtected()) {
-                    connFile.setDecrypted();
-                }
+                if (connFile.isPasswordProtected()) connFile.setEmptyDecrypted();
                 connFile.setParent(this);
                 getSubUnits().add(connFile);
                 prefs.put(connFile.getName(), connFile.getFileName());

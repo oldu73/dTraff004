@@ -602,9 +602,20 @@ public class RootLayoutController {
 
     /**
      * Closes the application.
+     * ?????????????? If empty clear/decrypted files... ??????????????
      */
     @FXML
     private void handleExit() {
+
+        // If connRoot has empty clear/decrypted file and user pref is set then,
+        // popup an alert message to inform user about empty clear/decrypted files.
+        // If Ok, remove empty clear/decrypted file entries in user preferences then exit
+        // else, return back to application.
+        Is1st.do2nd(connRoot.hasEmptyAndIsPref(), connRoot::alertEmptyFiles);
+
+        //TODO handle exit on close application with window "up right cross"
+        //TODO on next application start after crash, empty files will appear as broken, is it ok?
+
         System.exit(0);
     }
 

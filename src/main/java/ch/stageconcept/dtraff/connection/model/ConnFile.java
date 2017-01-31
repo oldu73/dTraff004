@@ -25,7 +25,7 @@ public class ConnFile extends ConnUnit<Conn> {
 
     // ### Attributes #####################################################################
 
-    private static final String ICON_FILENAME = ConnFileState.EMPTY.getIconFileName();
+    private static final String ICON_FILENAME = ConnFileState.EMPTY_CLEAR.getIconFileName();
 
     public static final String MENU_OPEN_FILE = "Open File";
     private static final String MENU_NEW_CONNECTION = "New Connection";
@@ -61,7 +61,7 @@ public class ConnFile extends ConnUnit<Conn> {
        this.parent = new SimpleObjectProperty<>();
 
        // State
-       state = new SimpleObjectProperty<>(ConnFileState.EMPTY);
+       state = new SimpleObjectProperty<>(ConnFileState.EMPTY_CLEAR);
 
        // Update icon when state change
        stateProperty().addListener((observable, oldvalue, newvalue) -> {
@@ -206,18 +206,18 @@ public class ConnFile extends ConnUnit<Conn> {
     }
 
     /**
-     * Test EMPTY state
-     * @return true on EMPTY state, false otherwise
+     * Test EMPTY_CLEAR state
+     * @return true on EMPTY_CLEAR state, false otherwise
      */
-    public boolean isEmpty() {
-        return state.getValue().equals(ConnFileState.EMPTY);
+    public boolean isEmptyClear() {
+        return state.getValue().equals(ConnFileState.EMPTY_CLEAR);
     }
 
     /**
-     * Set to EMPTY state
+     * Set to EMPTY_CLEAR state
      */
-    public void setEmpty() {
-        setState(ConnFileState.EMPTY);
+    public void setEmptyClear() {
+        setState(ConnFileState.EMPTY_CLEAR);
     }
 
     /**
@@ -248,6 +248,21 @@ public class ConnFile extends ConnUnit<Conn> {
      */
     public void setEncrypted() {
         setState(ConnFileState.ENCRYPTED);
+    }
+
+    /**
+     * Test EMPTY_DECRYPTED state
+     * @return true on EMPTY_DECRYPTED state, false otherwise
+     */
+    public boolean isEmptyDecrypted() {
+        return state.getValue().equals(ConnFileState.EMPTY_DECRYPTED);
+    }
+
+    /**
+     * Set to EMPTY_DECRYPTED state
+     */
+    public void setEmptyDecrypted() {
+        setState(ConnFileState.EMPTY_DECRYPTED);
     }
 
     /**
