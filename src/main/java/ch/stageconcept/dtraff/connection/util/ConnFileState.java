@@ -7,7 +7,11 @@ package ch.stageconcept.dtraff.connection.util;
  */
 public enum ConnFileState {
 
-    BROKEN("fileBroken001.png"), CLEAR("file001.png"), ENCRYPTED("fileLock001.png"), DECRYPTED("fileUnLock001.png") ;
+    BROKEN("fileBroken001.png"),
+    EMPTY("fileEmpty001.png"),
+    CLEAR("fileClear001.png"),
+    ENCRYPTED("fileLock001.png"),
+    DECRYPTED("fileUnLock001.png") ;
 
     private String iconFileName ;
 

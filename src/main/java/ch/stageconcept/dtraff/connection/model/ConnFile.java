@@ -25,7 +25,7 @@ public class ConnFile extends ConnUnit<Conn> {
 
     // ### Attributes #####################################################################
 
-    private static final String ICON_FILENAME = ConnFileState.CLEAR.getIconFileName();
+    private static final String ICON_FILENAME = ConnFileState.EMPTY.getIconFileName();
 
     public static final String MENU_OPEN_FILE = "Open File";
     private static final String MENU_NEW_CONNECTION = "New Connection";
@@ -61,7 +61,7 @@ public class ConnFile extends ConnUnit<Conn> {
        this.parent = new SimpleObjectProperty<>();
 
        // State
-       state = new SimpleObjectProperty<>(ConnFileState.CLEAR);
+       state = new SimpleObjectProperty<>(ConnFileState.EMPTY);
 
        // Update icon when state change
        stateProperty().addListener((observable, oldvalue, newvalue) -> {
@@ -190,8 +190,6 @@ public class ConnFile extends ConnUnit<Conn> {
         this.rootLayoutController = rootLayoutController;
     }
 
-    // ### Methods #####################################################################
-
     /**
      * Test BROKEN state
      * @return true on BROKEN state, false otherwise
@@ -205,6 +203,21 @@ public class ConnFile extends ConnUnit<Conn> {
      */
     public void setBroken() {
         setState(ConnFileState.BROKEN);
+    }
+
+    /**
+     * Test EMPTY state
+     * @return true on EMPTY state, false otherwise
+     */
+    public boolean isEmpty() {
+        return state.getValue().equals(ConnFileState.EMPTY);
+    }
+
+    /**
+     * Set to EMPTY state
+     */
+    public void setEmpty() {
+        setState(ConnFileState.EMPTY);
     }
 
     /**
@@ -251,6 +264,8 @@ public class ConnFile extends ConnUnit<Conn> {
     public void setDecrypted() {
         setState(ConnFileState.DECRYPTED);
     }
+
+    // ### Methods #####################################################################
 
     /**
      * Open broken state ConnFile object (file).

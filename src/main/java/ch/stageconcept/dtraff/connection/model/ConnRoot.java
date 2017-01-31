@@ -286,7 +286,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
         if (!subUnits.isEmpty()) {
             setSubUnits(getSubUnitsSubList(connFile -> true), setBrokenIfFileNotExistOrDirectory);
             setSubUnits(getSubUnitsSubList(((Predicate<ConnFile>) ConnFile::isBroken).negate()),
-                    setEncryptedIfFilePasswordIsEncrypted);
+                    setEncryptedIfFilePasswordIsEncrypted.andThen(connFile -> {if (!connFile.isEncrypted()) connFile.setClear();} ));
         }
     }
 

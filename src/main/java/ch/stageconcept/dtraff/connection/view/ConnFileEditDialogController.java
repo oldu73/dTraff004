@@ -3,10 +3,18 @@ package ch.stageconcept.dtraff.connection.view;
 import ch.stageconcept.dtraff.connection.model.ConnFile;
 import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import ch.stageconcept.dtraff.util.AlertDialog;
+import javafx.application.Platform;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Dialog controller to edit details
@@ -27,6 +35,9 @@ public class ConnFileEditDialogController {
 
     @FXML
     private TextField folderField;
+
+    @FXML
+    private ProgressIndicator progressIndicator;
 
     @FXML
     private TextField fileField;
@@ -119,25 +130,86 @@ public class ConnFileEditDialogController {
 
     /**
      * Called when the user clicks browse.
+     *
+     * SRC: http://stackoverflow.com/questions/37393642/creating-a-javafx-dialog-inside-a-javafx-task
+     * SRC: http://stackoverflow.com/questions/13838089/file-chooser-dialog-not-closing
+     * SRC: http://fabrice-bouye.developpez.com/tutoriels/javafx/gui-service-tache-de-fond-thread-javafx/
+     * SRC: http://stackoverflow.com/questions/16978557/wait-until-platform-runlater-is-executed-using-latch
+     * SRC: http://tutorials.jenkov.com/java-util-concurrent/countdownlatch.html
+     *
      */
     @FXML
     private void handleBrowse() {
-        //TODO Put in "Thread"
+
         // Could take some times to get back from system to application
-        // with path information. During this time, nothing happen and the UI is frozen.
-        // So, put in task or something alike to let user be informed that process is on the way.
-        // (UI disabled and mouse waiting symbol animation.)
+        // with path information. During this time, nothing happen and the UI is frozen...
+        // ==>> CountDownLatch, Service, Task, runLater and Thread
 
-        DirectoryChooser directoryChooser = new DirectoryChooser();
+        final CountDownLatch latch = new CountDownLatch(1);
 
-        try {
-            folderField.setText(directoryChooser.showDialog(dialogStage).getAbsolutePath());
-        } catch(NullPointerException e)
-        {
-            folderField.setText(null);
-        }
+        // SRC: http://stackoverflow.com/questions/13395114/how-to-initialize-liststring-object-in-java
+        // SRC: http://stackoverflow.com/questions/1005073/initialization-of-an-arraylist-in-one-line
+        List<Button> buttonList = new ArrayList<>(Arrays.asList(browseButton, okButton, cancelButton));
 
-        System.out.println("Back from browsing..");
+        // SRC: https://www.mkyong.com/java8/java-8-foreach-examples/
+        buttonList.forEach(button -> button.setDisable(true));
+
+        final Service<Void> browseService = new Service<Void>() {
+
+            @Override
+            protected Task<Void> createTask() {
+                return new Task<Void>() {
+
+                    @Override
+                    protected Void call() throws Exception {
+
+                        Platform.runLater(() -> {
+                            progressIndicator.setVisible(true);
+
+                            DirectoryChooser directoryChooser = new DirectoryChooser();
+
+                            try {
+                                folderField.setText(directoryChooser.showDialog(dialogStage).getAbsolutePath());
+                            } catch(NullPointerException e)
+                            {
+                                folderField.setText(null);
+                            }
+
+                            latch.countDown();
+                        });
+
+                        return null;
+                    }
+                };
+            }
+        };
+
+        browseService.start();
+
+        // asynchronous thread waiting for the process (browseService) to finish
+        new Thread(() -> {
+
+            // debug mode
+            //System.out.println("Await");
+
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                //e.printStackTrace();
+            }
+
+            // queuing the done notification into the javafx thread
+
+            Platform.runLater(() -> {
+
+                // debug mode
+                //System.out.println("Done");
+
+                buttonList.forEach(button -> button.setDisable(false));
+                progressIndicator.setVisible(false);
+            });
+
+        }).start();
 
     }
 

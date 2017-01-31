@@ -5,6 +5,7 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -44,6 +45,7 @@
             <PasswordField fx:id="repeatPasswordField" GridPane.columnIndex="2" GridPane.rowIndex="4" />
             <Button fx:id="browseButton" mnemonicParsing="false" onAction="#handleBrowse" text="Browse" GridPane.columnIndex="3" GridPane.halignment="RIGHT" />
             <Label text="Folder" />
+            <ProgressIndicator fx:id="progressIndicator" visible="false" GridPane.columnIndex="1" />
          </children>
       </GridPane>
       <ButtonBar layoutX="386.0" layoutY="346.0" prefHeight="40.0" prefWidth="353.0" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0">
