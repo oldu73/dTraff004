@@ -75,6 +75,10 @@ public class ConnRoot extends ConnUnit<ConnFile> {
     private static final String ALCNF_BAD_PASSWORD_HEADER = "Bad password!";
     private static final String ALCNF_BAD_PASSWORD_CONTENT = "Try again?";
 
+    private static final String ALCNF_EMPTY_FILE_TITLE = "Empty File";
+    private static final String ALCNF_EMPTY_FILE_HEADER = "Ok to leave?";
+    private static final String ALCNF_EMPTY_FILE_CONTENT = "On leaving, following empty file(s) will be removed from list:\n";
+
     private static Stage stage;
     private RootLayoutController rootLayoutController;
 
@@ -415,23 +419,39 @@ public class ConnRoot extends ConnUnit<ConnFile> {
 
     }
 
-    //TODO javadoc
-    public void alertEmptyFiles() {
-        //TODO add alertEmptyFiles on exit pref, with don't warn again check box in exit dialog lower left corner.
+    /**
+     * Alert popup dialog to inform user
+     * with empty clear/decrypted files.
+     *
+     * @return true if it's ok to leave application
+     * with empty file(s) knowing that they will
+     * be removed from list,
+     * false for getting back to application.
+     */
+    public boolean alertEmptyFiles() {
 
-        //TODO exit empty file warning static texts
+        //TODO add alertEmptyFiles on exit user preference.
+        //TODO empty file warning dialog with don't warn again check box in lower left corner (-> set user pref), (nice to have).
 
-        AlertDialog.provide(stage,
-                Alert.AlertType.ERROR,
-                ALERR_LOAD_DATA_TITLE,
-                ALERR_LOAD_DATA_HEADER,
-                ALERR_LOAD_DATA_CONTENT
+        Alert alert = AlertDialog.provide(stage,
+                Alert.AlertType.CONFIRMATION,
+                ALCNF_EMPTY_FILE_TITLE,
+                ALCNF_EMPTY_FILE_HEADER,
+                ALCNF_EMPTY_FILE_CONTENT
                         + namesFileNamesToString(getSubUnitsSubList(((Predicate<ConnFile>) ConnFile::isEmptyClear)
                                 .or(ConnFile::isEmptyDecrypted))), true);
-
         // SRC: https://www.leveluplunch.com/java/examples/java-util-function-predicate-example/
 
-        //TODO remove empty file user preference entries
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (result.get() == ButtonType.OK) {
+            // ... user chose OK
+            return true;
+        } else {
+            // ... user chose CANCEL or closed the dialog
+        }
+
+        return false;
 
     }
 

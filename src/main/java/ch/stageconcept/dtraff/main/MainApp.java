@@ -3,10 +3,13 @@ package ch.stageconcept.dtraff.main;
 import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import ch.stageconcept.dtraff.preference.model.Pref;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 
@@ -68,6 +71,16 @@ public class MainApp extends Application {
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle(APP_TITLE);
 
+        Platform.setImplicitExit(false);
+        // Called before last window has been closed
+        // SRC: http://stackoverflow.com/questions/17003906/prevent-cancel-closing-of-primary-stage-in-javafx-2-2
+        //primaryStage.setOnCloseRequest(event -> controller.handleExit(event));
+        primaryStage.setOnCloseRequest(event -> {
+            System.out.println(controller.isExit());
+            if (!controller.isExit()) controller.handleExit();
+            else Platform.exit();   //event.consume();
+        });
+
         primaryStage.setScene(scene);
 
         if (!Pref.isDecryptFilePassPopUpAtStartOrOnOpen() && !Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) {
@@ -100,5 +113,15 @@ public class MainApp extends Application {
 
         //launch(args);
     //}
+
+    /**
+     * Called automatically after last window has been closed
+     *
+     * SRC: http://stackoverflow.com/questions/26619566/javafx-stage-close-handler
+     */
+    @Override
+    public void stop(){
+        //controller.handleExit();
+    }
 
 }

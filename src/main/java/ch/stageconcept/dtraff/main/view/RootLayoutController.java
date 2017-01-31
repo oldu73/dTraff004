@@ -27,6 +27,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 import javax.xml.bind.JAXBContext;
@@ -116,6 +117,7 @@ public class RootLayoutController {
     private TreeView<ConnUnit<?>> connTreeView;
     private Preferences preferences = Preferences.userRoot().node(ConnRoot.PREFS_PATH);  // User preferences
     private ObjectProperty<ConnFileState> selectedConnFileState = new SimpleObjectProperty<>();
+    private boolean exit = false;
 
     // Getters and Setters
     // #####################################################################
@@ -132,7 +134,11 @@ public class RootLayoutController {
         return connTreeView;
     }
 
-// Methods
+    public boolean isExit() {
+        return exit;
+    }
+
+    // Methods
     // #####################################################################
 
     /**
@@ -601,22 +607,47 @@ public class RootLayoutController {
     }
 
     /**
-     * Closes the application.
-     * ?????????????? If empty clear/decrypted files... ??????????????
+     * Manage possible empty clear/decrypted files
+     * and close application.
      */
     @FXML
-    private void handleExit() {
+    public void handleExit() {
+    //public void handleExit(WindowEvent event) {
+
+        //TODO clean consume, also in MainApp
 
         // If connRoot has empty clear/decrypted file and user pref is set then,
         // popup an alert message to inform user about empty clear/decrypted files.
         // If Ok, remove empty clear/decrypted file entries in user preferences then exit
         // else, return back to application.
-        Is1st.do2nd(connRoot.hasEmptyAndIsPref(), connRoot::alertEmptyFiles);
 
-        //TODO handle exit on close application with window "up right cross"
-        //TODO on next application start after crash, empty files will appear as broken, is it ok?
+        // On application crash, acceptable behavior is that on next start empty files will appear as broken
+        // and should be manually removed (close/delete menus).
 
-        System.exit(0);
+
+
+        // ???!!!
+        //Is1st.do2nd(connRoot.hasEmptyAndIsPref(), connRoot::alertEmptyFiles);
+
+
+
+        if (connRoot.hasEmptyAndIsPref().get()) {
+            if (connRoot.alertEmptyFiles()) {
+                //TODO remove empty file user preference entries
+
+                //if (event != null) event.consume();
+
+                exit = true;
+
+                System.exit(0);
+            }
+        } else {
+            //TODO remove empty file user preference entries
+            System.exit(0);
+        }
+
+        // Get back to application!
+
     }
 
     /**
