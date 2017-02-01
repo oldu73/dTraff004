@@ -333,6 +333,13 @@ public class ConnFile extends ConnUnit<Conn> {
             //this.createAndAddSubUnit("Hello, world!");
             saveConnDataToFile();
         }
+
+        // Change state
+        if (getSubUnits() != null) {
+            if (isEmptyClear()) setClear();
+            else setDecrypted();
+        }
+
     }
 
     /**

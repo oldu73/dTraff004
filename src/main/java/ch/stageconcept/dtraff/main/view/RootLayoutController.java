@@ -24,6 +24,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
@@ -56,12 +57,18 @@ public class RootLayoutController {
     // ConnRoot treeView root denomination
     private static final String NETWORK = "Network";
 
+    // Wait icon resource file name
+    private static final String ICON_WAIT = "wait001.png";
+
     // ConnRoot treeView CSS resource
     // !WARNING! In order to use file that reside in resources folder, don’t forget to add a slash before file name!
     private static final String CONNROOT_TREEVIEW_CSS = "/connRootTreeView.css";
 
     // Initializing static text
     private static final String LABEL_INITIALIZING = "Initializing...";
+
+    // Pending opening file static text
+    private static final String PENDING_OPENING_FILE = "Opening file...";
 
     // Alerts statics texts
     private static final String ALINF_ABOUT_TITLE = "Data Traffic";
@@ -480,6 +487,32 @@ public class RootLayoutController {
     }
 
     /**
+     * Open ConnFile object.
+     */
+    public void openConnFile() {
+
+        File file = getXmlFile();
+
+        if (file != null) {
+            // name without extension
+            String name = file.getName().substring(0, file.getName().indexOf("."));
+            // file name (path)
+            String fileName = file.getAbsolutePath();
+
+            if (getConnFile(name) != null) alertAlreadyPresent(getConnFile(name));
+            else {
+                // Open ConnFile (file) and create new ConnRoot treeView entry
+                ConnFile connFile = new ConnFile(name);
+                connFile.setFileName(fileName);
+                connFile.setParent(connRoot);
+                connFile.setRootLayoutController(this);
+                connRoot.getSubUnits().add(connFile);
+                treatSubUnit(connFile, true);
+            }
+        }
+    }
+
+    /**
      * Open broken state ConnFile object (file)
      * @param connFile
      */
@@ -538,13 +571,29 @@ public class RootLayoutController {
      * @return File or null
      */
     private File getXmlFile() {
+
+        String tmpName = connRoot.getName();
+        connRoot.setName(PENDING_OPENING_FILE);
+        ImageView tmpIcon = connRoot.getIcon();
+        connRoot.setIcon(new ImageView(ICON_WAIT));
+        connTreeView.setDisable(true);
+
+        //TODO where am I!
+
         //TODO put in "Thread" like, when the fileChooser close, the UI is frozen for a while (depends of machine)
         FileChooser fileChooser = new FileChooser();
         // Set extension filter
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
         fileChooser.getExtensionFilters().add(extFilter);
+
         // Show open file dialog
-        return fileChooser.showOpenDialog(MainApp.primaryStage);
+        File file = fileChooser.showOpenDialog(MainApp.primaryStage);
+
+        connTreeView.setDisable(false);
+        connRoot.setIcon(tmpIcon);
+        connRoot.setName(tmpName);
+
+        return file;
     }
 
     /**
@@ -557,32 +606,6 @@ public class RootLayoutController {
                 ALINF_FILE_ALREADY_PRESENT_TITLE,
                 ALINF_FILE_ALREADY_PRESENT_HEADER,
                 ALINF_FILE_ALREADY_PRESENT_CONTENT + connFile.getFileName(), true);
-    }
-
-    /**
-     * Open ConnFile object.
-     */
-    public void openConnFile() {
-
-        File file = getXmlFile();
-
-        if (file != null) {
-            // name without extension
-            String name = file.getName().substring(0, file.getName().indexOf("."));
-            // file name (path)
-            String fileName = file.getAbsolutePath();
-
-            if (getConnFile(name) != null) alertAlreadyPresent(getConnFile(name));
-            else {
-                // Open ConnFile (file) and create new ConnRoot treeView entry
-                ConnFile connFile = new ConnFile(name);
-                connFile.setFileName(fileName);
-                connFile.setParent(connRoot);
-                connFile.setRootLayoutController(this);
-                connRoot.getSubUnits().add(connFile);
-                treatSubUnit(connFile, true);
-            }
-        }
     }
 
     /**
