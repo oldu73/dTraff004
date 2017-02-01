@@ -126,7 +126,60 @@ public class RootLayoutController {
     // Functional interface implementations
     // #####################################################################
 
-    // ...
+    /**
+     * Manage possible empty clear/decrypted files,
+     * or exit confirmation,
+     * and close application (or not).
+     *
+     * SRC: http://stackoverflow.com/questions/31540500/alert-box-for-when-user-attempts-to-close-application-using-setoncloserequest-in
+     */
+    private EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
+
+        // If connRoot has empty clear/decrypted file and user pref is set then,
+        // popup an alert message to inform user about empty clear/decrypted files.
+        // If Ok, remove empty clear/decrypted file entries in user preferences then exit
+        // else, return back to application.
+
+        // On application crash, acceptable behavior is that on next start empty files will appear as broken
+        // and should be manually removed (close/delete menus).
+
+        if (connRoot.hasEmptyAndIsPref().get()) {
+
+            if (!connRoot.alertEmptyFiles()) {
+                event.consume();    // Consume window close request event
+                return;             // and get back to application!
+            }
+
+        } else if (Pref.isWarnExitingOnClose()) {
+
+            // ### Exit confirmation
+
+            Alert alert = AlertDialog.provide(MainApp.primaryStage,
+                    Alert.AlertType.CONFIRMATION,
+                    ALCNF_EXIT_TITLE,
+                    ALCNF_EXIT_HEADER,
+                    ALCNF_EXIT_CONTENT, false);
+
+            Optional<ButtonType> result = alert.showAndWait();
+
+            if (!(result.get() == ButtonType.OK)) {
+
+                event.consume();    // Consume window close request event
+                return;             // and get back to application!
+
+            }
+
+        }
+
+        // Event not consumed (by conditions) before and not returned back to application,
+        // so here we are at the end of window closing process
+
+        // In any case, remove empty clear/decrypted file(s)
+        connRoot.removeEmptyFiles();
+
+        // Exit!
+
+    };
 
     // Getters and Setters
     // #####################################################################
@@ -629,50 +682,6 @@ public class RootLayoutController {
         );
 
     }
-
-    /**
-     * Manage possible empty clear/decrypted files,
-     * or exit confirmation,
-     * and close application (or not).
-     *
-     * SRC: http://stackoverflow.com/questions/31540500/alert-box-for-when-user-attempts-to-close-application-using-setoncloserequest-in
-     */
-    private EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
-
-        //TODO move to functional interface implementation section
-
-        // If connRoot has empty clear/decrypted file and user pref is set then,
-        // popup an alert message to inform user about empty clear/decrypted files.
-        // If Ok, remove empty clear/decrypted file entries in user preferences then exit
-        // else, return back to application.
-
-        // On application crash, acceptable behavior is that on next start empty files will appear as broken
-        // and should be manually removed (close/delete menus).
-
-        if (connRoot.hasEmptyAndIsPref().get()) {
-            // ### Manage empty clear/decrypted files
-
-            if (connRoot.alertEmptyFiles()) connRoot.removeEmptyFiles();
-            else event.consume(); // Get back to application!
-
-        } else {
-            // ### Exit confirmation
-
-            Alert alert = AlertDialog.provide(MainApp.primaryStage,
-                    Alert.AlertType.CONFIRMATION,
-                    ALCNF_EXIT_TITLE,
-                    ALCNF_EXIT_HEADER,
-                    ALCNF_EXIT_CONTENT, false);
-
-            Optional<ButtonType> result = alert.showAndWait();
-
-            if (!(result.get() == ButtonType.OK)) event.consume();  // Get back to application!
-
-        }
-
-        // Exit!
-
-    };
 
     /**
      * Get ConnRoot treeView selected ConnFile object

@@ -282,8 +282,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      * Boolean.FALSE otherwise
      */
     public Supplier<Boolean> hasEmptyAndIsPref() {
-        //TODO implement alert for empty files on exit user preference
-        return () -> (hasSubUnit(ConnFile::isEmptyClear) || hasSubUnit(ConnFile::isEmptyDecrypted)) && true;
+        return () -> (hasSubUnit(ConnFile::isEmptyClear) || hasSubUnit(ConnFile::isEmptyDecrypted)) && Pref.isWarnRemoveEmptyFileOnClose();
     }
 
     // #####################################################################################

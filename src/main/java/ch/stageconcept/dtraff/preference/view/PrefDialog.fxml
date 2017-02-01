@@ -58,20 +58,20 @@
             <ColumnConstraints hgrow="SOMETIMES" maxWidth="181.0" minWidth="10.0" prefWidth="97.0" />
          </columnConstraints>
          <rowConstraints>
+            <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <Label text="Splash screen" />
-            <CheckBox fx:id="splashScreenCheckBox1" mnemonicParsing="false" GridPane.columnIndex="1" />
-            <Label text="Error loading data from file popup at start&#10;or on open" GridPane.rowIndex="1" />
-            <CheckBox fx:id="errorLoadingDataFromFilePopUpAtStartOrOnOpenCheckBox1" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Label text="Enter encrypted connection file password at start&#10;or on open" GridPane.rowIndex="2" />
-            <CheckBox fx:id="decryptConnFilePassAtStartOrOnOpenCheckBox1" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Label text="Warn of empty file(s) removal&#10;when application close" />
+            <CheckBox fx:id="warnRemoveEmptyFileOnCloseCheckBox" mnemonicParsing="false" GridPane.columnIndex="1" />
+            <Label text="Confirm application exit" GridPane.rowIndex="1" />
+            <CheckBox fx:id="warnExitingOnCloseCheckBox" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Label text="null" visible="false" GridPane.rowIndex="2" />
+            <CheckBox mnemonicParsing="false" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
          </children>
       </GridPane>
-      <Separator layoutX="14.0" layoutY="457.0" prefWidth="372.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" />
+      <Separator layoutX="14.0" layoutY="447.0" prefWidth="372.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" />
    </children>
 </AnchorPane>
