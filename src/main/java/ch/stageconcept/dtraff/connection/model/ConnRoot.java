@@ -140,6 +140,14 @@ public class ConnRoot extends ConnUnit<ConnFile> {
                     isFileInSubUnitOk.and(isFileInSubUnitNotEmpty).test(subUnit);
 
     /**
+     * Is subUnit state empty clear or empty decrypted?
+     *
+     * SRC: https://www.leveluplunch.com/java/examples/java-util-function-predicate-example/
+     */
+    private static Predicate<ConnFile> isSubUnitEmptyClearOrDecrypted =
+            ((Predicate<ConnFile>) ConnFile::isEmptyClear).or(ConnFile::isEmptyDecrypted);
+
+    /**
      * Set broken if OS file nonexistent or directory
      */
     private static Consumer<ConnFile> setBrokenIfFileNotExistOrDirectory = subUnit -> {
@@ -437,10 +445,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
                 Alert.AlertType.CONFIRMATION,
                 ALCNF_EMPTY_FILE_TITLE,
                 ALCNF_EMPTY_FILE_HEADER,
-                ALCNF_EMPTY_FILE_CONTENT
-                        + namesFileNamesToString(getSubUnitsSubList(((Predicate<ConnFile>) ConnFile::isEmptyClear)
-                                .or(ConnFile::isEmptyDecrypted))), true);
-        // SRC: https://www.leveluplunch.com/java/examples/java-util-function-predicate-example/
+                ALCNF_EMPTY_FILE_CONTENT + namesFileNamesToString(getSubUnitsSubList(isSubUnitEmptyClearOrDecrypted)), false);
 
         Optional<ButtonType> result = alert.showAndWait();
 
@@ -453,6 +458,13 @@ public class ConnRoot extends ConnUnit<ConnFile> {
 
         return false;
 
+    }
+
+    /**
+     * Remove empty files.
+     */
+    public void removeEmptyFiles() {
+        getSubUnitsSubList(isSubUnitEmptyClearOrDecrypted).forEach(ConnFile::closeConnFile);
     }
 
     /**
@@ -542,7 +554,6 @@ public class ConnRoot extends ConnUnit<ConnFile> {
         //TODO When TAB key is pressed to change focus on Cancel button and hit ENTER key
         //Bad password popup is displayed even if password field was let empty and hit enter key (not click)
         // on cancel button, (OK button (which is highlighted) like behavior).
-        //Also Bad Password dialog has an "Annuler" button who should be a "Cancel" button!
 
         boolean tryAgain;
 

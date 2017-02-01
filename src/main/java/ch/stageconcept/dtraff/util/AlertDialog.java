@@ -1,6 +1,8 @@
 package ch.stageconcept.dtraff.util;
 
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 
 /**
@@ -31,6 +33,19 @@ public enum AlertDialog {
         alert.setTitle(title);
         alert.setHeaderText(header);
         alert.setContentText(content);
+
+        if (alertType.equals(Alert.AlertType.CONFIRMATION)) {
+
+            Button okButton = (Button) alert.getDialogPane().lookupButton(ButtonType.OK);
+            okButton.setText("OK");
+
+            //TODO internationalization
+            // In certain conditions, cancel button text is "Annuler", so, just to be sure... (as well for above OK button (we never know ;-))
+
+            Button cancelButton = (Button) alert.getDialogPane().lookupButton(ButtonType.CANCEL);
+            cancelButton.setText("Cancel");
+
+        }
 
         if (showAndWait) alert.showAndWait();
 

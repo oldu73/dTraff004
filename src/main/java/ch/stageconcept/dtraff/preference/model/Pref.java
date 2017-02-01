@@ -19,6 +19,8 @@ public enum Pref {
     private static boolean splashScreen = pref.getBoolean("splashScreen", true);
     private static boolean errorLoadingFilePopUpAtStartOrOnOpen = pref.getBoolean("errorLoadingFilePopUpAtStartOrOnOpen", true);
     private static boolean decryptFilePassPopUpAtStartOrOnOpen = pref.getBoolean("decryptFilePassPopUpAtStartOrOnOpen", false);
+    private static boolean warnRemoveEmptyFileOnClose = pref.getBoolean("warnRemoveEmptyFileOnClose", true);
+    private static boolean warnExitingOnClose = pref.getBoolean("warnExitingOnClose", true);
 
     /**
      * Constructor.
@@ -38,7 +40,7 @@ public enum Pref {
     }
 
     public static void setSplashScreen(boolean splashScreenParam) {
-        splashScreen = splashScreenParam;
+        Pref.splashScreen = splashScreenParam;
         // Store value in preferences
         pref.putBoolean("splashScreen", splashScreen);
     }
@@ -48,7 +50,7 @@ public enum Pref {
     }
 
     public static void setErrorLoadingFilePopUpAtStartOrOnOpen(boolean errorLoadingDataFromFilePopUpAtStartOrOnOpenParam) {
-        errorLoadingFilePopUpAtStartOrOnOpen = errorLoadingDataFromFilePopUpAtStartOrOnOpenParam;
+        Pref.errorLoadingFilePopUpAtStartOrOnOpen = errorLoadingDataFromFilePopUpAtStartOrOnOpenParam;
         // Store value in preferences
         pref.putBoolean("errorLoadingFilePopUpAtStartOrOnOpen", errorLoadingFilePopUpAtStartOrOnOpen);
     }
@@ -58,9 +60,29 @@ public enum Pref {
     }
 
     public static void setDecryptFilePassPopUpAtStartOrOnOpen(boolean decryptConnFilePassAtStartOrOnOpenParam) {
-        decryptFilePassPopUpAtStartOrOnOpen = decryptConnFilePassAtStartOrOnOpenParam;
+        Pref.decryptFilePassPopUpAtStartOrOnOpen = decryptConnFilePassAtStartOrOnOpenParam;
         // Store value in preferences
         pref.putBoolean("decryptFilePassPopUpAtStartOrOnOpen", decryptFilePassPopUpAtStartOrOnOpen);
+    }
+
+    public static boolean isWarnRemoveEmptyFileOnClose() {
+        return warnRemoveEmptyFileOnClose;
+    }
+
+    public static void setWarnRemoveEmptyFileOnClose(boolean warnRemoveEmptyFileOnClose) {
+        Pref.warnRemoveEmptyFileOnClose = warnRemoveEmptyFileOnClose;
+        // Store value in preferences
+        pref.putBoolean("warnRemoveEmptyFileOnClose", warnRemoveEmptyFileOnClose);
+    }
+
+    public static boolean isWarnExitingOnClose() {
+        return warnExitingOnClose;
+    }
+
+    public static void setWarnExitingOnClose(boolean warnExitingOnClose) {
+        Pref.warnExitingOnClose = warnExitingOnClose;
+        // Store value in preferences
+        pref.putBoolean("warnExitingOnClose", warnExitingOnClose);
     }
 
     // #####################################################################

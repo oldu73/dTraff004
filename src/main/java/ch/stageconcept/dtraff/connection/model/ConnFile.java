@@ -306,7 +306,7 @@ public class ConnFile extends ConnUnit<Conn> {
     /**
      * Close ConnFile
      */
-    private void closeConnFile() {
+    public void closeConnFile() {
         //System.out.println("Close file on:" + this.getName());
         this.getParent().closeConnFile(this);
     }

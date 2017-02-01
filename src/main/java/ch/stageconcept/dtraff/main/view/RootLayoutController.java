@@ -27,6 +27,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
@@ -79,6 +80,10 @@ public class RootLayoutController {
     private static final String ALINF_FILE_ALREADY_PRESENT_HEADER = "File entry already present";
     public static final String ALINF_FILE_ALREADY_PRESENT_CONTENT = "A file entry with specified name is already present:\n";
 
+    private static final String ALCNF_EXIT_TITLE = "Close Application";
+    private static final String ALCNF_EXIT_HEADER = "Confirm Exit";
+    private static final String ALCNF_EXIT_CONTENT = "Are you sure you want to exit?";
+
     @FXML
     private BorderPane rootBorderPane;
 
@@ -118,8 +123,10 @@ public class RootLayoutController {
     private Preferences preferences = Preferences.userRoot().node(ConnRoot.PREFS_PATH);  // User preferences
     private ObjectProperty<ConnFileState> selectedConnFileState = new SimpleObjectProperty<>();
 
-    //TODO remove exit
-    private boolean exit = false;
+    // Functional interface implementations
+    // #####################################################################
+
+    // ...
 
     // Getters and Setters
     // #####################################################################
@@ -136,8 +143,8 @@ public class RootLayoutController {
         return connTreeView;
     }
 
-    public boolean isExit() {
-        return exit;
+    public EventHandler<WindowEvent> getConfirmCloseEventHandler() {
+        return confirmCloseEventHandler;
     }
 
     // Methods
@@ -609,14 +616,30 @@ public class RootLayoutController {
     }
 
     /**
-     * Manage possible empty clear/decrypted files
-     * and close application.
+     * Fire close window event request
      */
     @FXML
     public void handleExit() {
-    //public void handleExit(WindowEvent event) {
 
-        //TODO clean consume, also in MainApp
+        MainApp.primaryStage.fireEvent(
+                new WindowEvent(
+                        MainApp.primaryStage,
+                        WindowEvent.WINDOW_CLOSE_REQUEST
+                )
+        );
+
+    }
+
+    /**
+     * Manage possible empty clear/decrypted files,
+     * or exit confirmation,
+     * and close application (or not).
+     *
+     * SRC: http://stackoverflow.com/questions/31540500/alert-box-for-when-user-attempts-to-close-application-using-setoncloserequest-in
+     */
+    private EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
+
+        //TODO move to functional interface implementation section
 
         // If connRoot has empty clear/decrypted file and user pref is set then,
         // popup an alert message to inform user about empty clear/decrypted files.
@@ -626,40 +649,30 @@ public class RootLayoutController {
         // On application crash, acceptable behavior is that on next start empty files will appear as broken
         // and should be manually removed (close/delete menus).
 
-
-
-        // ???!!!
-        //Is1st.do2nd(connRoot.hasEmptyAndIsPref(), connRoot::alertEmptyFiles);
-
-
-/*
         if (connRoot.hasEmptyAndIsPref().get()) {
-            if (connRoot.alertEmptyFiles()) {
-                //TODO remove empty file user preference entries
+            // ### Manage empty clear/decrypted files
 
-                //if (event != null) event.consume();
+            if (connRoot.alertEmptyFiles()) connRoot.removeEmptyFiles();
+            else event.consume(); // Get back to application!
 
-                exit = true;
-
-                System.exit(0);
-            }
         } else {
-            //TODO remove empty file user preference entries
-            System.exit(0);
+            // ### Exit confirmation
+
+            Alert alert = AlertDialog.provide(MainApp.primaryStage,
+                    Alert.AlertType.CONFIRMATION,
+                    ALCNF_EXIT_TITLE,
+                    ALCNF_EXIT_HEADER,
+                    ALCNF_EXIT_CONTENT, false);
+
+            Optional<ButtonType> result = alert.showAndWait();
+
+            if (!(result.get() == ButtonType.OK)) event.consume();  // Get back to application!
+
         }
 
-        // Get back to application!
-*/
+        // Exit!
 
-        MainApp.primaryStage.fireEvent(
-                new WindowEvent(
-                        MainApp.primaryStage,
-                        WindowEvent.WINDOW_CLOSE_REQUEST
-                )
-        );
-
-
-    }
+    };
 
     /**
      * Get ConnRoot treeView selected ConnFile object
@@ -976,10 +989,6 @@ public class RootLayoutController {
      * @return password if correct, null otherwise
      */
     private String getConnFilePassword(ConnFile connFile) {
-
-        //TODO When TAB key is pressed to change focus on Cancel button and hit ENTER key
-        //Bad password popup is displayed even if password field was let empty (OK button (which is highlighted) like behavior)
-        //Also Bad Password dialog has an "Annuler" button who should be a "Cancel" button!
 
         boolean tryAgain;
 

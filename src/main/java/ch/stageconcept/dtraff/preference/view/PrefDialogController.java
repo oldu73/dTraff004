@@ -23,6 +23,12 @@ public class PrefDialogController {
     private CheckBox decryptConnFilePassAtStartOrOnOpenCheckBox;
 
     @FXML
+    private CheckBox warnRemoveEmptyFileOnCloseCheckBox;
+
+    @FXML
+    private CheckBox warnExitingOnCloseCheckBox;
+
+    @FXML
     private Button okButton;
 
     @FXML
@@ -41,6 +47,8 @@ public class PrefDialogController {
         splashScreenCheckBox.setSelected(Pref.isSplashScreen());
         errorLoadingDataFromFilePopUpAtStartOrOnOpenCheckBox.setSelected(Pref.isErrorLoadingFilePopUpAtStartOrOnOpen());
         decryptConnFilePassAtStartOrOnOpenCheckBox.setSelected(Pref.isDecryptFilePassPopUpAtStartOrOnOpen());
+        warnRemoveEmptyFileOnCloseCheckBox.setSelected(Pref.isWarnRemoveEmptyFileOnClose());
+        warnExitingOnCloseCheckBox.setSelected(Pref.isWarnExitingOnClose());
 
     }
 
@@ -72,6 +80,8 @@ public class PrefDialogController {
         Pref.setSplashScreen(splashScreenCheckBox.isSelected());
         Pref.setErrorLoadingFilePopUpAtStartOrOnOpen(errorLoadingDataFromFilePopUpAtStartOrOnOpenCheckBox.isSelected());
         Pref.setDecryptFilePassPopUpAtStartOrOnOpen(decryptConnFilePassAtStartOrOnOpenCheckBox.isSelected());
+        Pref.setWarnRemoveEmptyFileOnClose(warnRemoveEmptyFileOnCloseCheckBox.isSelected());
+        Pref.setWarnExitingOnClose(warnExitingOnCloseCheckBox.isSelected());
 
         dialogStage.close();
     }
