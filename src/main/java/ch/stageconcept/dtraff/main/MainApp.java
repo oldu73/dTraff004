@@ -7,11 +7,16 @@ import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Main application class.
@@ -75,11 +80,15 @@ public class MainApp extends Application {
         // Called before last window has been closed
         // SRC: http://stackoverflow.com/questions/17003906/prevent-cancel-closing-of-primary-stage-in-javafx-2-2
         //primaryStage.setOnCloseRequest(event -> controller.handleExit(event));
+        /*
         primaryStage.setOnCloseRequest(event -> {
             System.out.println(controller.isExit());
             if (!controller.isExit()) controller.handleExit();
             else Platform.exit();   //event.consume();
         });
+        */
+
+        primaryStage.setOnCloseRequest(confirmCloseEventHandler);
 
         primaryStage.setScene(scene);
 
@@ -123,5 +132,33 @@ public class MainApp extends Application {
     public void stop(){
         //controller.handleExit();
     }
+
+    private EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
+        Alert closeConfirmation = new Alert(
+                Alert.AlertType.CONFIRMATION,
+                "Are you sure you want to exit?"
+        );
+        Button exitButton = (Button) closeConfirmation.getDialogPane().lookupButton(
+                ButtonType.OK
+        );
+        exitButton.setText("Exit");
+        closeConfirmation.setHeaderText("Confirm Exit");
+        closeConfirmation.initModality(Modality.APPLICATION_MODAL);
+        closeConfirmation.initOwner(primaryStage);
+
+        // normally, you would just use the default alert positioning,
+        // but for this simple sample the main stage is small,
+        // so explicitly position the alert so that the main window can still be seen.
+        closeConfirmation.setX(primaryStage.getX());
+        closeConfirmation.setY(primaryStage.getY() + primaryStage.getHeight());
+
+        Optional<ButtonType> closeResponse = closeConfirmation.showAndWait();
+        if (!ButtonType.OK.equals(closeResponse.get())) {
+            System.exit(0);
+            //event.consume();
+
+
+        }
+    };
 
 }

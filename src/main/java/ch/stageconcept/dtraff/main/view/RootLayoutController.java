@@ -117,6 +117,8 @@ public class RootLayoutController {
     private TreeView<ConnUnit<?>> connTreeView;
     private Preferences preferences = Preferences.userRoot().node(ConnRoot.PREFS_PATH);  // User preferences
     private ObjectProperty<ConnFileState> selectedConnFileState = new SimpleObjectProperty<>();
+
+    //TODO remove exit
     private boolean exit = false;
 
     // Getters and Setters
@@ -630,7 +632,7 @@ public class RootLayoutController {
         //Is1st.do2nd(connRoot.hasEmptyAndIsPref(), connRoot::alertEmptyFiles);
 
 
-
+/*
         if (connRoot.hasEmptyAndIsPref().get()) {
             if (connRoot.alertEmptyFiles()) {
                 //TODO remove empty file user preference entries
@@ -647,6 +649,15 @@ public class RootLayoutController {
         }
 
         // Get back to application!
+*/
+
+        MainApp.primaryStage.fireEvent(
+                new WindowEvent(
+                        MainApp.primaryStage,
+                        WindowEvent.WINDOW_CLOSE_REQUEST
+                )
+        );
+
 
     }
 
