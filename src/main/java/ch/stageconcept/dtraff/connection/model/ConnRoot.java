@@ -4,12 +4,15 @@ import ch.stageconcept.dtraff.connection.util.*;
 import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import ch.stageconcept.dtraff.preference.model.Pref;
 import ch.stageconcept.dtraff.util.AlertDialog;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import org.codefx.libfx.listener.handle.ListenerHandle;
 import org.codefx.libfx.listener.handle.ListenerHandles;
@@ -60,7 +63,17 @@ public class ConnRoot extends ConnUnit<ConnFile> {
 
     // Fields ##############################################################################
 
+    // ConnRoot treeView root denomination
+    public static final String NETWORK = "Network";
+
+    // Pending opening file static text
+    private static final String PENDING_OPENING_FILE = "Opening file...";
+
+    // Icon resource file name and size
     private static final String ICON_FILENAME = "network001.png";
+    private static final int ICON_HEIGHT = 16;
+    private static final int ICON_WIDTH = ICON_HEIGHT;
+
     public static final String PREFS_PATH = "/ch/stageconcept/datatraffic/file";
     private static final String MENU_NEW_FILE = "New File";
     private static final String MENU_OPEN_FILE = ConnFile.MENU_OPEN_FILE;
@@ -87,6 +100,8 @@ public class ConnRoot extends ConnUnit<ConnFile> {
     private String[] prefKeys = null;
 
     private ListenerHandle subUnitsListenerHandle;
+
+    private final ObjectProperty<ConnRootState> state;
 
     // Functional interface implementations, Predicate, Consumer, Function, ...
 
@@ -198,6 +213,17 @@ public class ConnRoot extends ConnUnit<ConnFile> {
     public ConnRoot(String name, ObservableList<ConnFile> subUnits) {
         super(name, subUnits, ConnFile::new, ICON_FILENAME);
 
+        // State
+        state = new SimpleObjectProperty<>(ConnRootState.QUITE);
+
+        // Update icon when state change
+        stateProperty().addListener((observable, oldvalue, newvalue) -> {
+            ImageView icon = new ImageView(newvalue.getIconFileName());
+            icon.setFitHeight(ICON_HEIGHT);
+            icon.setFitWidth(ICON_WIDTH);
+            setIcon(icon);
+        });
+
         ContextMenu contextMenu = new ContextMenu();
 
         MenuItem newFileMenuItem = new MenuItem(MENU_NEW_FILE);
@@ -285,9 +311,53 @@ public class ConnRoot extends ConnUnit<ConnFile> {
         return () -> (hasSubUnit(ConnFile::isEmptyClear) || hasSubUnit(ConnFile::isEmptyDecrypted)) && Pref.isWarnRemoveEmptyFileOnClose();
     }
 
+    public ConnRootState getState() {
+        return state.get();
+    }
+
+    public ObjectProperty<ConnRootState> stateProperty() {
+        return state;
+    }
+
+    private void setState(ConnRootState state) {
+        this.state.set(state);
+    }
+
     // #####################################################################################
 
     // Methods #############################################################################
+
+    /**
+     * Test QUITE state
+     * @return true on QUITE state, false otherwise
+     */
+    public boolean isQuite() {
+        return state.getValue().equals(ConnRootState.QUITE);
+    }
+
+    /**
+     * Set to QUITE state
+     */
+    public void setQuite() {
+        setState(ConnRootState.QUITE);  // ! Order matter (listener): 1st state, 2nd name !
+        setName(NETWORK);   // set treeView denomination to default value
+    }
+
+    /**
+     * Test OPENING_FILE state
+     * @return true on OPENING_FILE state, false otherwise
+     */
+    public boolean isOpeningFile() {
+        return state.getValue().equals(ConnRootState.OPENING_FILE);
+    }
+
+    /**
+     * Set to OPENING_FILE state
+     */
+    public void setOpeningFile() {
+        setState(ConnRootState.OPENING_FILE);   // ! Order matter (listener): 1st state, 2nd name !
+        setName(PENDING_OPENING_FILE);  // set treeView denomination to waiting message value
+    }
 
     /**
      * Create ConnRoot first sub level structure ConnFile list (subUnits),

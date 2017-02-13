@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
 
+import ch.stageconcept.dtraff.connection.model.ConnRoot;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
@@ -19,6 +20,10 @@ import javafx.scene.image.ImageView;
 //TODO javadoc (cf. connection.model.ConnRoot class header documentation)
 
 public class ModelTree<T> {
+
+    // Font styles
+    private static final String FONT_STYLE_NORMAL = "-fx-font-style: normal";
+    private static final String FONT_STYLE_ITALIC = "-fx-font-style: italic";
 
     private final TreeView<T> treeView ;
     
@@ -60,6 +65,16 @@ public class ModelTree<T> {
                         pseudoClassStateChanged(itemPC, true);
                         pseudoClassesSet.add(itemPC);
                     }
+
+                    // Because of UI frozen behavior (depends of machine) due to file chooser,
+                    // we manage to inform user of running process (opening file) through treeView
+                    // root item icon and designation. Here we intercept the designation change that happen
+                    // when ConnRoot instance state change and set text style to italic during this process.
+                    textProperty().addListener(nv -> {
+                        if (item.getClass().equals(ConnRoot.class) && ((ConnRoot) item).isOpeningFile()) setStyle(FONT_STYLE_ITALIC);
+                        else setStyle(FONT_STYLE_NORMAL);
+                    });
+
                 }
             }
         });

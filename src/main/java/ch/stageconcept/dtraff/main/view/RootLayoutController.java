@@ -54,23 +54,12 @@ public class RootLayoutController {
     // Attributes
     // #####################################################################
 
-    // ConnRoot treeView root denomination
-    private static final String NETWORK = "Network";
-
-    // Wait icon resource file name and size
-    private static final String ICON_WAIT = "loadingGray001.gif";
-    private static final int ICON_WAIT_HEIGHT = 16;
-    private static final int ICON_WAIT_WIDTH = ICON_WAIT_HEIGHT;
-
     // ConnRoot treeView CSS resource
     // !WARNING! In order to use file that reside in resources folder, don’t forget to add a slash before file name!
     private static final String CONNROOT_TREEVIEW_CSS = "/connRootTreeView.css";
 
     // Initializing static text
     private static final String LABEL_INITIALIZING = "Initializing...";
-
-    // Pending opening file static text
-    private static final String PENDING_OPENING_FILE = "Opening file...";
 
     // Alerts statics texts
     private static final String ALINF_ABOUT_TITLE = "Data Traffic";
@@ -229,7 +218,7 @@ public class RootLayoutController {
      */
     public void subInitialize() {
 
-        connRoot = new ConnRoot(NETWORK, MainApp.primaryStage, this);
+        connRoot = new ConnRoot(ConnRoot.NETWORK, MainApp.primaryStage, this);
 
         boolean initializingLabelAnimation = connRoot.isUserActionNeededAtStart();
 
@@ -579,23 +568,22 @@ public class RootLayoutController {
      */
     private File getXmlFile() {
 
-        String tmpName = connRoot.getName();
-        connRoot.setName(PENDING_OPENING_FILE);
+        // Because of UI frozen behavior (depends of machine) due to file chooser,
+        // we manage to inform user of running process (opening file) through treeView
+        // root item icon and designation.
 
-        ImageView tmpIcon = connRoot.getIcon();
-        ImageView loadIcon = new ImageView(ICON_WAIT);
-        loadIcon.setFitHeight(ICON_WAIT_HEIGHT);
-        loadIcon.setFitWidth(ICON_WAIT_WIDTH);
-        connRoot.setIcon(loadIcon);
+        // ### Before file chooser
 
+        // Put connRoot in OPENING_FILE state
+        connRoot.setOpeningFile();
+        // If root is selected -> deselect (for visual reason)
         boolean rootIsSelected = connTreeView.getSelectionModel().getSelectedIndex() == 0;
         if (rootIsSelected) connTreeView.getSelectionModel().clearSelection();
-
+        // and finally, disable treeView (before opening file chooser)
         connTreeView.setDisable(true);
 
-        //TODO where am I!
+        // ### File chooser
 
-        //TODO put in "Thread" like, when the fileChooser close, the UI is frozen for a while (depends of machine)
         FileChooser fileChooser = new FileChooser();
         // Set extension filter
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
@@ -604,10 +592,14 @@ public class RootLayoutController {
         // Show open file dialog
         File file = fileChooser.showOpenDialog(MainApp.primaryStage);
 
+        // ### After file chooser
+
+        // Once finished with file chooser, if root was selected in treeView, select it again
         if (rootIsSelected) connTreeView.getSelectionModel().selectFirst();
+        // Re-enable treeView
         connTreeView.setDisable(false);
-        connRoot.setIcon(tmpIcon);
-        connRoot.setName(tmpName);
+        // Put treeView in QUITE state
+        connRoot.setQuite();
 
         return file;
     }
@@ -766,7 +758,7 @@ public class RootLayoutController {
      */
     private ConnRoot createNetwork() {
 
-        ConnRoot connRoot = new ConnRoot(NETWORK);
+        ConnRoot connRoot = new ConnRoot(ConnRoot.NETWORK);
         String[] prefKeys = null;
 
         connRoot.setRootLayoutController(this);
