@@ -57,8 +57,10 @@ public class RootLayoutController {
     // ConnRoot treeView root denomination
     private static final String NETWORK = "Network";
 
-    // Wait icon resource file name
-    private static final String ICON_WAIT = "wait001.png";
+    // Wait icon resource file name and size
+    private static final String ICON_WAIT = "loadingGray001.gif";
+    private static final int ICON_WAIT_HEIGHT = 16;
+    private static final int ICON_WAIT_WIDTH = ICON_WAIT_HEIGHT;
 
     // ConnRoot treeView CSS resource
     // !WARNING! In order to use file that reside in resources folder, don’t forget to add a slash before file name!
@@ -405,25 +407,30 @@ public class RootLayoutController {
         // Some File - menus disable property setting if the ConnRoot treeView
         // selected item is not a ConnFile object and other menu specific related conditions
         connTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.getValue() instanceof ConnFile) {
+            try {
+                if (newValue.getValue() instanceof ConnFile) {
 
-                ConnFile selectedConnFile = (ConnFile) newValue.getValue();
+                    ConnFile selectedConnFile = (ConnFile) newValue.getValue();
 
-                // Following line is related to double click action that may
-                // change selected ConnFile state. Therefor menus disable property
-                // should follow directly (as soon as state change) even if connTreeView
-                // selected item doesn't change.
-                selectedConnFileState.bind(selectedConnFile.stateProperty());
+                    // Following line is related to double click action that may
+                    // change selected ConnFile state. Therefor menus disable property
+                    // should follow directly (as soon as state change) even if connTreeView
+                    // selected item doesn't change.
+                    selectedConnFileState.bind(selectedConnFile.stateProperty());
 
-                // ### File - Server Connection - New: Disable if the ConnRoot treeView
-                // selected item is not a clear or decrypted ConnFile object
-                newServerConnectionMenuItem.setDisable(!(selectedConnFile.isClear() || selectedConnFile.isDecrypted()));
+                    // ### File - Server Connection - New: Disable if the ConnRoot treeView
+                    // selected item is not a clear or decrypted ConnFile object
+                    newServerConnectionMenuItem.setDisable(!(selectedConnFile.isClear() || selectedConnFile.isDecrypted()));
 
-                // ### File - Enter Password: Disable if the ConnRoot treeView
-                // selected item is not an encrypted ConnFile object
-                fileEnterPasswordMenuItem.setDisable(!selectedConnFile.isEncrypted());
+                    // ### File - Enter Password: Disable if the ConnRoot treeView
+                    // selected item is not an encrypted ConnFile object
+                    fileEnterPasswordMenuItem.setDisable(!selectedConnFile.isEncrypted());
 
-            } else setMenusDisable(true, newServerConnectionMenuItem, fileEnterPasswordMenuItem);  // connTreeView selected item is NOT a ConnFile instance
+                } else
+                    setMenusDisable(true, newServerConnectionMenuItem, fileEnterPasswordMenuItem);  // connTreeView selected item is NOT a ConnFile instance
+            } catch (NullPointerException ex) {
+                // ...
+            }
         });
 
         // After double click on an encrypted file to enter correct password,
@@ -574,8 +581,16 @@ public class RootLayoutController {
 
         String tmpName = connRoot.getName();
         connRoot.setName(PENDING_OPENING_FILE);
+
         ImageView tmpIcon = connRoot.getIcon();
-        connRoot.setIcon(new ImageView(ICON_WAIT));
+        ImageView loadIcon = new ImageView(ICON_WAIT);
+        loadIcon.setFitHeight(ICON_WAIT_HEIGHT);
+        loadIcon.setFitWidth(ICON_WAIT_WIDTH);
+        connRoot.setIcon(loadIcon);
+
+        boolean rootIsSelected = connTreeView.getSelectionModel().getSelectedIndex() == 0;
+        if (rootIsSelected) connTreeView.getSelectionModel().clearSelection();
+
         connTreeView.setDisable(true);
 
         //TODO where am I!
@@ -589,6 +604,7 @@ public class RootLayoutController {
         // Show open file dialog
         File file = fileChooser.showOpenDialog(MainApp.primaryStage);
 
+        if (rootIsSelected) connTreeView.getSelectionModel().selectFirst();
         connTreeView.setDisable(false);
         connRoot.setIcon(tmpIcon);
         connRoot.setName(tmpName);
