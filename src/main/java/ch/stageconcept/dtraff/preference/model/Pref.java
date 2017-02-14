@@ -36,6 +36,10 @@ public enum Pref {
     // Getters and Setters
     // #####################################################################
 
+    public static Preferences getPref() {
+        return pref;
+    }
+
     public static boolean isSplashScreen() {
         return splashScreen;
     }

@@ -11,12 +11,16 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.prefs.PreferenceChangeListener;
 
 /**
  * Main application class.
@@ -27,11 +31,15 @@ public class MainApp extends Application {
 
     private static final String APP_TITLE = RootLayoutController.ALINF_ABOUT_HEADER;
     private static final String ROOT_LAYOUT = "view/RootLayout.fxml";
+    private static final String I18N_BASE = "text";
 
     public static Stage primaryStage;   // Static reference to primaryStage
     private BorderPane rootLayout;
     private Scene scene;
     private RootLayoutController controller;
+
+    private String languageString;
+    private BorderPane borderPane;
 
     /**
      * Constructor
@@ -56,16 +64,49 @@ public class MainApp extends Application {
             }
         }
 
+        languageString = Pref.getLanguage();
+
+        Pref.getPref().addPreferenceChangeListener(evt -> {
+            String prefLanguageString = Pref.getLanguage();
+            if (!languageString.equals(prefLanguageString)) {
+                languageString = prefLanguageString;
+                System.out.println(languageString);
+                loadView(new Locale(languageString), true);
+            }
+        });
+
+        loadView(new Locale(languageString), false);
+
+    }
+
+    /**
+     * Load view with local resource
+     *
+     * @param locale
+     */
+    private void loadView(Locale locale, boolean changed) {
+        System.out.println("local " + locale);
         try {
             // Load root layout from fxml file.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource(ROOT_LAYOUT));
+
+            // Resource bundles name for multi-languages support is set.
+            loader.setResources(ResourceBundle.getBundle(I18N_BASE, locale));
+
+            //rootLayout = loader.load(this.getClass().getResource(ROOT_LAYOUT).openStream());
+            loader.setLocation(this.getClass().getResource(ROOT_LAYOUT));
             rootLayout = loader.load();
 
             // Set scene containing the root layout.
             scene = new Scene(rootLayout);
 
             controller = loader.getController();
+
+            if (changed) {
+                Pane pane = (BorderPane) loader.load(this.getClass().getResource(ROOT_LAYOUT).openStream());
+                borderPane.getChildren().removeAll();
+                borderPane.setCenter(pane);
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -74,6 +115,7 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle(APP_TITLE);
 
@@ -85,6 +127,8 @@ public class MainApp extends Application {
         if (!Pref.isDecryptFilePassPopUpAtStartOrOnOpen() && !Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) {
             controller.getRootBorderPane().getChildren().remove(controller.getInitializingLabel());
         }
+
+        borderPane = controller.getRootBorderPane();
 
         // Show primaryStage.
         primaryStage.show();

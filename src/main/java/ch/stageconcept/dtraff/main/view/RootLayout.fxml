@@ -13,7 +13,7 @@
    <top>
       <MenuBar BorderPane.alignment="CENTER">
         <menus>
-          <Menu mnemonicParsing="false" text="File">
+          <Menu mnemonicParsing="false" text="%file">
             <items>
                   <MenuItem fx:id="fileNewMenuItem" mnemonicParsing="false" text="New" />
                   <MenuItem fx:id="fileOpenMenuItem" mnemonicParsing="false" onAction="#handleFileOpen" text="Open" />
