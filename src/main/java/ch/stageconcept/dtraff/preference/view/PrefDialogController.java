@@ -1,10 +1,20 @@
 package ch.stageconcept.dtraff.preference.view;
 
 import ch.stageconcept.dtraff.preference.model.Pref;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
+
+import java.util.Locale;
+
+import static org.apache.commons.lang3.text.WordUtils.capitalize;
 
 /**
  * Dialog to edit user preferences.
@@ -21,6 +31,11 @@ public class PrefDialogController {
 
     @FXML
     private CheckBox decryptConnFilePassAtStartOrOnOpenCheckBox;
+
+    @FXML
+    private GridPane miscGridPane;
+
+    private ComboBox<Locale> languageComboBox;
 
     @FXML
     private CheckBox warnRemoveEmptyFileOnCloseCheckBox;
@@ -47,6 +62,41 @@ public class PrefDialogController {
         splashScreenCheckBox.setSelected(Pref.isSplashScreen());
         errorLoadingDataFromFilePopUpAtStartOrOnOpenCheckBox.setSelected(Pref.isErrorLoadingFilePopUpAtStartOrOnOpen());
         decryptConnFilePassAtStartOrOnOpenCheckBox.setSelected(Pref.isDecryptFilePassPopUpAtStartOrOnOpen());
+
+        // ### Language
+
+        languageComboBox = new ComboBox<>();
+
+        ObservableList<Locale> languageOptions = FXCollections.observableArrayList(new Locale("en"), new Locale("fr"));
+
+        languageComboBox.setConverter(new StringConverter<Locale>() {
+            @Override
+            public String toString(Locale object) {
+                return capitalize(object.getDisplayLanguage(object));
+            }
+
+            @Override
+            public Locale fromString(String string) {
+                return null;
+            }
+        });
+
+        languageComboBox.setCellFactory(p -> new ListCell<Locale>() {
+            @Override
+            protected void updateItem(Locale item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item != null) {
+                    setText(capitalize(item.getDisplayLanguage(item)));
+                }
+            }
+        });
+
+        languageComboBox.setItems(languageOptions);
+        languageComboBox.getSelectionModel().select(new Locale(Pref.getLanguage()));
+        miscGridPane.add(languageComboBox, 1, 0);
+
+        // ############
+
         warnRemoveEmptyFileOnCloseCheckBox.setSelected(Pref.isWarnRemoveEmptyFileOnClose());
         warnExitingOnCloseCheckBox.setSelected(Pref.isWarnExitingOnClose());
 
@@ -80,6 +130,7 @@ public class PrefDialogController {
         Pref.setSplashScreen(splashScreenCheckBox.isSelected());
         Pref.setErrorLoadingFilePopUpAtStartOrOnOpen(errorLoadingDataFromFilePopUpAtStartOrOnOpenCheckBox.isSelected());
         Pref.setDecryptFilePassPopUpAtStartOrOnOpen(decryptConnFilePassAtStartOrOnOpenCheckBox.isSelected());
+        Pref.setLanguage(languageComboBox.getSelectionModel().getSelectedItem().toString());
         Pref.setWarnRemoveEmptyFileOnClose(warnRemoveEmptyFileOnCloseCheckBox.isSelected());
         Pref.setWarnExitingOnClose(warnExitingOnCloseCheckBox.isSelected());
 

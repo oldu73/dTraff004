@@ -19,6 +19,7 @@ public enum Pref {
     private static boolean splashScreen = pref.getBoolean("splashScreen", true);
     private static boolean errorLoadingFilePopUpAtStartOrOnOpen = pref.getBoolean("errorLoadingFilePopUpAtStartOrOnOpen", true);
     private static boolean decryptFilePassPopUpAtStartOrOnOpen = pref.getBoolean("decryptFilePassPopUpAtStartOrOnOpen", false);
+    private static String language = pref.get("language", "en");
     private static boolean warnRemoveEmptyFileOnClose = pref.getBoolean("warnRemoveEmptyFileOnClose", true);
     private static boolean warnExitingOnClose = pref.getBoolean("warnExitingOnClose", true);
 
@@ -63,6 +64,16 @@ public enum Pref {
         Pref.decryptFilePassPopUpAtStartOrOnOpen = decryptConnFilePassAtStartOrOnOpenParam;
         // Store value in preferences
         pref.putBoolean("decryptFilePassPopUpAtStartOrOnOpen", decryptFilePassPopUpAtStartOrOnOpen);
+    }
+
+    public static String getLanguage() {
+        return language;
+    }
+
+    public static void setLanguage(String language) {
+        Pref.language = language;
+        // Store value in preferences
+        pref.put("language", language);
     }
 
     public static boolean isWarnRemoveEmptyFileOnClose() {

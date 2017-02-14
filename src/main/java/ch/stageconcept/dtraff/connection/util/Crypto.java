@@ -7,7 +7,6 @@ import org.jasypt.util.text.StrongTextEncryptor;
  *
  * @author Olivier Durand
  */
-
 public class Crypto {
 
     /**

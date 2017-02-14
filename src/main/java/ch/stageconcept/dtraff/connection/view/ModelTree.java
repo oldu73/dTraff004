@@ -68,12 +68,15 @@ public class ModelTree<T> {
 
                     // Because of UI frozen behavior (depends of machine) due to file chooser,
                     // we manage to inform user of running process (opening file) through treeView
-                    // root item icon and designation. Here we intercept the designation change that happen
-                    // when ConnRoot instance state change and set text style to italic during this process.
-                    textProperty().addListener(nv -> {
-                        if (item.getClass().equals(ConnRoot.class) && ((ConnRoot) item).isOpeningFile()) setStyle(FONT_STYLE_ITALIC);
-                        else setStyle(FONT_STYLE_NORMAL);
-                    });
+                    // root item icon and designation. Here we listen the ConnRoot instance state change
+                    // and set text style to italic during this process.
+                    if (item.getClass().equals(ConnRoot.class)) {
+                        ConnRoot connRoot = (ConnRoot) item;
+                        connRoot.stateProperty().addListener(nv -> {
+                            if (connRoot.isOpeningFile()) setStyle(FONT_STYLE_ITALIC);
+                            else setStyle(FONT_STYLE_NORMAL);
+                        });
+                    }
 
                 }
             }
