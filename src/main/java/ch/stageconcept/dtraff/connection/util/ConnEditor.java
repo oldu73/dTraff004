@@ -13,7 +13,7 @@ import java.io.IOException;
 
 /**
  * Helper enum class to supply ConnectionEditDialog
- * in front of primaryStage
+ * in front of PRIMARY_STAGE
  *
  * @author Olivier Durand
  */
@@ -43,7 +43,7 @@ public enum ConnEditor {
             Stage dialogStage = new Stage();
             dialogStage.setTitle(title);
             dialogStage.initModality(Modality.WINDOW_MODAL);
-            dialogStage.initOwner(MainApp.primaryStage);
+            dialogStage.initOwner(MainApp.PRIMARY_STAGE);
             Scene scene = new Scene(page);
             dialogStage.setScene(scene);
 

@@ -1,6 +1,7 @@
 package ch.stageconcept.dtraff.preference.view;
 
 import ch.stageconcept.dtraff.preference.model.Pref;
+import ch.stageconcept.dtraff.util.I18N;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -130,7 +131,13 @@ public class PrefDialogController {
         Pref.setSplashScreen(splashScreenCheckBox.isSelected());
         Pref.setErrorLoadingFilePopUpAtStartOrOnOpen(errorLoadingDataFromFilePopUpAtStartOrOnOpenCheckBox.isSelected());
         Pref.setDecryptFilePassPopUpAtStartOrOnOpen(decryptConnFilePassAtStartOrOnOpenCheckBox.isSelected());
-        Pref.setLanguage(languageComboBox.getSelectionModel().getSelectedItem().toString());
+
+        String languageString = languageComboBox.getSelectionModel().getSelectedItem().toString();
+        if (!languageString.equals(Pref.getLanguage())) {
+            Pref.setLanguage(languageString);
+            I18N.setLocale(new Locale(languageString));
+        }
+
         Pref.setWarnRemoveEmptyFileOnClose(warnRemoveEmptyFileOnCloseCheckBox.isSelected());
         Pref.setWarnExitingOnClose(warnExitingOnCloseCheckBox.isSelected());
 

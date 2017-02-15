@@ -2,25 +2,16 @@ package ch.stageconcept.dtraff.main;
 
 import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import ch.stageconcept.dtraff.preference.model.Pref;
+import ch.stageconcept.dtraff.util.I18N;
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.prefs.PreferenceChangeListener;
 
 /**
  * Main application class.
@@ -31,15 +22,15 @@ public class MainApp extends Application {
 
     private static final String APP_TITLE = RootLayoutController.ALINF_ABOUT_HEADER;
     private static final String ROOT_LAYOUT = "view/RootLayout.fxml";
-    private static final String I18N_BASE = "text";
+    public static final String I18N_BASE = "text";
 
-    public static Stage primaryStage;   // Static reference to primaryStage
+    public static Stage PRIMARY_STAGE;   // Static reference to primaryStage
     private BorderPane rootLayout;
     private Scene scene;
     private RootLayoutController controller;
 
     private String languageString;
-    private BorderPane borderPane;
+    public static ResourceBundle TEXT_BUNDLE;
 
     /**
      * Constructor
@@ -65,17 +56,19 @@ public class MainApp extends Application {
         }
 
         languageString = Pref.getLanguage();
+        Locale locale = new Locale(languageString);
+        I18N.setLocale(locale);
+        TEXT_BUNDLE = ResourceBundle.getBundle(I18N_BASE, locale);
 
         Pref.getPref().addPreferenceChangeListener(evt -> {
             String prefLanguageString = Pref.getLanguage();
             if (!languageString.equals(prefLanguageString)) {
                 languageString = prefLanguageString;
-                System.out.println(languageString);
-                loadView(new Locale(languageString), true);
+                TEXT_BUNDLE = ResourceBundle.getBundle(I18N_BASE, new Locale(languageString));
             }
         });
 
-        loadView(new Locale(languageString), false);
+        loadView(locale);
 
     }
 
@@ -84,8 +77,7 @@ public class MainApp extends Application {
      *
      * @param locale
      */
-    private void loadView(Locale locale, boolean changed) {
-        System.out.println("local " + locale);
+    private void loadView(Locale locale) {
         try {
             // Load root layout from fxml file.
             FXMLLoader loader = new FXMLLoader();
@@ -102,12 +94,6 @@ public class MainApp extends Application {
 
             controller = loader.getController();
 
-            if (changed) {
-                Pane pane = (BorderPane) loader.load(this.getClass().getResource(ROOT_LAYOUT).openStream());
-                borderPane.getChildren().removeAll();
-                borderPane.setCenter(pane);
-            }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -116,8 +102,8 @@ public class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) {
 
-        this.primaryStage = primaryStage;
-        this.primaryStage.setTitle(APP_TITLE);
+        this.PRIMARY_STAGE = primaryStage;
+        this.PRIMARY_STAGE.setTitle(APP_TITLE);
 
         // Manage possible empty clear/decrypted files, or exit confirmation.
         primaryStage.setOnCloseRequest(controller.getConfirmCloseEventHandler());
@@ -128,9 +114,7 @@ public class MainApp extends Application {
             controller.getRootBorderPane().getChildren().remove(controller.getInitializingLabel());
         }
 
-        borderPane = controller.getRootBorderPane();
-
-        // Show primaryStage.
+        // Show PRIMARY_STAGE.
         primaryStage.show();
 
         // RootLayoutController initialize process after main window shows.

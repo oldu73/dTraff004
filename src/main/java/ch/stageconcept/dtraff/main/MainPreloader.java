@@ -1,6 +1,7 @@
 package ch.stageconcept.dtraff.main;
 
 import ch.stageconcept.dtraff.main.view.RootLayoutController;
+import ch.stageconcept.dtraff.preference.model.Pref;
 import javafx.application.Preloader;
 import javafx.application.Preloader.StateChangeNotification.Type;
 import javafx.scene.Scene;
@@ -11,6 +12,9 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * Main preloader class.
@@ -31,7 +35,11 @@ public class MainPreloader extends Preloader {
         VBox loading = new VBox(20);
         loading.setMaxWidth(Region.USE_PREF_SIZE);
         loading.setMaxHeight(Region.USE_PREF_SIZE);
-        loading.getChildren().add(new Label(RootLayoutController.ALINF_ABOUT_HEADER + "\nLoading, please wait..."));
+
+        ResourceBundle textBundle = ResourceBundle.getBundle(MainApp.I18N_BASE, new Locale(Pref.getLanguage()));
+        String loadingMessage = textBundle.getString("splashScreen");
+
+        loading.getChildren().add(new Label(RootLayoutController.ALINF_ABOUT_HEADER + "\n" + loadingMessage));
         loading.getChildren().add(new ProgressBar());
 
         BorderPane root = new BorderPane(loading);

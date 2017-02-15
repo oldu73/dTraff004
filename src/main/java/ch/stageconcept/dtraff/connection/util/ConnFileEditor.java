@@ -13,7 +13,7 @@ import java.io.IOException;
 
 /**
  * Helper enum class to supply ConnFileEditDialog
- * in front of primaryStage.
+ * in front of PRIMARY_STAGE.
  *
  * @author Olivier Durand
  */
@@ -45,7 +45,7 @@ public enum ConnFileEditor {
             Stage dialogStage = new Stage();
             dialogStage.setTitle(DIALOG_TITLE);
             dialogStage.initModality(Modality.WINDOW_MODAL);
-            dialogStage.initOwner(MainApp.primaryStage);
+            dialogStage.initOwner(MainApp.PRIMARY_STAGE);
             Scene scene = new Scene(page);
             dialogStage.setScene(scene);
 

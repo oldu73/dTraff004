@@ -7,6 +7,7 @@ import ch.stageconcept.dtraff.main.MainApp;
 import ch.stageconcept.dtraff.preference.model.Pref;
 import ch.stageconcept.dtraff.preference.util.PrefEditor;
 import ch.stageconcept.dtraff.util.AlertDialog;
+import ch.stageconcept.dtraff.util.I18N;
 import ch.stageconcept.dtraff.util.Is1st;
 import ch.stageconcept.dtraff.xrelease.Release;
 import javafx.animation.Animation;
@@ -24,11 +25,9 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
@@ -89,6 +88,9 @@ public class RootLayoutController {
     private Label initializingLabel;
 
     @FXML
+    private Menu fileMenu;
+
+    @FXML
     private MenuItem fileNewMenuItem;
 
     @FXML
@@ -110,10 +112,22 @@ public class RootLayoutController {
     private MenuItem editServerConnectionMenuItem;
 
     @FXML
+    private MenuItem fileExitMenuItem;
+
+    @FXML
+    private Menu editMenu;
+
+    @FXML
     private MenuItem editDeleteMenuItem;
 
     @FXML
     private MenuItem editPreferencesMenuItem;
+
+    @FXML
+    private Menu helpMenu;
+
+    @FXML
+    private MenuItem helpAboutMenuItem;
 
     private ConnRoot connRoot;    // ConnRoot description to be used in a treeView : ConnRoot (root node) - ConnFile - Conn - Database - (...)
     private ModelTree<ConnUnit<?>> connTree;
@@ -152,7 +166,7 @@ public class RootLayoutController {
 
             // ### Exit confirmation
 
-            Alert alert = AlertDialog.provide(MainApp.primaryStage,
+            Alert alert = AlertDialog.provide(MainApp.PRIMARY_STAGE,
                     Alert.AlertType.CONFIRMATION,
                     ALCNF_EXIT_TITLE,
                     ALCNF_EXIT_HEADER,
@@ -206,7 +220,36 @@ public class RootLayoutController {
      * after the fxml file has been loaded.
      */
     @FXML
-    private void initialize() { /* not used! */ }
+    private void initialize() {
+
+        // I18N String bindings.
+
+        // File
+
+        fileMenu.textProperty().bind(I18N.createStringBinding("fileMenu"));
+        fileNewMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.new"));
+        fileOpenMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.open"));
+        fileEnterPasswordMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.enterPassword"));
+        fileCloseMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.close"));
+
+        serverConnectionMenuItem.textProperty().bind(I18N.createStringBinding("serverConnectionMenu"));
+        newServerConnectionMenuItem.textProperty().bind(I18N.createStringBinding("serverConnectionMenuItem.new"));
+        editServerConnectionMenuItem.textProperty().bind(I18N.createStringBinding("serverConnectionMenuItem.edit"));
+
+        fileExitMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.exit"));
+
+        // Edit
+
+        editMenu.textProperty().bind(I18N.createStringBinding("editMenu"));
+        editDeleteMenuItem.textProperty().bind(I18N.createStringBinding("editMenuItem.delete"));
+        editPreferencesMenuItem.textProperty().bind(I18N.createStringBinding("editMenuItem.preferences"));
+
+        // Help
+
+        helpMenu.textProperty().bind(I18N.createStringBinding("helpMenu"));
+        helpAboutMenuItem.textProperty().bind(I18N.createStringBinding("helpMenuItem.about"));
+
+    }
 
     /**
      * Initialization called from outside.
@@ -218,7 +261,8 @@ public class RootLayoutController {
      */
     public void subInitialize() {
 
-        connRoot = new ConnRoot(ConnRoot.NETWORK, MainApp.primaryStage, this);
+        connRoot = new ConnRoot(ConnRoot.NETWORK, MainApp.PRIMARY_STAGE, this);
+        connRoot.nameProperty().bind(I18N.createStringBinding("network.network"));
 
         boolean initializingLabelAnimation = connRoot.isUserActionNeededAtStart();
 
@@ -590,7 +634,7 @@ public class RootLayoutController {
         fileChooser.getExtensionFilters().add(extFilter);
 
         // Show open file dialog
-        File file = fileChooser.showOpenDialog(MainApp.primaryStage);
+        File file = fileChooser.showOpenDialog(MainApp.PRIMARY_STAGE);
 
         // ### After file chooser
 
@@ -609,7 +653,7 @@ public class RootLayoutController {
      * @param connFile
      */
     private void alertAlreadyPresent(ConnFile connFile) {
-        AlertDialog.provide(MainApp.primaryStage,
+        AlertDialog.provide(MainApp.PRIMARY_STAGE,
                 Alert.AlertType.INFORMATION,
                 ALINF_FILE_ALREADY_PRESENT_TITLE,
                 ALINF_FILE_ALREADY_PRESENT_HEADER,
@@ -692,7 +736,7 @@ public class RootLayoutController {
      */
     @FXML
     private void handleAbout() {
-        AlertDialog.provide(MainApp.primaryStage,
+        AlertDialog.provide(MainApp.PRIMARY_STAGE,
                 Alert.AlertType.INFORMATION,
                 ALINF_ABOUT_TITLE,
                 ALINF_ABOUT_HEADER,
@@ -705,9 +749,9 @@ public class RootLayoutController {
     @FXML
     public void handleExit() {
 
-        MainApp.primaryStage.fireEvent(
+        MainApp.PRIMARY_STAGE.fireEvent(
                 new WindowEvent(
-                        MainApp.primaryStage,
+                        MainApp.PRIMARY_STAGE,
                         WindowEvent.WINDOW_CLOSE_REQUEST
                 )
         );
@@ -993,7 +1037,7 @@ public class RootLayoutController {
         connFile.setBroken();
 
         if (Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) {
-            AlertDialog.provide(MainApp.primaryStage,
+            AlertDialog.provide(MainApp.PRIMARY_STAGE,
                     Alert.AlertType.ERROR,
                     ALERR_LOAD_DATA_TITLE,
                     ALERR_LOAD_DATA_HEADER,
@@ -1053,7 +1097,7 @@ public class RootLayoutController {
 
                     //e.printStackTrace();
 
-                    Alert alert = AlertDialog.provide(MainApp.primaryStage,
+                    Alert alert = AlertDialog.provide(MainApp.PRIMARY_STAGE,
                             Alert.AlertType.CONFIRMATION,
                             ALCNF_BAD_PASSWORD_TITLE,
                             ALCNF_BAD_PASSWORD_HEADER,

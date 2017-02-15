@@ -1,9 +1,11 @@
 package ch.stageconcept.dtraff.connection.model;
 
 import ch.stageconcept.dtraff.connection.util.*;
+import ch.stageconcept.dtraff.main.MainApp;
 import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import ch.stageconcept.dtraff.preference.model.Pref;
 import ch.stageconcept.dtraff.util.AlertDialog;
+import ch.stageconcept.dtraff.util.I18N;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -66,9 +68,6 @@ public class ConnRoot extends ConnUnit<ConnFile> {
     // ConnRoot treeView root denomination
     public static final String NETWORK = "Network";
 
-    // Pending opening file static text
-    private static final String PENDING_OPENING_FILE = "Opening file...";
-
     // Icon resource file name and size
     private static final String ICON_FILENAME = "network001.png";
     private static final int ICON_HEIGHT = 16;
@@ -78,15 +77,6 @@ public class ConnRoot extends ConnUnit<ConnFile> {
     private static final String MENU_NEW_FILE = "New File";
     private static final String MENU_OPEN_FILE = ConnFile.MENU_OPEN_FILE;
     private static final String CONNFILE_DEFAULT_NAME = "default";
-
-    // Alerts statics texts
-    private static final String ALERR_LOAD_DATA_TITLE = "Error";
-    private static final String ALERR_LOAD_DATA_HEADER = "Could not load data";
-    private static final String ALERR_LOAD_DATA_CONTENT = "Could not load data from file(s):\n";
-
-    private static final String ALCNF_BAD_PASSWORD_TITLE = ConnFile.MENU_ENTER_PASSWORD;
-    private static final String ALCNF_BAD_PASSWORD_HEADER = "Bad password!";
-    private static final String ALCNF_BAD_PASSWORD_CONTENT = "Try again?";
 
     private static final String ALCNF_EMPTY_FILE_TITLE = "Empty File";
     private static final String ALCNF_EMPTY_FILE_HEADER = "Ok to leave?";
@@ -340,7 +330,9 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      */
     public void setQuite() {
         setState(ConnRootState.QUITE);  // ! Order matter (listener): 1st state, 2nd name !
-        setName(NETWORK);   // set treeView denomination to default value
+        this.nameProperty().unbind();
+        // set treeView denomination to default value
+        this.nameProperty().bind(I18N.createStringBinding("network.network"));
     }
 
     /**
@@ -356,7 +348,9 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      */
     public void setOpeningFile() {
         setState(ConnRootState.OPENING_FILE);   // ! Order matter (listener): 1st state, 2nd name !
-        setName(PENDING_OPENING_FILE);  // set treeView denomination to waiting message value
+        this.nameProperty().unbind();
+        // set treeView denomination to waiting message value
+        this.nameProperty().bind(I18N.createStringBinding("network.openingFile"));
     }
 
     /**
@@ -490,9 +484,10 @@ public class ConnRoot extends ConnUnit<ConnFile> {
 
         AlertDialog.provide(stage,
                 Alert.AlertType.ERROR,
-                ALERR_LOAD_DATA_TITLE,
-                ALERR_LOAD_DATA_HEADER,
-                ALERR_LOAD_DATA_CONTENT + namesFileNamesToString(getSubUnitsSubList(ConnFile::isBroken)), true);
+                MainApp.TEXT_BUNDLE.getString("alerrLoadData.title"),
+                MainApp.TEXT_BUNDLE.getString("alerrLoadData.header"),
+                MainApp.TEXT_BUNDLE.getString("alerrLoadData.content")
+                        + "\n" + namesFileNamesToString(getSubUnitsSubList(ConnFile::isBroken)), true);
 
     }
 
@@ -650,9 +645,9 @@ public class ConnRoot extends ConnUnit<ConnFile> {
 
                     Alert alert = AlertDialog.provide(stage,
                             Alert.AlertType.CONFIRMATION,
-                            ALCNF_BAD_PASSWORD_TITLE,
-                            ALCNF_BAD_PASSWORD_HEADER,
-                            ALCNF_BAD_PASSWORD_CONTENT, false);
+                            MainApp.TEXT_BUNDLE.getString("alcnfBadPassword.title"),
+                            MainApp.TEXT_BUNDLE.getString("alcnfBadPassword.header"),
+                            MainApp.TEXT_BUNDLE.getString("alcnfBadPassword.content"), false);
 
                     Optional<ButtonType> badPasswordDialogResult = alert.showAndWait();
 
