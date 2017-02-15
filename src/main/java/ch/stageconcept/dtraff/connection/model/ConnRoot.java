@@ -74,13 +74,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
     private static final int ICON_WIDTH = ICON_HEIGHT;
 
     public static final String PREFS_PATH = "/ch/stageconcept/datatraffic/file";
-    private static final String MENU_NEW_FILE = "New File";
-    private static final String MENU_OPEN_FILE = ConnFile.MENU_OPEN_FILE;
     private static final String CONNFILE_DEFAULT_NAME = "default";
-
-    private static final String ALCNF_EMPTY_FILE_TITLE = "Empty File";
-    private static final String ALCNF_EMPTY_FILE_HEADER = "Ok to leave?";
-    private static final String ALCNF_EMPTY_FILE_CONTENT = "On leaving, following empty file(s) will be removed from list:\n";
 
     private static Stage stage;
     private RootLayoutController rootLayoutController;
@@ -216,10 +210,10 @@ public class ConnRoot extends ConnUnit<ConnFile> {
 
         ContextMenu contextMenu = new ContextMenu();
 
-        MenuItem newFileMenuItem = new MenuItem(MENU_NEW_FILE);
+        MenuItem newFileMenuItem = I18N.menuItemForKey("connRoot.contextMenu.file.new");
         newFileMenuItem.setOnAction(newConnFile());
 
-        MenuItem openFileMenuItem = new MenuItem(MENU_OPEN_FILE);
+        MenuItem openFileMenuItem = I18N.menuItemForKey("connRoot.contextMenu.file.open");
         openFileMenuItem.setOnAction((ActionEvent t) -> getRootLayoutController().openConnFile());
 
         contextMenu.getItems().addAll(newFileMenuItem, openFileMenuItem);
@@ -502,14 +496,13 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      */
     public boolean alertEmptyFiles() {
 
-        //TODO add alertEmptyFiles on exit user preference.
         //TODO empty file warning dialog with don't warn again check box in lower left corner (-> set user pref), (nice to have).
 
         Alert alert = AlertDialog.provide(stage,
                 Alert.AlertType.CONFIRMATION,
-                ALCNF_EMPTY_FILE_TITLE,
-                ALCNF_EMPTY_FILE_HEADER,
-                ALCNF_EMPTY_FILE_CONTENT + namesFileNamesToString(getSubUnitsSubList(isSubUnitEmptyClearOrDecrypted)), false);
+                MainApp.TEXT_BUNDLE.getString("alcnfEmptyFile.title"),
+                MainApp.TEXT_BUNDLE.getString("alcnfEmptyFile.header"),
+                MainApp.TEXT_BUNDLE.getString("alcnfEmptyFile.content") + "\n" + namesFileNamesToString(getSubUnitsSubList(isSubUnitEmptyClearOrDecrypted)), false);
 
         Optional<ButtonType> result = alert.showAndWait();
 

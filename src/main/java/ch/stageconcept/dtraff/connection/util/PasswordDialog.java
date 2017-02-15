@@ -1,6 +1,7 @@
 package ch.stageconcept.dtraff.connection.util;
 
 import ch.stageconcept.dtraff.connection.model.ConnFile;
+import ch.stageconcept.dtraff.main.MainApp;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -19,14 +20,15 @@ import javafx.scene.layout.Priority;
  * Adapted by Olivier Durand
  */
 public class PasswordDialog extends Dialog<String> {
+
     private PasswordField passwordField;
 
     public PasswordDialog(String fileName) {
-        setTitle(ConnFile.MENU_ENTER_PASSWORD);
-        setHeaderText("Please enter password for: \n" + fileName);
+        setTitle(MainApp.TEXT_BUNDLE.getString("passwordDialog.title"));
+        setHeaderText(MainApp.TEXT_BUNDLE.getString("passwordDialog.header") + "\n" + fileName);
 
-        ButtonType okButton = new ButtonType("OK", ButtonData.OK_DONE);
-        ButtonType cancelButton = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+        ButtonType okButton = new ButtonType(MainApp.TEXT_BUNDLE.getString("button.ok"), ButtonData.OK_DONE);
+        ButtonType cancelButton = new ButtonType(MainApp.TEXT_BUNDLE.getString("button.cancel"), ButtonData.CANCEL_CLOSE);
 
         //ButtonType passwordButtonType = new ButtonType("Decrypt", ButtonData.OK_DONE);
         //getDialogPane().getButtonTypes().addAll(passwordButtonType, ButtonType.CANCEL);
@@ -36,7 +38,7 @@ public class PasswordDialog extends Dialog<String> {
         getDialogPane().setGraphic(new ImageView(this.getClass().getResource("/password001.png").toString()));
 
         passwordField = new PasswordField();
-        passwordField.setPromptText("Password");
+        passwordField.setPromptText(MainApp.TEXT_BUNDLE.getString("passwordDialog.promptText"));
 
         HBox hBox = new HBox();
         hBox.getChildren().add(passwordField);

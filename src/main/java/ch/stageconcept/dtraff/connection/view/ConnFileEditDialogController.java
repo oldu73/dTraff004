@@ -30,7 +30,7 @@ public class ConnFileEditDialogController {
     private static final String ALERR_INPUT_INVALID_HEADER = "Please correct invalid fields";
     private static final String ALERR_INPUT_INVALID_CONTENT_FOLDER = "No valid folder!\n";
     private static final String ALERR_INPUT_INVALID_CONTENT_FILE_1 = "No valid file!\n";
-    private static final String ALERR_INPUT_INVALID_CONTENT_FILE_2 = RootLayoutController.ALINF_FILE_ALREADY_PRESENT_CONTENT;
+    private static final String ALERR_INPUT_INVALID_CONTENT_FILE_2 = "A file entry with specified name is already present:\n";
     private static final String ALERR_INPUT_INVALID_CONTENT_PASSWORD = "No valid password!\n";
 
     @FXML

@@ -68,22 +68,20 @@ public class MainApp extends Application {
             }
         });
 
-        loadView(locale);
+        loadView();
 
     }
 
     /**
      * Load view with local resource
-     *
-     * @param locale
      */
-    private void loadView(Locale locale) {
+    private void loadView() {
         try {
             // Load root layout from fxml file.
             FXMLLoader loader = new FXMLLoader();
 
             // Resource bundles name for multi-languages support is set.
-            loader.setResources(ResourceBundle.getBundle(I18N_BASE, locale));
+            loader.setResources(TEXT_BUNDLE);
 
             //rootLayout = loader.load(this.getClass().getResource(ROOT_LAYOUT).openStream());
             loader.setLocation(this.getClass().getResource(ROOT_LAYOUT));

@@ -36,22 +36,22 @@
          <children>
             <TextField fx:id="folderField" GridPane.columnIndex="2" />
             <TextField fx:id="fileField" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-            <Label fx:id="passwordLabel" text="Password" GridPane.rowIndex="3" />
-            <Label fx:id="repeatPasswordLabel" text="Repeat Password" GridPane.rowIndex="4" />
-            <Label text="File" GridPane.rowIndex="1" />
+            <Label fx:id="passwordLabel" text="%connFileEditDialog.password" GridPane.rowIndex="3" />
+            <Label fx:id="repeatPasswordLabel" text="%connFileEditDialog.repeatPassword" GridPane.rowIndex="4" />
+            <Label text="%connFileEditDialog.file" GridPane.rowIndex="1" />
             <Label fx:id="testConnectionLabel" GridPane.columnIndex="2" GridPane.rowIndex="9" />
-            <CheckBox fx:id="passwordCheckBox" mnemonicParsing="false" text="Password" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <CheckBox fx:id="passwordCheckBox" mnemonicParsing="false" text="%connFileEditDialog.password" GridPane.columnIndex="2" GridPane.rowIndex="2" />
             <PasswordField fx:id="passwordField" GridPane.columnIndex="2" GridPane.rowIndex="3" />
             <PasswordField fx:id="repeatPasswordField" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-            <Button fx:id="browseButton" mnemonicParsing="false" onAction="#handleBrowse" text="Browse" GridPane.columnIndex="3" GridPane.halignment="RIGHT" />
-            <Label text="Folder" />
+            <Button fx:id="browseButton" mnemonicParsing="false" onAction="#handleBrowse" text="%connFileEditDialog.browse" GridPane.columnIndex="3" GridPane.halignment="RIGHT" />
+            <Label text="%connFileEditDialog.folder" />
             <ProgressIndicator fx:id="progressIndicator" visible="false" GridPane.columnIndex="1" />
          </children>
       </GridPane>
       <ButtonBar layoutX="386.0" layoutY="346.0" prefHeight="40.0" prefWidth="353.0" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0">
         <buttons>
-          <Button fx:id="okButton" mnemonicParsing="false" onAction="#handleOk" text="OK" />
-            <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#handleCancel" text="Cancel" />
+          <Button fx:id="okButton" mnemonicParsing="false" onAction="#handleOk" text="%button.ok" />
+            <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#handleCancel" text="%button.cancel" />
         </buttons>
       </ButtonBar>
    </children>

@@ -57,29 +57,19 @@ public class RootLayoutController {
     // !WARNING! In order to use file that reside in resources folder, don’t forget to add a slash before file name!
     private static final String CONNROOT_TREEVIEW_CSS = "/connRootTreeView.css";
 
-    // Initializing static text
-    private static final String LABEL_INITIALIZING = "Initializing...";
-
     // Alerts statics texts
     private static final String ALINF_ABOUT_TITLE = "Data Traffic";
     public static final String ALINF_ABOUT_HEADER = ALINF_ABOUT_TITLE + Release.NUMBER.getValue();
-    private static final String ALINF_ABOUT_CONTENT = "Author: Olivier Durand\nWebsite: http://www.stageconcept.ch";
 
-    private static final String ALERR_LOAD_DATA_TITLE = "Error";
-    private static final String ALERR_LOAD_DATA_HEADER = "Could not load data";
-    private static final String ALERR_LOAD_DATA_CONTENT = "Could not load data from file:\n";
+    // Deprecated!
+    private static final String ALERR_LOAD_DATA_TITLE = "Deprecated! " + "Error";
+    private static final String ALERR_LOAD_DATA_HEADER = "Deprecated! " + "Could not load data";
+    private static final String ALERR_LOAD_DATA_CONTENT = "Deprecated! " + "Could not load data from file:\n";
 
-    private static final String ALCNF_BAD_PASSWORD_TITLE = ConnFile.MENU_ENTER_PASSWORD;
-    private static final String ALCNF_BAD_PASSWORD_HEADER = "Bad password!";
-    private static final String ALCNF_BAD_PASSWORD_CONTENT = "Try again?";
-
-    private static final String ALINF_FILE_ALREADY_PRESENT_TITLE = "File Open";
-    private static final String ALINF_FILE_ALREADY_PRESENT_HEADER = "File entry already present";
-    public static final String ALINF_FILE_ALREADY_PRESENT_CONTENT = "A file entry with specified name is already present:\n";
-
-    private static final String ALCNF_EXIT_TITLE = "Close Application";
-    private static final String ALCNF_EXIT_HEADER = "Confirm Exit";
-    private static final String ALCNF_EXIT_CONTENT = "Are you sure you want to exit?";
+    // Deprecated!
+    private static final String ALCNF_BAD_PASSWORD_TITLE = "Deprecated! " + ConnFile.MENU_ENTER_PASSWORD;
+    private static final String ALCNF_BAD_PASSWORD_HEADER = "Deprecated! " + "Bad password!";
+    private static final String ALCNF_BAD_PASSWORD_CONTENT = "Deprecated! " + "Try again?";
 
     @FXML
     private BorderPane rootBorderPane;
@@ -168,9 +158,9 @@ public class RootLayoutController {
 
             Alert alert = AlertDialog.provide(MainApp.PRIMARY_STAGE,
                     Alert.AlertType.CONFIRMATION,
-                    ALCNF_EXIT_TITLE,
-                    ALCNF_EXIT_HEADER,
-                    ALCNF_EXIT_CONTENT, false);
+                    MainApp.TEXT_BUNDLE.getString("alcnfExit.title"),
+                    MainApp.TEXT_BUNDLE.getString("alcnfExit.header"),
+                    MainApp.TEXT_BUNDLE.getString("alcnfExit.content"), false);
 
             Optional<ButtonType> result = alert.showAndWait();
 
@@ -306,19 +296,24 @@ public class RootLayoutController {
      */
     private void initializingLabelTextAnimation() {
 
-        final IntegerProperty i = new SimpleIntegerProperty(12);
+        String initializingString = MainApp.TEXT_BUNDLE.getString("initializingLabel");
+        int indexOfDot = initializingString.indexOf('.');
+
+        final IntegerProperty i = new SimpleIntegerProperty(indexOfDot);
         Timeline timeline = new Timeline();
+
         KeyFrame keyFrame = new KeyFrame(
                 Duration.seconds(0.4),
                 event -> {
-                    if (i.get() > LABEL_INITIALIZING.length()) {
-                        i.set(12);
+                    if (i.get() > initializingString.length()) {
+                        i.set(indexOfDot);
                         timeline.playFromStart();
                     } else {
-                        initializingLabel.setText(LABEL_INITIALIZING.substring(0, i.get()));
+                        initializingLabel.setText(initializingString.substring(0, i.get()));
                         i.set(i.get() + 1);
                     }
                 });
+
         timeline.getKeyFrames().add(keyFrame);
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
@@ -653,11 +648,13 @@ public class RootLayoutController {
      * @param connFile
      */
     private void alertAlreadyPresent(ConnFile connFile) {
+
         AlertDialog.provide(MainApp.PRIMARY_STAGE,
                 Alert.AlertType.INFORMATION,
-                ALINF_FILE_ALREADY_PRESENT_TITLE,
-                ALINF_FILE_ALREADY_PRESENT_HEADER,
-                ALINF_FILE_ALREADY_PRESENT_CONTENT + connFile.getFileName(), true);
+                MainApp.TEXT_BUNDLE.getString("alinfFileAlreadyPresent.title"),
+                MainApp.TEXT_BUNDLE.getString("alinfFileAlreadyPresent.header"),
+                MainApp.TEXT_BUNDLE.getString("alinfFileAlreadyPresent.content") + "\n" + connFile.getFileName(), true);
+
     }
 
     /**
@@ -736,11 +733,16 @@ public class RootLayoutController {
      */
     @FXML
     private void handleAbout() {
+
         AlertDialog.provide(MainApp.PRIMARY_STAGE,
                 Alert.AlertType.INFORMATION,
                 ALINF_ABOUT_TITLE,
                 ALINF_ABOUT_HEADER,
-                ALINF_ABOUT_CONTENT, true);
+                MainApp.TEXT_BUNDLE.getString("software.author")
+                        + "\n"
+                        + MainApp.TEXT_BUNDLE.getString("software.companyWebSite"),
+                true);
+
     }
 
     /**

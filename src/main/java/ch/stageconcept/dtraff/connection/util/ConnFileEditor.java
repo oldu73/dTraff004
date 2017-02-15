@@ -38,12 +38,13 @@ public enum ConnFileEditor {
         try {
             // Load the fxml file and create a new stage for the popup dialog.
             FXMLLoader loader = new FXMLLoader();
+            loader.setResources(MainApp.TEXT_BUNDLE);
             loader.setLocation(MainApp.class.getResource(FXML_RESOURCE_PATH));
             AnchorPane page = loader.load();
 
             // Create the dialog Stage.
             Stage dialogStage = new Stage();
-            dialogStage.setTitle(DIALOG_TITLE);
+            dialogStage.setTitle(MainApp.TEXT_BUNDLE.getString("connFileEditDialog.title"));
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.initOwner(MainApp.PRIMARY_STAGE);
             Scene scene = new Scene(page);

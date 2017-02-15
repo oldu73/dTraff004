@@ -15,6 +15,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tooltip;
 
 import java.text.MessageFormat;
@@ -146,12 +147,27 @@ public final class I18N {
      *         ResourceBundle key
      * @param args
      *         optional arguments for the message
-     * @return Label
+     * @return Tooltip
      */
     public static Tooltip tooltipForKey(final String key, final Object... args) {
         Tooltip tooltip = new Tooltip();
         tooltip.textProperty().bind(createStringBinding(key, args));
         return tooltip;
+    }
+
+    /**
+     * creates a bound MenuItem for the given resourcebundle key
+     *
+     * @param key
+     *         ResourceBundle key
+     * @param args
+     *         optional arguments for the message
+     * @return MenuItem
+     */
+    public static MenuItem menuItemForKey(final String key, final Object... args) {
+        MenuItem menuItem = new MenuItem();
+        menuItem.textProperty().bind(createStringBinding(key, args));
+        return menuItem;
     }
 
 }
