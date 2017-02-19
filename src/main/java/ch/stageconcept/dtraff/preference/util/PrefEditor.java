@@ -2,6 +2,7 @@ package ch.stageconcept.dtraff.preference.util;
 
 import ch.stageconcept.dtraff.main.MainApp;
 import ch.stageconcept.dtraff.preference.view.PrefDialogController;
+import ch.stageconcept.dtraff.util.I18N;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
@@ -34,7 +35,7 @@ public enum PrefEditor {
 
             // Create the dialog Stage.
             Stage dialogStage = new Stage();
-            dialogStage.setTitle("Edit User Preferences");
+            dialogStage.titleProperty().bind(I18N.createStringBinding("prefDialog.title"));
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.initOwner(MainApp.PRIMARY_STAGE);
             Scene scene = new Scene(page);

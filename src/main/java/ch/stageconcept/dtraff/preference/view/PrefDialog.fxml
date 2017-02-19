@@ -13,7 +13,7 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ch.stageconcept.dtraff.preference.view.PrefDialogController">
    <children>
-      <Label layoutX="14.0" layoutY="14.0" text="Start" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0">
+      <Label fx:id="startLabel" layoutX="14.0" layoutY="14.0" text="Start" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0">
          <font>
             <Font name="System Bold Italic" size="12.0" />
          </font>
@@ -31,16 +31,16 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label text="Splash screen" />
+            <Label fx:id="splashScreenLabel" text="Splash screen" />
             <CheckBox fx:id="splashScreenCheckBox" mnemonicParsing="false" GridPane.columnIndex="1" />
-            <Label text="Error loading data from file popup at start&#10;or on open" GridPane.rowIndex="1" />
+            <Label fx:id="errorLoadingDataFromFilePopUpAtStartOrOnOpenLabel" text="Error loading data from file popup at start&#10;or on open" GridPane.rowIndex="1" />
             <CheckBox fx:id="errorLoadingDataFromFilePopUpAtStartOrOnOpenCheckBox" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Label text="Enter encrypted connection file password at start&#10;or on open" GridPane.rowIndex="2" />
+            <Label fx:id="decryptConnFilePassAtStartOrOnOpenLabel" text="Enter encrypted connection file password at start&#10;or on open" GridPane.rowIndex="2" />
             <CheckBox fx:id="decryptConnFilePassAtStartOrOnOpenCheckBox" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
          </children>
       </GridPane>
       <Separator layoutX="14.0" layoutY="171.0" prefWidth="372.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" />
-      <Label layoutX="22.0" layoutY="189.0" text="Misc" AnchorPane.leftAnchor="14.0">
+      <Label fx:id="miscLabel" layoutX="22.0" layoutY="189.0" text="Misc" AnchorPane.leftAnchor="14.0">
          <font>
             <Font name="System Bold Italic" size="12.0" />
          </font>
@@ -58,13 +58,13 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <Label text="Language" />
+            <Label fx:id="languageLabel" text="Language" />
             <Label text="empty" visible="false" GridPane.rowIndex="1" />
             <Label text="empty" visible="false" GridPane.rowIndex="2" />
          </children>
       </GridPane>
       <Separator layoutX="22.0" layoutY="346.0" prefWidth="372.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" />
-      <Label layoutX="14.0" layoutY="369.0" text="Close" translateY="-5.0">
+      <Label fx:id="closeLabel" layoutX="14.0" layoutY="369.0" text="Close" translateY="-5.0">
          <font>
             <Font name="System Bold Italic" size="12.0" />
          </font>
@@ -82,9 +82,9 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <Label text="Warn of empty file(s) removal&#10;when application close" />
+            <Label fx:id="warnRemoveEmptyFileOnCloseLabel" text="Warn of empty file(s) removal&#10;when application close" />
             <CheckBox fx:id="warnRemoveEmptyFileOnCloseCheckBox" mnemonicParsing="false" GridPane.columnIndex="1" />
-            <Label text="Confirm application exit" GridPane.rowIndex="1" />
+            <Label fx:id="warnExitingOnCloseLabel" text="Confirm application exit" GridPane.rowIndex="1" />
             <CheckBox fx:id="warnExitingOnCloseCheckBox" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             <Label text="null" visible="false" GridPane.rowIndex="2" />
             <CheckBox mnemonicParsing="false" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />

@@ -126,6 +126,21 @@ public final class I18N {
     }
 
     /**
+     * creates a bound Label for the given resourcebundle key
+     *
+     * @param key
+     *         ResourceBundle key
+     * @param args
+     *         optional arguments for the message
+     * @return Label
+     */
+    public static Label labelForKey(final String key, final Object... args) {
+        Label label = new Label();
+        label.textProperty().bind(createStringBinding(key, args));
+        return label;
+    }
+
+    /**
      * creates a bound Button for the given resourcebundle key
      *
      * @param key
