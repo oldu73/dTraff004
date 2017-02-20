@@ -1,6 +1,7 @@
 package ch.stageconcept.dtraff.connection.model;
 
 import ch.stageconcept.dtraff.connection.util.*;
+import ch.stageconcept.dtraff.main.MainApp;
 import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -35,8 +36,6 @@ public class ConnFile extends ConnUnit<Conn> {
     private static final String ALERT_SAVE_DATA_TITLE = "Error";
     private static final String ALERT_SAVE_DATA_HEADER = "Could not save data";
     private static final String ALERT_SAVE_DATA_CONTENT = "Could not save data to file:\n";
-
-    private static final String DIALOG_NEW_CONNECTION_TITLE = MENU_NEW_CONNECTION;
 
     // Reference to parent object
     private final ObjectProperty<ConnRoot> parent;
@@ -328,7 +327,7 @@ public class ConnFile extends ConnUnit<Conn> {
             conn.setPassword(crypto.getEncrypted(conn.getPassword()));
         }
 
-        if (ConnEditor.INSTANCE.supply(conn, DIALOG_NEW_CONNECTION_TITLE)) {
+        if (ConnEditor.INSTANCE.supply(conn, MainApp.TEXT_BUNDLE.getString("connEditDialog.title.new"))) {
             getSubUnits().add(conn);
             //this.createAndAddSubUnit("Hello, world!");
             saveConnDataToFile();

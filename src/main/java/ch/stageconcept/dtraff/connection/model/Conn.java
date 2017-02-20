@@ -3,6 +3,8 @@ package ch.stageconcept.dtraff.connection.model;
 import ch.stageconcept.dtraff.connection.util.ConnEditor;
 import ch.stageconcept.dtraff.connection.util.DbDescriptor;
 import ch.stageconcept.dtraff.connection.util.DbType;
+import ch.stageconcept.dtraff.main.MainApp;
+import ch.stageconcept.dtraff.util.I18N;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -38,8 +40,6 @@ public class Conn extends ConnUnit<DataBase> {
 
     private static final String ICON_FILENAME = "serverDefault001.gif";
     private static final int VALID_CONNECTION_CHECK_TIMEOUT_SECONDS = 5;
-    private static final String MENU_EDIT_CONNECTION = "Edit Connection";
-    private static final String DIALOG_EDIT_CONNECTION_TITLE = MENU_EDIT_CONNECTION;
 
     // Reference to parent object
     private final ObjectProperty<ConnFile> parent;
@@ -79,7 +79,7 @@ public class Conn extends ConnUnit<DataBase> {
         //#####
         // treeView context menu
         ContextMenu contextMenu = new ContextMenu();
-        MenuItem editConnectionMenuItem = new MenuItem(MENU_EDIT_CONNECTION);
+        MenuItem editConnectionMenuItem = I18N.menuItemForKey("conn.contextMenu.editConnection");
         editConnectionMenuItem.setOnAction((ActionEvent t) -> editConnection());
         contextMenu.getItems().add(editConnectionMenuItem);
         this.setMenu(contextMenu);
@@ -132,7 +132,7 @@ public class Conn extends ConnUnit<DataBase> {
      * Edit connection
      */
     public void editConnection() {
-        ConnEditor.INSTANCE.supply(this, DIALOG_EDIT_CONNECTION_TITLE);
+        ConnEditor.INSTANCE.supply(this, MainApp.TEXT_BUNDLE.getString("connEditDialog.title.edit"));
         this.getParent().saveConnDataToFile();
     }
 

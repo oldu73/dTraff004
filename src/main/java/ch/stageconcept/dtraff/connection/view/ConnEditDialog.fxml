@@ -36,17 +36,17 @@
          <children>
             <TextField fx:id="nameField" GridPane.columnIndex="2" />
             <ComboBox fx:id="denominationField" prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-            <Label text="Host" GridPane.rowIndex="2" />
-            <Label text="Port" GridPane.rowIndex="3" />
-            <Label text="User" GridPane.rowIndex="4" />
-            <Label text="Password" GridPane.rowIndex="5" />
+            <Label text="%connEditDialog.host" GridPane.rowIndex="2" />
+            <Label text="%connEditDialog.port" GridPane.rowIndex="3" />
+            <Label text="%connEditDialog.user" GridPane.rowIndex="4" />
+            <Label text="%connEditDialog.password" GridPane.rowIndex="5" />
             <TextField fx:id="hostField" GridPane.columnIndex="2" GridPane.rowIndex="2" />
             <TextField fx:id="portField" GridPane.columnIndex="2" GridPane.rowIndex="3" />
             <TextField fx:id="userField" GridPane.columnIndex="2" GridPane.rowIndex="4" />
             <PasswordField fx:id="passwordField" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-            <Label text="Database" GridPane.rowIndex="1" />
-            <Label text="Name" />
-            <Button fx:id="testConnectionButton" mnemonicParsing="false" onAction="#handleTestConnection" text="Test Connection" GridPane.rowIndex="9" />
+            <Label text="%connEditDialog.database" GridPane.rowIndex="1" />
+            <Label text="%connEditDialog.name" />
+            <Button fx:id="testConnectionButton" mnemonicParsing="false" onAction="#handleTestConnection" text="%connEditDialog.testConnection" GridPane.rowIndex="9" />
             <ProgressIndicator fx:id="testConnectionProgressIndicator" prefHeight="25.0" prefWidth="25.0" GridPane.columnIndex="1" GridPane.rowIndex="9">
                <GridPane.margin>
                   <Insets bottom="5.0" right="10.0" top="5.0" />
@@ -57,8 +57,8 @@
       </GridPane>
       <ButtonBar layoutX="386.0" layoutY="346.0" prefHeight="40.0" prefWidth="353.0" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0">
         <buttons>
-          <Button fx:id="okButton" mnemonicParsing="false" onAction="#handleOk" text="OK" />
-            <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#handleCancel" text="Cancel" />
+          <Button fx:id="okButton" mnemonicParsing="false" onAction="#handleOk" text="%button.ok" />
+            <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#handleCancel" text="%button.cancel" />
         </buttons>
       </ButtonBar>
    </children>

@@ -36,6 +36,7 @@ public enum ConnEditor {
         try {
             // Load the fxml file and create a new stage for the popup dialog.
             FXMLLoader loader = new FXMLLoader();
+            loader.setResources(MainApp.TEXT_BUNDLE);
             loader.setLocation(MainApp.class.getResource(CONN_EDIT_DIALOG_FXML));
             AnchorPane page = loader.load();
 

@@ -21,8 +21,6 @@ public enum ConnFileEditor {
 
     INSTANCE;
 
-    private static final String DIALOG_TITLE = "New Connection File";
-
     // Fxml resource
     private static final String FXML_RESOURCE_PATH = "../connection/view/ConnFileEditDialog.fxml";
 

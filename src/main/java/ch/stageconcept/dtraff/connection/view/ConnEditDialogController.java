@@ -4,6 +4,7 @@ import ch.stageconcept.dtraff.connection.model.Conn;
 import ch.stageconcept.dtraff.connection.util.Crypto;
 import ch.stageconcept.dtraff.connection.util.DbDescriptor;
 import ch.stageconcept.dtraff.connection.util.DbType;
+import ch.stageconcept.dtraff.main.MainApp;
 import ch.stageconcept.dtraff.util.AlertDialog;
 import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
@@ -28,20 +29,6 @@ import java.util.Set;
  * @author Olivier Durand
  */
 public class ConnEditDialogController {
-
-    private static final String CONNECTION_TRY = "Try to connect..";
-    private static final String CONNECTION_SUCCESSFUL = "Connection successfully established..";
-    private static final String CONNECTION_FAIL = "Unable to establish connection!";
-
-    private static final String ALERT_INVALID_NAME = "No valid name!\n";
-    private static final String ALERT_INVALID_DATABASE = "No valid database!\n";
-    private static final String ALERT_INVALID_HOST = "No valid host!\n";
-    private static final String ALERT_INVALID_PORT = "No valid port!\n";
-    private static final String ALERT_INVALID_PORT_NUMBER = "No valid port (must be an integer)!\n";
-    private static final String ALERT_INVALID_USER = "No valid user!\n";
-    private static final String ALERT_INVALID_PASSWORD = "No valid password!\n";
-    private static final String ALERT_INVALID_TITLE = "Invalid Fields";
-    private static final String ALERT_INVALID_HEADER = "Please correct invalid fields";
 
     @FXML
     private TextField nameField;
@@ -226,7 +213,7 @@ public class ConnEditDialogController {
             //testConnectionLabel.textProperty().bind(task.messageProperty());
 
             task.setOnRunning(t -> {
-                testConnectionLabel.setText(CONNECTION_TRY);
+                testConnectionLabel.setText(MainApp.TEXT_BUNDLE.getString("connEditDialog.connection.try"));
                 testConnectionLabel.setTextFill(Color.BLACK);
             });
 
@@ -238,7 +225,7 @@ public class ConnEditDialogController {
                 // and here we act according to result of code
                 if (task.getValue()) {
                     // Successful login
-                    testConnectionLabel.setText(CONNECTION_SUCCESSFUL);
+                    testConnectionLabel.setText(MainApp.TEXT_BUNDLE.getString("connEditDialog.connection.successful"));
                     testConnectionLabel.setTextFill(Color.GREEN);
                 } /* Unnecessary because exception thrown in case of bad parameters -> task.setOnFailed
                 else {
@@ -252,7 +239,7 @@ public class ConnEditDialogController {
             task.setOnFailed(t -> {
                     // This handler will be called if exception occurred during your task execution
                     // E.g. network or db conn exceptions
-                    testConnectionLabel.setText(CONNECTION_FAIL);
+                    testConnectionLabel.setText(MainApp.TEXT_BUNDLE.getString("connEditDialog.connection.fail"));
                     testConnectionLabel.setTextFill(Color.RED);
             });
 
@@ -323,44 +310,49 @@ public class ConnEditDialogController {
         String errorMessage = "";
 
         if (nameField.getText() == null || nameField.getText().length() == 0) {
-            errorMessage += ALERT_INVALID_NAME;
+            errorMessage += MainApp.TEXT_BUNDLE.getString("connEditDialog.alertInvalid.name");
         }
 
         if (denominationField.getSelectionModel().getSelectedItem() == null ||
                 denominationField.getSelectionModel().getSelectedItem().toString().length() == 0) {
-            errorMessage += ALERT_INVALID_DATABASE;
+            errorMessage += MainApp.TEXT_BUNDLE.getString("connEditDialog.alertInvalid.database");
         }
 
         if (hostField.getText() == null || hostField.getText().length() == 0) {
-            errorMessage += ALERT_INVALID_HOST;
+            errorMessage += MainApp.TEXT_BUNDLE.getString("connEditDialog.alertInvalid.host");
         } else {
             //TODO Check that hostField contain valid URL or IP address
         }
 
         if (portField.getText() == null || portField.getText().length() == 0) {
-            errorMessage += ALERT_INVALID_PORT;
+            errorMessage += MainApp.TEXT_BUNDLE.getString("connEditDialog.alertInvalid.port");
         } else {
             // try to parse the port into an int.
             try {
                 Integer.parseInt(portField.getText());
             } catch (NumberFormatException e) {
-                errorMessage += ALERT_INVALID_PORT_NUMBER;
+                errorMessage += MainApp.TEXT_BUNDLE.getString("connEditDialog.alertInvalid.portNumber");
             }
         }
 
         if (userField.getText() == null || userField.getText().length() == 0) {
-            errorMessage += ALERT_INVALID_USER;
+            errorMessage += MainApp.TEXT_BUNDLE.getString("connEditDialog.alertInvalid.user");
         }
 
         if (passwordField.getText() == null || passwordField.getText().length() == 0) {
-            errorMessage += ALERT_INVALID_PASSWORD;
+            errorMessage += MainApp.TEXT_BUNDLE.getString("connEditDialog.alertInvalid.password");
         }
 
         if (errorMessage.length() == 0) {
             return true;
         } else {
             // Show the error message.
-            AlertDialog.provide(dialogStage, Alert.AlertType.ERROR, ALERT_INVALID_TITLE, ALERT_INVALID_HEADER, errorMessage, true);
+            AlertDialog.provide(dialogStage,
+                    Alert.AlertType.ERROR,
+                    MainApp.TEXT_BUNDLE.getString("connEditDialog.alertInvalid.title"),
+                    MainApp.TEXT_BUNDLE.getString("connEditDialog.alertInvalid.header"),
+                    errorMessage,
+                    true);
             return false;
         }
     }
