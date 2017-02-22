@@ -1,6 +1,7 @@
 package ch.stageconcept.dtraff.connection.view;
 
 import ch.stageconcept.dtraff.connection.model.ConnFile;
+import ch.stageconcept.dtraff.main.MainApp;
 import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import ch.stageconcept.dtraff.util.AlertDialog;
 import javafx.application.Platform;
@@ -25,13 +26,6 @@ import java.util.concurrent.CountDownLatch;
 public class ConnFileEditDialogController {
 
     private static final String FILE_EXT = ".xml";
-
-    private static final String ALERR_INPUT_INVALID_TITLE = "Invalid Fields";
-    private static final String ALERR_INPUT_INVALID_HEADER = "Please correct invalid fields";
-    private static final String ALERR_INPUT_INVALID_CONTENT_FOLDER = "No valid folder!\n";
-    private static final String ALERR_INPUT_INVALID_CONTENT_FILE_1 = "No valid file!\n";
-    private static final String ALERR_INPUT_INVALID_CONTENT_FILE_2 = "A file entry with specified name is already present:\n";
-    private static final String ALERR_INPUT_INVALID_CONTENT_PASSWORD = "No valid password!\n";
 
     @FXML
     private TextField folderField;
@@ -248,32 +242,41 @@ public class ConnFileEditDialogController {
      * @return true if the input is valid
      */
     private boolean isInputValid() {
+
         String folder = folderField.getText();
         String file = fileField.getText();
         String password = passwordField.getText();
         String repeatPassword = repeatPasswordField.getText();
         String errorMessage = "";
 
-        if (folder == null || folder.length() == 0) errorMessage += ALERR_INPUT_INVALID_CONTENT_FOLDER;
+        if (folder == null || folder.length() == 0) errorMessage += MainApp.TEXT_BUNDLE.getString("connFileEditDialog.alertInvalid.content.folder");
 
-        if (file == null || file.length() == 0) errorMessage += ALERR_INPUT_INVALID_CONTENT_FILE_1;
+        if (file == null || file.length() == 0) errorMessage += MainApp.TEXT_BUNDLE.getString("connFileEditDialog.alertInvalid.content.file.1");
         else {
             ConnFile existingConnFile = connFile.getRootLayoutController().getConnFile(file);
             if (existingConnFile != null) {
-                errorMessage += "\n" + ALERR_INPUT_INVALID_CONTENT_FILE_2 + existingConnFile.getFileName() + "\n\n";
+                errorMessage += "\n" + MainApp.TEXT_BUNDLE.getString("connFileEditDialog.alertInvalid.content.file.2") + existingConnFile.getFileName() + "\n\n";
             }
         }
 
         if (passwordCheckBox.isSelected() && (password == null ||
                 password.length() == 0 ||
-                !password.equals(repeatPassword))) errorMessage += ALERR_INPUT_INVALID_CONTENT_PASSWORD;
+                !password.equals(repeatPassword))) errorMessage += MainApp.TEXT_BUNDLE.getString("connFileEditDialog.alertInvalid.content.password");
 
         if (errorMessage.length() == 0) {
             return true;
         } else {
             // Show the error message.
-            AlertDialog.provide(dialogStage, Alert.AlertType.ERROR, ALERR_INPUT_INVALID_TITLE, ALERR_INPUT_INVALID_HEADER, errorMessage, true);
+            AlertDialog.provide(dialogStage,
+                    Alert.AlertType.ERROR,
+                    MainApp.TEXT_BUNDLE.getString("connFileEditDialog.alertInvalid.title"),
+                    MainApp.TEXT_BUNDLE.getString("connFileEditDialog.alertInvalid.header"),
+                    errorMessage,
+                    true);
+
             return false;
         }
+
     }
+
 }

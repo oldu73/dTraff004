@@ -3,6 +3,8 @@ package ch.stageconcept.dtraff.connection.model;
 import ch.stageconcept.dtraff.connection.util.*;
 import ch.stageconcept.dtraff.main.MainApp;
 import ch.stageconcept.dtraff.main.view.RootLayoutController;
+import ch.stageconcept.dtraff.util.AlertDialog;
+import ch.stageconcept.dtraff.util.I18N;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -27,15 +29,6 @@ public class ConnFile extends ConnUnit<Conn> {
     // ### Attributes #####################################################################
 
     private static final String ICON_FILENAME = ConnFileState.EMPTY_CLEAR.getIconFileName();
-
-    public static final String MENU_OPEN_FILE = "Open File";
-    private static final String MENU_NEW_CONNECTION = "New Connection";
-    public static final String MENU_ENTER_PASSWORD = "Enter Password";
-    private static final String MENU_CLOSE_FILE = "Close File";
-
-    private static final String ALERT_SAVE_DATA_TITLE = "Error";
-    private static final String ALERT_SAVE_DATA_HEADER = "Could not save data";
-    private static final String ALERT_SAVE_DATA_CONTENT = "Could not save data to file:\n";
 
     // Reference to parent object
     private final ObjectProperty<ConnRoot> parent;
@@ -71,28 +64,28 @@ public class ConnFile extends ConnUnit<Conn> {
        ContextMenu contextMenu = new ContextMenu();
 
        // ### Open File Menu
-       MenuItem openFileMenuItem = new MenuItem(MENU_OPEN_FILE);
+       MenuItem openFileMenuItem = I18N.menuItemForKey("connFile.contextMenu.file.open");
        openFileMenuItem.setOnAction((ActionEvent t) -> openBrokenConnFile());
        // Disable context menu Open File if ConnFile object state is not broken
        openFileMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> !isBroken(), state));
        // ###################################################################
 
        // ### New Connection Menu
-       MenuItem newConnectionMenuItem = new MenuItem(MENU_NEW_CONNECTION);
+       MenuItem newConnectionMenuItem = I18N.menuItemForKey("connFile.contextMenu.newConnection");
        newConnectionMenuItem.setOnAction((ActionEvent t) -> newConn());
        // Disable context menu New Connection if ConnFile object state is broken or encrypted
        newConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> isBroken() || isEncrypted(), state));
        // ###################################################################
 
        // ### Enter password Menu
-       MenuItem enterPasswordMenuItem = new MenuItem(MENU_ENTER_PASSWORD);
+       MenuItem enterPasswordMenuItem = I18N.menuItemForKey("connFile.contextMenu.enterPassword");
        enterPasswordMenuItem.setOnAction((ActionEvent t) -> enterPassword());
        // Disable context menu Enter password if ConnFile object state is not encrypted
        enterPasswordMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> !isEncrypted(), state));
        // ###################################################################
 
        // ### Close File Menu
-       MenuItem closeFileMenuItem = new MenuItem(MENU_CLOSE_FILE);
+       MenuItem closeFileMenuItem = I18N.menuItemForKey("connFile.contextMenu.file.close");
        closeFileMenuItem.setOnAction((ActionEvent t) -> closeConnFile());
        // ###################################################################
 
@@ -378,12 +371,12 @@ public class ConnFile extends ConnUnit<Conn> {
 
             //e.printStackTrace();
 
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle(ALERT_SAVE_DATA_TITLE);
-            alert.setHeaderText(ALERT_SAVE_DATA_HEADER);
-            alert.setContentText(ALERT_SAVE_DATA_CONTENT + file.getPath());
+            AlertDialog.provide(MainApp.PRIMARY_STAGE,
+                    Alert.AlertType.ERROR,
+                    MainApp.TEXT_BUNDLE.getString("connFile.alertSaveData.title"),
+                    MainApp.TEXT_BUNDLE.getString("connFile.alertSaveData.header"),
+                    MainApp.TEXT_BUNDLE.getString("connFile.alertSaveData.content") + file.getPath(), true);
 
-            alert.showAndWait();
         }
     }
 

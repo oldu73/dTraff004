@@ -67,7 +67,7 @@ public class RootLayoutController {
     private static final String ALERR_LOAD_DATA_CONTENT = "Deprecated! " + "Could not load data from file:\n";
 
     // Deprecated!
-    private static final String ALCNF_BAD_PASSWORD_TITLE = "Deprecated! " + ConnFile.MENU_ENTER_PASSWORD;
+    private static final String ALCNF_BAD_PASSWORD_TITLE = "Deprecated! " + "Enter Password";
     private static final String ALCNF_BAD_PASSWORD_HEADER = "Deprecated! " + "Bad password!";
     private static final String ALCNF_BAD_PASSWORD_CONTENT = "Deprecated! " + "Try again?";
 
@@ -251,7 +251,7 @@ public class RootLayoutController {
      */
     public void subInitialize() {
 
-        connRoot = new ConnRoot(ConnRoot.NETWORK, MainApp.PRIMARY_STAGE, this);
+        connRoot = new ConnRoot(MainApp.TEXT_BUNDLE.getString("network.network"), MainApp.PRIMARY_STAGE, this);
         connRoot.nameProperty().bind(I18N.createStringBinding("network.network"));
 
         boolean initializingLabelAnimation = connRoot.isUserActionNeededAtStart();
