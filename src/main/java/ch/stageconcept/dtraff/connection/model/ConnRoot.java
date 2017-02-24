@@ -164,6 +164,21 @@ public class ConnRoot extends ConnUnit<ConnFile> {
     };
 
     /**
+     * Set clear if not encrypted
+     */
+    private static Consumer<ConnFile> setClearIfNotEncrypted = subUnit -> {
+        if (!subUnit.isEncrypted()) subUnit.setClear();
+    };
+
+    /**
+     * Set encrypted if encrypted, clear else
+     */
+    private static Consumer<ConnFile> setEncryptedOrClear = subUnit -> {
+        // SRC: http://www.java2s.com/Tutorials/Java/java.util.function/Consumer/1040__Consumer.andThen.htm
+        setEncryptedIfFilePasswordIsEncrypted.andThen(setClearIfNotEncrypted).accept(subUnit);
+    };
+
+    /**
      * Set decrypted if password (popup) ok
      */
     private static Consumer<ConnFile> setDecryptedIfPasswordOk = subUnit -> {
@@ -348,6 +363,35 @@ public class ConnRoot extends ConnUnit<ConnFile> {
     }
 
     /**
+     * Create new ConnRoot treeView entry (ConnFile instance)
+     *
+     * @param name
+     * @param fileName
+     * @param rootLayoutController
+     */
+    public void createSubUnit(String name, String fileName, RootLayoutController rootLayoutController) {
+
+        ConnFile connFile = new ConnFile(name, fileName, this, rootLayoutController);
+        getSubUnits().add(connFile);
+
+        setEncryptedOrClear.accept(connFile);
+
+        if (connFile.isEncrypted() && Pref.isDecryptFilePassPopUpAtStartOrOnOpen()) {
+            String password = getSubUnitPassword(connFile);
+            if (password != null) {
+                connFile.setPassword(password);
+                connFile.setDecrypted();
+            }
+        }
+
+        populateSubUnit(connFile);
+
+        // update preference
+        prefs.put(connFile.getName(), connFile.getFileName());
+
+    }
+
+    /**
      * Create ConnRoot first sub level structure ConnFile list (subUnits),
      * to be used in a treeView : ConnRoot (root node) - ConnFiles - Conns - Databases - (...)
      *
@@ -367,7 +411,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
         if (!subUnits.isEmpty()) {
             setSubUnits(getSubUnitsSubList(connFile -> true), setBrokenIfFileNotExistOrDirectory);
             setSubUnits(getSubUnitsSubList(((Predicate<ConnFile>) ConnFile::isBroken).negate()),
-                    setEncryptedIfFilePasswordIsEncrypted.andThen(connFile -> {if (!connFile.isEncrypted()) connFile.setClear();} ));
+                    setEncryptedOrClear);
         }
     }
 

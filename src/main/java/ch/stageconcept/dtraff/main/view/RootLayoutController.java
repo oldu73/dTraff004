@@ -536,13 +536,10 @@ public class RootLayoutController {
 
             if (getConnFile(name) != null) alertAlreadyPresent(getConnFile(name));
             else {
-                // Open ConnFile (file) and create new ConnRoot treeView entry
-                ConnFile connFile = new ConnFile(name);
-                connFile.setFileName(fileName);
-                connFile.setParent(connRoot);
-                connFile.setRootLayoutController(this);
-                connRoot.getSubUnits().add(connFile);
-                treatSubUnit(connFile, true);
+                // Create new ConnRoot treeView entry (ConnFile instance)
+                connRoot.createSubUnit(name, fileName, this);
+
+                //treatSubUnit(connFile, true);
             }
         }
     }
