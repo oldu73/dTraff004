@@ -128,6 +128,14 @@ public class ConnRoot extends ConnUnit<ConnFile> {
     };
 
     /**
+     * Check if subUnit file is damaged
+     */
+    private static Predicate<ConnFile> isFileInSubUnitNotDamaged = subUnit -> {
+        if (loadConnsFromSubUnit(subUnit) == null) return false;
+        return true;
+    };
+
+    /**
      * Is subUnit OS file's fileName represented, ready to populate
      * subUnit.subUnits (Conns)?
      */
@@ -136,7 +144,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
                     !(subUnit.isBroken() || subUnit.isEncrypted()) &&
                     !(subUnit.getName() == null || subUnit.getName().length() == 0) &&
                     !(subUnit.getFileName() == null || subUnit.getFileName().length() == 0) &&
-                    isFileInSubUnitOk.and(isFileInSubUnitNotEmpty).test(subUnit);
+                    isFileInSubUnitOk.and(isFileInSubUnitNotEmpty).and(isFileInSubUnitNotDamaged).test(subUnit);
 
     /**
      * Is subUnit state empty clear or empty decrypted?
@@ -147,10 +155,10 @@ public class ConnRoot extends ConnUnit<ConnFile> {
             ((Predicate<ConnFile>) ConnFile::isEmptyClear).or(ConnFile::isEmptyDecrypted);
 
     /**
-     * Set broken if OS file nonexistent or directory
+     * Set broken if OS file nonexistent or directory or damaged
      */
-    private static Consumer<ConnFile> setBrokenIfFileNotExistOrDirectory = subUnit -> {
-        if(!isFileInSubUnitOk.test(subUnit)) subUnit.setBroken();
+    private static Consumer<ConnFile> setBrokenIfFileNotExistOrDirectoryOrDamaged = subUnit -> {
+        if(!isFileInSubUnitOk.and(isFileInSubUnitNotDamaged).test(subUnit)) subUnit.setBroken();
     };
 
     /**
@@ -254,7 +262,13 @@ public class ConnRoot extends ConnUnit<ConnFile> {
         this.stage = stage;
         this.rootLayoutController = rootLayoutController;
 
-        createSubUnits();
+        // Load user preferences keys
+        loadPrefKeys();
+        // Create subUnits from preferences keys
+        createSubUnitsFromPrefKeys();
+        // Set subUnits state
+        if (!subUnits.isEmpty()) subUnits.forEach(subUnit -> setSubUnitState(subUnit));
+
     }
 
     // #####################################################################################
@@ -373,46 +387,37 @@ public class ConnRoot extends ConnUnit<ConnFile> {
 
         ConnFile connFile = new ConnFile(name, fileName, this, rootLayoutController);
         getSubUnits().add(connFile);
+        setSubUnitState(connFile);
 
-        setEncryptedOrClear.accept(connFile);
-
-        if (connFile.isEncrypted() && Pref.isDecryptFilePassPopUpAtStartOrOnOpen()) {
-            String password = getSubUnitPassword(connFile);
-            if (password != null) {
-                connFile.setPassword(password);
-                connFile.setDecrypted();
-            }
-        }
+        if (connFile.isBroken() && Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) alertLoadFile(connFile);
+        if (connFile.isEncrypted() && Pref.isDecryptFilePassPopUpAtStartOrOnOpen()) setDecryptedIfPasswordOk.accept(connFile);
 
         populateSubUnit(connFile);
-
         // update preference
         prefs.put(connFile.getName(), connFile.getFileName());
 
     }
 
     /**
-     * Create ConnRoot first sub level structure ConnFile list (subUnits),
-     * to be used in a treeView : ConnRoot (root node) - ConnFiles - Conns - Databases - (...)
+     * Set subUnit (ConnFile instance) state
      *
      * Process:
      * ========
      *
-     * - 1. Load user preferences keys
-     * - 2. Create subUnits from keys
-     * - 3. If subUnits not empty, for subUnits:
-     *      - 4. Set nonexistent files to broken
-     *      - 5. Set password protected files to encrypted
+     * - 1. Set nonexistent file to broken
+     * - 2. Set password protected file to encrypted
      */
-    private void createSubUnits() {
-        loadPrefKeys();
-        createSubUnitsFromPrefKeys();
+    private void setSubUnitState(ConnFile connFile) {
 
-        if (!subUnits.isEmpty()) {
-            setSubUnits(getSubUnitsSubList(connFile -> true), setBrokenIfFileNotExistOrDirectory);
-            setSubUnits(getSubUnitsSubList(((Predicate<ConnFile>) ConnFile::isBroken).negate()),
-                    setEncryptedOrClear);
-        }
+        setBrokenIfFileNotExistOrDirectoryOrDamaged.accept(connFile);
+
+        if (!connFile.isBroken()) setEncryptedOrClear.accept(connFile);
+
+        /*
+        setSubUnits(getSubUnitsSubList(cf -> true), setBrokenIfFileNotExistOrDirectoryOrDamaged);
+        setSubUnits(getSubUnitsSubList(((Predicate<ConnFile>) ConnFile::isBroken).negate()), setEncryptedOrClear);
+        */
+
     }
 
     /**
@@ -516,15 +521,30 @@ public class ConnRoot extends ConnUnit<ConnFile> {
 
     /**
      * Alert popup dialog to inform user
+     * with broken file.
+     */
+    public void alertLoadFile(ConnFile connFile) {
+
+        AlertDialog.provide(stage,
+                Alert.AlertType.ERROR,
+                MainApp.TEXT_BUNDLE.getString("connRoot.alerrLoadFile.title"),
+                MainApp.TEXT_BUNDLE.getString("connRoot.alerrLoadFile.header"),
+                MainApp.TEXT_BUNDLE.getString("connRoot.alerrLoadFile.content")
+                        + "\n" + nameFileNameToString.apply(connFile), true);
+
+    }
+
+    /**
+     * Alert popup dialog to inform user
      * with broken files.
      */
     public void alertLoadFiles() {
 
         AlertDialog.provide(stage,
                 Alert.AlertType.ERROR,
-                MainApp.TEXT_BUNDLE.getString("alerrLoadData.title"),
-                MainApp.TEXT_BUNDLE.getString("alerrLoadData.header"),
-                MainApp.TEXT_BUNDLE.getString("alerrLoadData.content")
+                MainApp.TEXT_BUNDLE.getString("connRoot.alerrLoadFiles.title"),
+                MainApp.TEXT_BUNDLE.getString("connRoot.alerrLoadFiles.header"),
+                MainApp.TEXT_BUNDLE.getString("connRoot.alerrLoadFiles.content")
                         + "\n" + namesFileNamesToString(getSubUnitsSubList(ConnFile::isBroken)), true);
 
     }
