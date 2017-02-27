@@ -63,13 +63,6 @@ public class ConnFile extends ConnUnit<Conn> {
        // treeView context menu
        ContextMenu contextMenu = new ContextMenu();
 
-       // ### Open File Menu
-       MenuItem openFileMenuItem = I18N.menuItemForKey("connFile.contextMenu.file.open");
-       openFileMenuItem.setOnAction((ActionEvent t) -> openBrokenConnFile());
-       // Disable context menu Open File if ConnFile object state is not broken
-       openFileMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> !isBroken(), state));
-       // ###################################################################
-
        // ### New Connection Menu
        MenuItem newConnectionMenuItem = I18N.menuItemForKey("connFile.contextMenu.newConnection");
        newConnectionMenuItem.setOnAction((ActionEvent t) -> newConn());
@@ -84,14 +77,21 @@ public class ConnFile extends ConnUnit<Conn> {
        enterPasswordMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> !isEncrypted(), state));
        // ###################################################################
 
+       // ### Repair File Menu
+       MenuItem repairFileMenuItem = I18N.menuItemForKey("connFile.contextMenu.file.repair");
+       repairFileMenuItem.setOnAction((ActionEvent t) -> openBrokenConnFile());
+       // Disable context menu Open File if ConnFile object state is not broken
+       repairFileMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> !isBroken(), state));
+       // ###################################################################
+
        // ### Close File Menu
        MenuItem closeFileMenuItem = I18N.menuItemForKey("connFile.contextMenu.file.close");
        closeFileMenuItem.setOnAction((ActionEvent t) -> closeConnFile());
        // ###################################################################
 
-       contextMenu.getItems().addAll(openFileMenuItem,
-               newConnectionMenuItem,
+       contextMenu.getItems().addAll(newConnectionMenuItem,
                enterPasswordMenuItem,
+               repairFileMenuItem,
                new SeparatorMenuItem(),
                closeFileMenuItem);
 

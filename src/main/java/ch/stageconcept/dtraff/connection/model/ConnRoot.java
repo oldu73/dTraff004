@@ -22,12 +22,15 @@ import org.codefx.libfx.listener.handle.ListenerHandles;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.*;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
+
+import static java.util.Comparator.naturalOrder;
 
 //TODO refactor (clean) doc
 
@@ -336,6 +339,10 @@ public class ConnRoot extends ConnUnit<ConnFile> {
         this.state.set(state);
     }
 
+    public static Function<ConnFile, String> getNameFileNameToString() {
+        return nameFileNameToString;
+    }
+
     // #####################################################################################
 
     // Methods #############################################################################
@@ -387,6 +394,18 @@ public class ConnRoot extends ConnUnit<ConnFile> {
 
         ConnFile connFile = new ConnFile(name, fileName, this, rootLayoutController);
         getSubUnits().add(connFile);
+
+        treatSubUnit(connFile);
+
+    }
+
+    /**
+     * SubUnit (ConnFile) common treatment
+     *
+     * @param connFile
+     */
+    public void treatSubUnit(ConnFile connFile) {
+
         setSubUnitState(connFile);
 
         if (connFile.isBroken() && Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) alertLoadFile(connFile);
@@ -790,9 +809,18 @@ public class ConnRoot extends ConnUnit<ConnFile> {
             //TODO Improve comparator: - test1, test10, test2, test3.. in the list is not so nice
             // (because of one, one zero for test1, test10)
 
+            //rootLayoutController.getConnTreeView().getRoot().getChildren().sort(Comparator.comparing((TreeItem<? super ConnFile> cf1) -> ((ConnFile)(cf1.getValue())).getName(),Comparator.naturalOrder()));
+
+            Comparator<TreeItem<? super ConnFile>> connFileComparator =
+                    (cf1, cf2) -> ((ConnFile)(cf1.getValue())).getName().compareTo(((ConnFile)(cf2.getValue())).getName());
+
+            rootLayoutController.getConnTreeView().getRoot().getChildren().sort(connFileComparator);
+
+            /*
             rootLayoutController.getConnTreeView().getRoot().getChildren()
                     .sort((TreeItem<? super ConnFile> cf1, TreeItem<? super ConnFile> cf2) ->
                             ((ConnFile)(cf1.getValue())).getName().compareTo(((ConnFile)(cf2.getValue())).getName()));
+            */
 
             //rootLayoutController.getConnTreeView().refresh();
         } catch (StackOverflowError e) {

@@ -18,6 +18,7 @@
                   <MenuItem fx:id="fileNewMenuItem" mnemonicParsing="false" text="New" />
                   <MenuItem fx:id="fileOpenMenuItem" mnemonicParsing="false" onAction="#handleFileOpen" text="Open" />
                   <MenuItem fx:id="fileEnterPasswordMenuItem" mnemonicParsing="false" onAction="#handleFileEnterPassword" text="Enter Password" />
+                  <MenuItem fx:id="fileRepairMenuItem" mnemonicParsing="false" onAction="#handleFileRepair" text="%fileMenuItem.repair" />
                   <MenuItem fx:id="fileCloseMenuItem" mnemonicParsing="false" onAction="#handleFileClose" text="Close" />
                   <SeparatorMenuItem mnemonicParsing="false" />
                   <Menu fx:id="serverConnectionMenuItem" mnemonicParsing="false" text="Server Connection">

@@ -90,6 +90,9 @@ public class RootLayoutController {
     private MenuItem fileEnterPasswordMenuItem;
 
     @FXML
+    private MenuItem fileRepairMenuItem;
+
+    @FXML
     private MenuItem fileCloseMenuItem;
 
     @FXML
@@ -220,6 +223,7 @@ public class RootLayoutController {
         fileNewMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.new"));
         fileOpenMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.open"));
         fileEnterPasswordMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.enterPassword"));
+        fileRepairMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.repair"));
         fileCloseMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.close"));
 
         serverConnectionMenuItem.textProperty().bind(I18N.createStringBinding("serverConnectionMenu"));
@@ -415,10 +419,7 @@ public class RootLayoutController {
             {
                 ConnFile connFile = (ConnFile) connTreeView.getSelectionModel().getSelectedItem().getValue();
 
-                if (connFile.isBroken()) {
-                    //TODO add double click behavior on broken file to open fileChooser.
-                    System.out.println("Broken -> file chooser!");
-                }
+                if (connFile.isBroken()) openBrokenConnFile(connFile);
                 else if (connFile.isEncrypted()) connRoot.decryptPassword(connFile).populateSubUnit(connFile);
             }
         };
@@ -430,7 +431,7 @@ public class RootLayoutController {
     private void menusDisable() {
 
         // Some File - menus disable property initial state
-        setMenusDisable(true, newServerConnectionMenuItem, fileEnterPasswordMenuItem);
+        setMenusDisable(true, fileEnterPasswordMenuItem, newServerConnectionMenuItem, fileRepairMenuItem);
 
         // Some File - menus disable property setting if the ConnRoot treeView
         // selected item is not a ConnFile object and other menu specific related conditions
@@ -446,13 +447,17 @@ public class RootLayoutController {
                     // selected item doesn't change.
                     selectedConnFileState.bind(selectedConnFile.stateProperty());
 
-                    // ### File - Server Connection - New: Disable if the ConnRoot treeView
-                    // selected item is not a clear or decrypted ConnFile object
-                    newServerConnectionMenuItem.setDisable(!(selectedConnFile.isClear() || selectedConnFile.isDecrypted()));
+                    // ### File - Repair: Disable if the ConnRoot treeView
+                    // selected item is not a broken ConnFile object
+                    fileRepairMenuItem.setDisable(!selectedConnFile.isBroken());
 
                     // ### File - Enter Password: Disable if the ConnRoot treeView
                     // selected item is not an encrypted ConnFile object
                     fileEnterPasswordMenuItem.setDisable(!selectedConnFile.isEncrypted());
+
+                    // ### File - Server Connection - New: Disable if the ConnRoot treeView
+                    // selected item is not a clear or decrypted ConnFile object
+                    newServerConnectionMenuItem.setDisable(!(selectedConnFile.isClear() || selectedConnFile.isDecrypted()));
 
                 } else
                     setMenusDisable(true, newServerConnectionMenuItem, fileEnterPasswordMenuItem);  // connTreeView selected item is NOT a ConnFile instance
@@ -465,11 +470,24 @@ public class RootLayoutController {
         // the serverConnectionMenuItem remain disabled until treeView selection changed!
         // So, the bellowing lines deserve to track ConnFile (in connTreeView)
         // selected object state changes in order to update the newServerConnectionMenuItem disabled status.
+        //
+        // .. same same for broken ConnFile..
         selectedConnFileState.addListener((observable, oldValue, newValue) -> {
+
             if (oldValue != null && (oldValue.equals(ConnFileState.ENCRYPTED) && newValue.equals(ConnFileState.DECRYPTED))) {
                 newServerConnectionMenuItem.setDisable(false);
                 fileEnterPasswordMenuItem.setDisable(true);
             }
+
+            if (oldValue != null && (oldValue.equals(ConnFileState.BROKEN) && !newValue.equals(ConnFileState.BROKEN))) {
+                fileRepairMenuItem.setDisable(true);
+            }
+
+            // After broken ConnFile repair failed tentative
+            if (oldValue != null && (oldValue.equals(ConnFileState.CLEAR) && newValue.equals(ConnFileState.BROKEN))) {
+                fileRepairMenuItem.setDisable(false);
+            }
+
         });
 
         // Disable tool bar menu File - Server Connection - Edit if no item or not a Conn object instance are selected in ConnRoot treeView
@@ -516,9 +534,20 @@ public class RootLayoutController {
      */
     @FXML
     private void handleFileOpen() {
+
+        openConnFile();
+
+    }
+
+    /**
+     * Called when the user selects the tool bar File - Repair menu.
+     */
+    @FXML
+    private void handleFileRepair() {
+
         ConnFile connFile = getSelectedConnFile();
         if (connFile != null && connFile.isBroken()) openBrokenConnFile(connFile);
-        else openConnFile();
+
     }
 
     /**
@@ -534,7 +563,9 @@ public class RootLayoutController {
             // file name (path)
             String fileName = file.getAbsolutePath();
 
-            if (getConnFile(name) != null) alertAlreadyPresent(getConnFile(name));
+            ConnFile connFile = getConnFile(name);
+
+            if (connFile != null) alertAlreadyPresent(connFile);
             else {
                 // Create new ConnRoot treeView entry (ConnFile instance)
                 connRoot.createSubUnit(name, fileName, this);
@@ -583,9 +614,12 @@ public class RootLayoutController {
                     preferences.remove(connFile.getName());
                     connFile.setName(name);
                     connFile.setFileName(fileName);
+                    // Reset state to default
                     connFile.setClear();
 
-                    treatSubUnit(connFile, true);
+                    connRoot.treatSubUnit(connFile);
+
+                    //treatSubUnit(connFile, true);
                 }
 
                 // ConnRoot treeView entry modification in place, so no list change triggered
@@ -650,7 +684,10 @@ public class RootLayoutController {
                 Alert.AlertType.INFORMATION,
                 MainApp.TEXT_BUNDLE.getString("alinfFileAlreadyPresent.title"),
                 MainApp.TEXT_BUNDLE.getString("alinfFileAlreadyPresent.header"),
-                MainApp.TEXT_BUNDLE.getString("alinfFileAlreadyPresent.content") + "\n" + connFile.getFileName(), true);
+                MainApp.TEXT_BUNDLE.getString("alinfFileAlreadyPresent.content")
+                        + "\n"
+                        + ConnRoot.getNameFileNameToString().apply(connFile),
+                true);
 
     }
 
