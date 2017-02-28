@@ -11,10 +11,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 
 import javax.xml.bind.JAXBContext;
@@ -63,36 +60,51 @@ public class ConnFile extends ConnUnit<Conn> {
        // treeView context menu
        ContextMenu contextMenu = new ContextMenu();
 
-       // ### New Connection Menu
+       // ### New Connection MenuItem
        MenuItem newConnectionMenuItem = I18N.menuItemForKey("connFile.contextMenu.newConnection");
        newConnectionMenuItem.setOnAction((ActionEvent t) -> newConn());
        // Disable context menu New Connection if ConnFile object state is broken or encrypted
        newConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> isBroken() || isEncrypted(), state));
        // ###################################################################
 
-       // ### Enter password Menu
-       MenuItem enterPasswordMenuItem = I18N.menuItemForKey("connFile.contextMenu.enterPassword");
+       // ### Password Menu
+       Menu passwordMenu = I18N.menuForKey("connFile.contextMenu.password");
+
+       MenuItem setPasswordMenuItem = I18N.menuItemForKey("connFile.contextMenu.password.set");
+       setPasswordMenuItem.setOnAction((ActionEvent t) -> setPassword());
+
+       MenuItem enterPasswordMenuItem = I18N.menuItemForKey("connFile.contextMenu.password.enter");
        enterPasswordMenuItem.setOnAction((ActionEvent t) -> enterPassword());
-       // Disable context menu Enter password if ConnFile object state is not encrypted
+       // Disable context menu Password - Enter if ConnFile object state is not encrypted
        enterPasswordMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> !isEncrypted(), state));
+
+       MenuItem changePasswordMenuItem = I18N.menuItemForKey("connFile.contextMenu.password.change");
+       changePasswordMenuItem.setOnAction((ActionEvent t) -> changePassword());
+
+       MenuItem removePasswordMenuItem = I18N.menuItemForKey("connFile.contextMenu.password.remove");
+       removePasswordMenuItem.setOnAction((ActionEvent t) -> removePassword());
+
+       passwordMenu.getItems().addAll(setPasswordMenuItem, enterPasswordMenuItem, changePasswordMenuItem, removePasswordMenuItem);
        // ###################################################################
 
-       // ### Repair File Menu
+       // ### Repair File MenuItem
        MenuItem repairFileMenuItem = I18N.menuItemForKey("connFile.contextMenu.file.repair");
        repairFileMenuItem.setOnAction((ActionEvent t) -> openBrokenConnFile());
        // Disable context menu Open File if ConnFile object state is not broken
        repairFileMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> !isBroken(), state));
        // ###################################################################
 
-       // ### Close File Menu
+       // ### Close File MenuItem
        MenuItem closeFileMenuItem = I18N.menuItemForKey("connFile.contextMenu.file.close");
        closeFileMenuItem.setOnAction((ActionEvent t) -> closeConnFile());
        // ###################################################################
 
-       contextMenu.getItems().addAll(newConnectionMenuItem,
-               enterPasswordMenuItem,
-               repairFileMenuItem,
+       contextMenu.getItems().addAll(
+               newConnectionMenuItem,
                new SeparatorMenuItem(),
+               passwordMenu,
+               new SeparatorMenuItem(),
+               repairFileMenuItem,
                closeFileMenuItem);
 
        this.setMenu(contextMenu);
@@ -287,12 +299,41 @@ public class ConnFile extends ConnUnit<Conn> {
     }
 
     /**
+     * Set password
+     */
+    private void setPassword() {
+        parent.get().setPassword(this);
+    }
+
+    /**
      * Enter password
      */
     private void enterPassword() {
+
+        parent.get().decryptPassword(this).populateSubUnit(this);
+
+        // Refactored (below replaced by above).
+
+        /*
         if (getRootLayoutController().decryptConnFile(this)) {
             getRootLayoutController().populateSubunit(this, getRootLayoutController().loadConnDataFromConnFile(this));
         }
+        */
+
+    }
+
+    /**
+     * Change password
+     */
+    private void changePassword() {
+        parent.get().changePassword(this);
+    }
+
+    /**
+     * Remove password
+     */
+    private void removePassword() {
+        parent.get().removePassword(this);
     }
 
     /**

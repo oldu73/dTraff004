@@ -746,6 +746,33 @@ public class ConnRoot extends ConnUnit<ConnFile> {
 
     }
 
+    /**
+     * Set subUnit (ConnFile instance) password
+     *
+     * @param connFile
+     */
+    public void setPassword(ConnFile connFile) {
+        System.out.println("Set Password on: " + connFile);
+    }
+
+    /**
+     * Change subUnit (ConnFile instance) password
+     *
+     * @param connFile
+     */
+    public void changePassword(ConnFile connFile) {
+        System.out.println("Change Password on: " + connFile);
+    }
+
+    /**
+     * Remove subUnit (ConnFile instance) password
+     *
+     * @param connFile
+     */
+    public void removePassword(ConnFile connFile) {
+        System.out.println("Remove Password on: " + connFile);
+    }
+
     //TODO refactor (at least, review (name newConnFile vs newSubUnit?)): newConnFile
     /**
      * New ConnFile object.

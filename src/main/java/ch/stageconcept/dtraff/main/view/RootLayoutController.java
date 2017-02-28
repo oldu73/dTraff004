@@ -90,13 +90,28 @@ public class RootLayoutController {
     private MenuItem fileEnterPasswordMenuItem;
 
     @FXML
+    private Menu passwordMenu;
+
+    @FXML
+    private MenuItem setPasswordMenuItem;
+
+    @FXML
+    private MenuItem enterPasswordMenuItem;
+
+    @FXML
+    private MenuItem changePasswordMenuItem;
+
+    @FXML
+    private MenuItem removePasswordMenuItem;
+
+    @FXML
     private MenuItem fileRepairMenuItem;
 
     @FXML
     private MenuItem fileCloseMenuItem;
 
     @FXML
-    private MenuItem serverConnectionMenuItem;
+    private Menu serverConnectionMenu;
 
     @FXML
     private MenuItem newServerConnectionMenuItem;
@@ -222,11 +237,16 @@ public class RootLayoutController {
         fileMenu.textProperty().bind(I18N.createStringBinding("fileMenu"));
         fileNewMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.new"));
         fileOpenMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.open"));
-        fileEnterPasswordMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.enterPassword"));
         fileRepairMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.repair"));
         fileCloseMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.close"));
 
-        serverConnectionMenuItem.textProperty().bind(I18N.createStringBinding("serverConnectionMenu"));
+        passwordMenu.textProperty().bind(I18N.createStringBinding("passwordMenu"));
+        setPasswordMenuItem.textProperty().bind(I18N.createStringBinding("passwordMenuItem.set"));
+        enterPasswordMenuItem.textProperty().bind(I18N.createStringBinding("passwordMenuItem.enter"));
+        changePasswordMenuItem.textProperty().bind(I18N.createStringBinding("passwordMenuItem.change"));
+        removePasswordMenuItem.textProperty().bind(I18N.createStringBinding("passwordMenuItem.remove"));
+
+        serverConnectionMenu.textProperty().bind(I18N.createStringBinding("serverConnectionMenu"));
         newServerConnectionMenuItem.textProperty().bind(I18N.createStringBinding("serverConnectionMenuItem.new"));
         editServerConnectionMenuItem.textProperty().bind(I18N.createStringBinding("serverConnectionMenuItem.edit"));
 
@@ -431,7 +451,7 @@ public class RootLayoutController {
     private void menusDisable() {
 
         // Some File - menus disable property initial state
-        setMenusDisable(true, fileEnterPasswordMenuItem, newServerConnectionMenuItem, fileRepairMenuItem);
+        setMenusDisable(true, enterPasswordMenuItem, newServerConnectionMenuItem, fileRepairMenuItem);
 
         // Some File - menus disable property setting if the ConnRoot treeView
         // selected item is not a ConnFile object and other menu specific related conditions
@@ -451,32 +471,30 @@ public class RootLayoutController {
                     // selected item is not a broken ConnFile object
                     fileRepairMenuItem.setDisable(!selectedConnFile.isBroken());
 
-                    // ### File - Enter Password: Disable if the ConnRoot treeView
+                    // ### File - Password - Enter: Disable if the ConnRoot treeView
                     // selected item is not an encrypted ConnFile object
-                    fileEnterPasswordMenuItem.setDisable(!selectedConnFile.isEncrypted());
+                    enterPasswordMenuItem.setDisable(!selectedConnFile.isEncrypted());
 
                     // ### File - Server Connection - New: Disable if the ConnRoot treeView
                     // selected item is not a clear or decrypted ConnFile object
                     newServerConnectionMenuItem.setDisable(!(selectedConnFile.isClear() || selectedConnFile.isDecrypted()));
 
                 } else
-                    setMenusDisable(true, newServerConnectionMenuItem, fileEnterPasswordMenuItem);  // connTreeView selected item is NOT a ConnFile instance
+                    setMenusDisable(true, newServerConnectionMenuItem, enterPasswordMenuItem);  // connTreeView selected item is NOT a ConnFile instance
             } catch (NullPointerException ex) {
                 // ...
             }
         });
 
         // After double click on an encrypted file to enter correct password,
-        // the serverConnectionMenuItem remain disabled until treeView selection changed!
+        // the serverConnectionMenu remain disabled until treeView selection changed!
         // So, the bellowing lines deserve to track ConnFile (in connTreeView)
-        // selected object state changes in order to update the newServerConnectionMenuItem disabled status.
-        //
-        // .. same same for broken ConnFile..
+        // selected object state changes in order to update related MenuItem disabled status.
         selectedConnFileState.addListener((observable, oldValue, newValue) -> {
 
             if (oldValue != null && (oldValue.equals(ConnFileState.ENCRYPTED) && newValue.equals(ConnFileState.DECRYPTED))) {
                 newServerConnectionMenuItem.setDisable(false);
-                fileEnterPasswordMenuItem.setDisable(true);
+                enterPasswordMenuItem.setDisable(true);
             }
 
             if (oldValue != null && (oldValue.equals(ConnFileState.BROKEN) && !newValue.equals(ConnFileState.BROKEN))) {
@@ -497,7 +515,7 @@ public class RootLayoutController {
                 connTreeView.getSelectionModel().selectedItemProperty()));
 
         // Disable tool bar menu File - Server Connection if File - Server Connection - New and Edit are disabled
-        serverConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() ->
+        serverConnectionMenu.disableProperty().bind(Bindings.createBooleanBinding(() ->
                         newServerConnectionMenuItem.isDisable() && editServerConnectionMenuItem.isDisable(),
                 newServerConnectionMenuItem.disableProperty(),
                 editServerConnectionMenuItem.disableProperty()));
@@ -692,16 +710,47 @@ public class RootLayoutController {
     }
 
     /**
-     * Called when the user selects the tool bar File - Enter Password menu.
+     * Called when the user selects the tool bar File - Password - Set menu.
      */
     @FXML
-    private void handleFileEnterPassword() {
+    private void handleSetPassword() {
+        connRoot.setPassword(getSelectedConnFile());
+    }
+
+    /**
+     * Called when the user selects the tool bar File - Password - Enter menu.
+     */
+    @FXML
+    private void handleEnterPassword() {
         // The tool bar menu is disabled if none or not an encrypted ConnFile is selected in Connection treeView.
         ConnFile connFile = getSelectedConnFile();
 
+        connRoot.decryptPassword(connFile).populateSubUnit(connFile);
+
+        // Refactored (below replaced by above).
+
+        /*
         if (connFile != null && decryptConnFile(connFile)) {
             populateSubunit(connFile, loadConnDataFromConnFile(connFile));
         }
+        */
+
+    }
+
+    /**
+     * Called when the user selects the tool bar File - Password - Change menu.
+     */
+    @FXML
+    private void handleChangePassword() {
+        connRoot.changePassword(getSelectedConnFile());
+    }
+
+    /**
+     * Called when the user selects the tool bar File - Password - Remove menu.
+     */
+    @FXML
+    private void handleRemovePassword() {
+        connRoot.removePassword(getSelectedConnFile());
     }
 
     //TODO File Save (nice to have)

@@ -17,11 +17,21 @@
             <items>
                   <MenuItem fx:id="fileNewMenuItem" mnemonicParsing="false" text="New" />
                   <MenuItem fx:id="fileOpenMenuItem" mnemonicParsing="false" onAction="#handleFileOpen" text="Open" />
-                  <MenuItem fx:id="fileEnterPasswordMenuItem" mnemonicParsing="false" onAction="#handleFileEnterPassword" text="Enter Password" />
-                  <MenuItem fx:id="fileRepairMenuItem" mnemonicParsing="false" onAction="#handleFileRepair" text="%fileMenuItem.repair" />
+                  <MenuItem fx:id="fileEnterPasswordMenuItem" mnemonicParsing="false" onAction="#handleEnterPassword" text="Enter Password" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <Menu fx:id="passwordMenu" mnemonicParsing="false" text="Password">
+                    <items>
+                      <MenuItem fx:id="setPasswordMenuItem" mnemonicParsing="false" onAction="#handleSetPassword" text="Set" />
+                        <MenuItem fx:id="enterPasswordMenuItem" mnemonicParsing="false" onAction="#handleEnterPassword" text="Enter" />
+                        <MenuItem fx:id="changePasswordMenuItem" mnemonicParsing="false" onAction="#handleChangePassword" text="Change" />
+                        <MenuItem fx:id="removePasswordMenuItem" mnemonicParsing="false" onAction="#handleRemovePassword" text="Remove" />
+                    </items>
+                  </Menu>
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem fx:id="fileRepairMenuItem" mnemonicParsing="false" onAction="#handleFileRepair" text="Repair" />
                   <MenuItem fx:id="fileCloseMenuItem" mnemonicParsing="false" onAction="#handleFileClose" text="Close" />
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <Menu fx:id="serverConnectionMenuItem" mnemonicParsing="false" text="Server Connection">
+                  <Menu fx:id="serverConnectionMenu" mnemonicParsing="false" text="Server Connection">
                     <items>
                         <MenuItem fx:id="newServerConnectionMenuItem" mnemonicParsing="false" onAction="#handleNewConnection" text="New">
                            <accelerator>
