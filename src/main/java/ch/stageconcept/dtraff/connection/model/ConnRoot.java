@@ -752,6 +752,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      * @param connFile
      */
     public void setPassword(ConnFile connFile) {
+        ConnFilePasswordContainerEditor.INSTANCE.supply(connFile);
         System.out.println("Set Password on: " + connFile);
     }
 
