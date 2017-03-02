@@ -35,6 +35,7 @@ public class ConnFilePasswordContainerDialogController {
     private Stage dialogStage;
     private ConnFile connFile;
     private boolean okClicked = false;
+    private ConnFilePasswordDialogController connFilePasswordDialogController;
 
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
@@ -57,40 +58,14 @@ public class ConnFilePasswordContainerDialogController {
             loader.setLocation(MainApp.class.getResource(FXML_PASSWORD_DIALOG_RESOURCE_PATH));
             AnchorPane anchorPane = loader.load();
 
-            ConnFilePasswordDialogController connFilePasswordDialogController = loader.getController();
+            connFilePasswordDialogController = loader.getController();
 
             okButton.disableProperty().bind(connFilePasswordDialogController.passwordOkProperty().not());
 
             passwordDialogAnchorPane.getChildren().add(anchorPane);
 
-            /*
-
-            // Create the dialog Stage.
-            Stage dialogStage = new Stage();
-            dialogStage.setTitle(MainApp.TEXT_BUNDLE.getString("connFilePasswordContainerDialog.title"));
-            dialogStage.initModality(Modality.WINDOW_MODAL);
-            dialogStage.initOwner(MainApp.PRIMARY_STAGE);
-            Scene scene = new Scene(page);
-            dialogStage.setScene(scene);
-
-            // Set the Stage and ConnFile objects into the controller.
-            ConnFilePasswordContainerDialogController controller = loader.getController();
-            controller.setDialogStage(dialogStage);
-            controller.setConnFile(connFile);
-
-            // Disable resize
-            dialogStage.setResizable(false);
-
-            // Show the dialog and wait until the user closes it
-            dialogStage.showAndWait();
-
-            return controller.isOkClicked();
-
-            */
-
         } catch (IOException e) {
             e.printStackTrace();
-            //return false;
         }
     }
 
@@ -108,6 +83,17 @@ public class ConnFilePasswordContainerDialogController {
      */
     @FXML
     private void handleOk() {
+
+        connFile.setPasswordProtected(true);
+        connFile.setPassword(connFilePasswordDialogController.getPassword());
+
+        connFile.getSubUnits().forEach(conn -> conn.setEncryptedPassword(conn.getPassword()));
+
+        if (connFile.isEmptyClear()) connFile.setEmptyDecrypted();
+        else {
+            connFile.setDecrypted();
+            connFile.saveConnDataToFile();
+        }
 
         okClicked = true;
         dialogStage.close();

@@ -8,7 +8,13 @@ import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
@@ -26,6 +32,18 @@ import java.util.concurrent.CountDownLatch;
 public class ConnFileEditDialogController {
 
     private static final String FILE_EXT = ".xml";
+
+    @FXML
+    private Pane pane1;
+
+    @FXML
+    private Pane pane2;
+
+    @FXML
+    private Pane pane3;
+
+    @FXML
+    private Pane pane4;
 
     @FXML
     private TextField folderField;
@@ -70,6 +88,16 @@ public class ConnFileEditDialogController {
      */
     @FXML
     private void initialize() {
+
+        // SRC: http://stackoverflow.com/questions/22841000/how-to-change-the-color-of-pane-in-javafx
+        // Below code is used to check GridPane column width
+        /*
+        pane1.setBackground(new Background(new BackgroundFill(Color.web("#d43232"), CornerRadii.EMPTY, Insets.EMPTY)));
+        pane2.setBackground(new Background(new BackgroundFill(Color.web("#ffe34c"), CornerRadii.EMPTY, Insets.EMPTY)));
+        pane3.setBackground(new Background(new BackgroundFill(Color.web("#6ca158"), CornerRadii.EMPTY, Insets.EMPTY)));
+        pane4.setBackground(new Background(new BackgroundFill(Color.web("#c4a155"), CornerRadii.EMPTY, Insets.EMPTY)));
+        */
+
         passwordLabel.disableProperty().bind(passwordCheckBox.selectedProperty().not());
         passwordField.disableProperty().bind(passwordCheckBox.selectedProperty().not());
         repeatPasswordLabel.disableProperty().bind(passwordCheckBox.selectedProperty().not());

@@ -4,10 +4,12 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.PasswordField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 
 import java.util.function.Predicate;
 
@@ -27,6 +29,18 @@ public class ConnFilePasswordDialogController {
     private GridPane gridPane;
 
     @FXML
+    private Pane pane1;
+
+    @FXML
+    private Pane pane2;
+
+    @FXML
+    private Pane pane3;
+
+    @FXML
+    private Pane pane4;
+
+    @FXML
     private PasswordField passwordField;
 
     @FXML
@@ -40,6 +54,9 @@ public class ConnFilePasswordDialogController {
 
     private BooleanProperty passwordOk;
 
+    // Getters & Setters
+    // #################
+
     public boolean isPasswordOk() {
         return passwordOk.get();
     }
@@ -48,12 +65,28 @@ public class ConnFilePasswordDialogController {
         return passwordOk;
     }
 
+    public String getPassword() {
+        return passwordField.getText();
+    }
+
+    // Methods
+    // #######
+
     /**
      * Initializes the controller class. This method is automatically called
      * after the fxml file has been loaded.
      */
     @FXML
     private void initialize() {
+
+        // SRC: http://stackoverflow.com/questions/22841000/how-to-change-the-color-of-pane-in-javafx
+        // Below code is used to check GridPane column width
+        /*
+        pane1.setBackground(new Background(new BackgroundFill(Color.web("#d43232"), CornerRadii.EMPTY, Insets.EMPTY)));
+        pane2.setBackground(new Background(new BackgroundFill(Color.web("#ffe34c"), CornerRadii.EMPTY, Insets.EMPTY)));
+        pane3.setBackground(new Background(new BackgroundFill(Color.web("#6ca158"), CornerRadii.EMPTY, Insets.EMPTY)));
+        pane4.setBackground(new Background(new BackgroundFill(Color.web("#c4a155"), CornerRadii.EMPTY, Insets.EMPTY)));
+        */
 
         Image ok = new Image(ICON_OK_FILENAME);
         Image notOk = new Image(ICON_NOT_OK_FILENAME);

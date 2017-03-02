@@ -1,6 +1,7 @@
 package ch.stageconcept.dtraff.connection.model;
 
 import ch.stageconcept.dtraff.connection.util.ConnEditor;
+import ch.stageconcept.dtraff.connection.util.Crypto;
 import ch.stageconcept.dtraff.connection.util.DbDescriptor;
 import ch.stageconcept.dtraff.connection.util.DbType;
 import ch.stageconcept.dtraff.main.MainApp;
@@ -127,6 +128,17 @@ public class Conn extends ConnUnit<DataBase> {
 
     // Methods
     // #####################################################################
+
+    /**
+     * Set encrypted password.
+     *
+     * @param password
+     */
+    public void setEncryptedPassword(String password) {
+        setPasswordEncrypted(true);
+        Crypto crypto = new Crypto(parent.get().getPassword());
+        setPassword(crypto.getEncrypted(password));
+    }
 
     /**
      * Edit connection

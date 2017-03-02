@@ -7,9 +7,9 @@ package ch.stageconcept.dtraff.xrelease;
  */
 public enum Release {
 
-    // updated: 20170301-1830
+    // updated: 20170302-2036
 
-    NUMBER(" r0.4.038");    // ! Don't miss first space character !
+    NUMBER(" r0.4.039");    // ! Don't miss first space character !
 
     private String value ;
 

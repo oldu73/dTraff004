@@ -120,6 +120,7 @@ public class ConnEditDialogController {
 
         // Initial state of testConnectionProgressIndicator is hidden
         testConnectionProgressIndicator.setVisible(false);
+
     }
 
     /**
@@ -151,6 +152,9 @@ public class ConnEditDialogController {
         } else {
             passwordField.setText(conn.getPassword());
         }
+
+        System.out.println(">:" + passwordField.getText());
+
     }
 
     /**
@@ -266,13 +270,10 @@ public class ConnEditDialogController {
             conn.setPort(Integer.parseInt(portField.getText()));
             conn.setUser(userField.getText());
 
-            if (conn.getParent().isPasswordProtected()) {
-                conn.setPasswordEncrypted(true);
-                Crypto crypto = new Crypto(conn.getParent().getPassword());
-                conn.setPassword(crypto.getEncrypted(passwordField.getText()));
-            } else {
-                conn.setPassword(passwordField.getText());
-            }
+            String password = passwordField.getText();
+
+            if (conn.getParent().isPasswordProtected()) conn.setEncryptedPassword(password);
+            else conn.setPassword(password);
 
             conn.setDriver(dbDescriptor.getDriver());
             conn.setBaseUrl(dbDescriptor.getBaseUrl(conn));
