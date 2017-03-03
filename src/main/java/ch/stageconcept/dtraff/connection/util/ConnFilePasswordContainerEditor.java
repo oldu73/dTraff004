@@ -33,7 +33,7 @@ public enum ConnFilePasswordContainerEditor {
      * @param connFile the object to be edited
      * @return true if the user clicked OK, false otherwise.
      */
-    public boolean supply(ConnFile connFile) {
+    public boolean supply(ConnFile connFile, String title) {
         try {
             // Load the fxml file and create a new stage for the popup dialog.
             FXMLLoader loader = new FXMLLoader();
@@ -43,7 +43,7 @@ public enum ConnFilePasswordContainerEditor {
 
             // Create the dialog Stage.
             Stage dialogStage = new Stage();
-            dialogStage.setTitle(MainApp.TEXT_BUNDLE.getString("connFilePasswordContainerDialog.title"));
+            if (title != null) dialogStage.setTitle(title);
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.initOwner(MainApp.PRIMARY_STAGE);
             Scene scene = new Scene(page);

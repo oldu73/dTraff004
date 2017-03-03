@@ -450,14 +450,19 @@ public class RootLayoutController {
      */
     private void menusDisable() {
 
+        // 1. initial
+
         // Some File - menus disable property initial state
-        setMenusDisable(true, enterPasswordMenuItem, newServerConnectionMenuItem, fileRepairMenuItem);
+        //TODO refactor with a MenuItem list (or something alike) which will also be used a few line below (same treatment -> so, factorize!)
+        setMenusDisable(true, setPasswordMenuItem, enterPasswordMenuItem, newServerConnectionMenuItem, fileRepairMenuItem);
 
         // Some File - menus disable property setting if the ConnRoot treeView
         // selected item is not a ConnFile object and other menu specific related conditions
         connTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             try {
                 if (newValue.getValue() instanceof ConnFile) {
+
+                    // 2. listener
 
                     ConnFile selectedConnFile = (ConnFile) newValue.getValue();
 
@@ -475,20 +480,33 @@ public class RootLayoutController {
                     // selected item is not an encrypted ConnFile object
                     enterPasswordMenuItem.setDisable(!selectedConnFile.isEncrypted());
 
+                    // ### File - Password - Set: Disable if the ConnRoot treeView
+                    // selected item is not a clear or empty clear ConnFile object
+                    setPasswordMenuItem.setDisable(selectedConnFile.isMenuSetPasswordDisabled());
+                    //TODO refactor with boolean bindings, see below, to avoid the actual menu enable/disable 4 steps process (initial, listener, reset, state change listener)
+                    //setPasswordMenuItem.disableProperty().bind(selectedConnFile.menuSetPasswordDisabledProperty());
+
                     // ### File - Server Connection - New: Disable if the ConnRoot treeView
                     // selected item is not a clear or decrypted ConnFile object
                     newServerConnectionMenuItem.setDisable(!(selectedConnFile.isClear() || selectedConnFile.isDecrypted()));
 
                 } else
-                    setMenusDisable(true, newServerConnectionMenuItem, enterPasswordMenuItem);  // connTreeView selected item is NOT a ConnFile instance
+
+                    // 3. reset
+
+                    setMenusDisable(true, setPasswordMenuItem, enterPasswordMenuItem, newServerConnectionMenuItem, fileRepairMenuItem); // connTreeView selected item is NOT a ConnFile instance
+
             } catch (NullPointerException ex) {
                 // ...
             }
         });
 
-        // After double click on an encrypted file to enter correct password,
+        // 4. state change listener
+
+        // Double click action completion generate a state change on a treeView ConnFile instance.
+        // As an example, after double click on an encrypted file to enter correct password,
         // the serverConnectionMenu remain disabled until treeView selection changed!
-        // So, the bellowing lines deserve to track ConnFile (in connTreeView)
+        // So, the bellowing lines deserve to track treeView ConnFile
         // selected object state changes in order to update related MenuItem disabled status.
         selectedConnFileState.addListener((observable, oldValue, newValue) -> {
 
@@ -504,6 +522,11 @@ public class RootLayoutController {
             // After broken ConnFile repair failed tentative
             if (oldValue != null && (oldValue.equals(ConnFileState.CLEAR) && newValue.equals(ConnFileState.BROKEN))) {
                 fileRepairMenuItem.setDisable(false);
+            }
+
+            if (oldValue != null && ((oldValue.equals(ConnFileState.EMPTY_CLEAR) || oldValue.equals(ConnFileState.CLEAR)) &&
+                    (newValue.equals(ConnFileState.EMPTY_DECRYPTED) || newValue.equals(ConnFileState.DECRYPTED)))) {
+                setPasswordMenuItem.setDisable(true);
             }
 
         });

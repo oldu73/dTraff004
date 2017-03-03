@@ -6,7 +6,9 @@ import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import ch.stageconcept.dtraff.util.AlertDialog;
 import ch.stageconcept.dtraff.util.I18N;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -35,6 +37,7 @@ public class ConnFile extends ConnUnit<Conn> {
     private String password;
     private final ObjectProperty<ConnFileState> state;
     private RootLayoutController rootLayoutController;
+    private BooleanProperty menuSetPasswordDisabled;
 
     // ### Constructors #####################################################################
 
@@ -57,6 +60,9 @@ public class ConnFile extends ConnUnit<Conn> {
            setIcon(new ImageView(newvalue.getIconFileName()));
        });
 
+       menuSetPasswordDisabled = new SimpleBooleanProperty();
+       menuSetPasswordDisabled.bind(Bindings.createBooleanBinding(() -> !isClear() && !isEmptyClear(), state));
+
        // treeView context menu
        ContextMenu contextMenu = new ContextMenu();
 
@@ -72,6 +78,8 @@ public class ConnFile extends ConnUnit<Conn> {
 
        MenuItem setPasswordMenuItem = I18N.menuItemForKey("connFile.contextMenu.password.set");
        setPasswordMenuItem.setOnAction((ActionEvent t) -> setPassword());
+       // Disable context menu Password - Set if ConnFile object state is not clear or empty clear
+       setPasswordMenuItem.disableProperty().bind(menuSetPasswordDisabled);
 
        MenuItem enterPasswordMenuItem = I18N.menuItemForKey("connFile.contextMenu.password.enter");
        enterPasswordMenuItem.setOnAction((ActionEvent t) -> enterPassword());
@@ -282,6 +290,14 @@ public class ConnFile extends ConnUnit<Conn> {
      */
     public void setDecrypted() {
         setState(ConnFileState.DECRYPTED);
+    }
+
+    public boolean isMenuSetPasswordDisabled() {
+        return menuSetPasswordDisabled.get();
+    }
+
+    public BooleanProperty menuSetPasswordDisabledProperty() {
+        return menuSetPasswordDisabled;
     }
 
     // ### Methods #####################################################################

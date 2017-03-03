@@ -30,8 +30,6 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
-import static java.util.Comparator.naturalOrder;
-
 //TODO refactor (clean) doc
 
 //TODO Manage empty file (state, icon, ...). What about empty encrypted file?
@@ -752,7 +750,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      * @param connFile
      */
     public void setPassword(ConnFile connFile) {
-        ConnFilePasswordContainerEditor.INSTANCE.supply(connFile);
+        ConnFilePasswordContainerEditor.INSTANCE.supply(connFile, MainApp.TEXT_BUNDLE.getString("connFilePasswordContainerDialog.title.set"));
         System.out.println("Set Password on: " + connFile);
     }
 
