@@ -785,6 +785,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
                 if (connFile.isPasswordProtected()) connFile.setEmptyDecrypted();
                 connFile.setParent(this);
                 getSubUnits().add(connFile);
+                connFile.setContextMenu();
                 prefs.put(connFile.getName(), connFile.getFileName());
             }
         };

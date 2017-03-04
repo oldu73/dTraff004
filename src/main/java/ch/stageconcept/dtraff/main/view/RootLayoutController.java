@@ -87,9 +87,6 @@ public class RootLayoutController {
     private MenuItem fileOpenMenuItem;
 
     @FXML
-    private MenuItem fileEnterPasswordMenuItem;
-
-    @FXML
     private Menu passwordMenu;
 
     @FXML
@@ -142,6 +139,7 @@ public class RootLayoutController {
     private TreeView<ConnUnit<?>> connTreeView;
     private Preferences preferences = Preferences.userRoot().node(ConnRoot.PREFS_PATH);  // User preferences
     private ObjectProperty<ConnFileState> selectedConnFileState = new SimpleObjectProperty<>();
+    private int passwordMenuIndex;
 
     // Functional interface implementations
     // #####################################################################
@@ -218,6 +216,23 @@ public class RootLayoutController {
 
     public EventHandler<WindowEvent> getConfirmCloseEventHandler() {
         return confirmCloseEventHandler;
+    }
+
+    // Node can only be displayed once in Scene Graph.
+    // So, when context menu show on a ConnFile instance,
+    // remove and return passwordMenu to ConnFile instance...
+    public Menu getPasswordMenu() {
+        passwordMenuIndex = fileMenu.getItems().indexOf(passwordMenu) != -1 ? fileMenu.getItems().indexOf(passwordMenu) : passwordMenuIndex;
+
+        if (passwordMenuIndex != -1) fileMenu.getItems().remove(passwordMenu);
+        return passwordMenu;
+    }
+
+    // ...And, when context menu hide on a ConnFile instance,
+    // remove it on a ConnFile instance and set passwordMenu back to controller
+    public void setPasswordMenu(Menu passwordMenu) {
+        this.passwordMenu = passwordMenu;
+        fileMenu.getItems().add(passwordMenuIndex, passwordMenu);
     }
 
     // Methods
@@ -449,6 +464,10 @@ public class RootLayoutController {
      * Main menus disable process.
      */
     private void menusDisable() {
+
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // !!WARNING!! Steps 1 to 4 process, don't miss one!!
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         // 1. initial
 

@@ -13,8 +13,11 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.stage.WindowEvent;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -38,6 +41,7 @@ public class ConnFile extends ConnUnit<Conn> {
     private final ObjectProperty<ConnFileState> state;
     private RootLayoutController rootLayoutController;
     private BooleanProperty menuSetPasswordDisabled;
+    private Menu passwordMenu;
 
     // ### Constructors #####################################################################
 
@@ -59,64 +63,6 @@ public class ConnFile extends ConnUnit<Conn> {
        stateProperty().addListener((observable, oldvalue, newvalue) -> {
            setIcon(new ImageView(newvalue.getIconFileName()));
        });
-
-       menuSetPasswordDisabled = new SimpleBooleanProperty();
-       menuSetPasswordDisabled.bind(Bindings.createBooleanBinding(() -> !isClear() && !isEmptyClear(), state));
-
-       // treeView context menu
-       ContextMenu contextMenu = new ContextMenu();
-
-       // ### New Connection MenuItem
-       MenuItem newConnectionMenuItem = I18N.menuItemForKey("connFile.contextMenu.newConnection");
-       newConnectionMenuItem.setOnAction((ActionEvent t) -> newConn());
-       // Disable context menu New Connection if ConnFile object state is broken or encrypted
-       newConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> isBroken() || isEncrypted(), state));
-       // ###################################################################
-
-       // ### Password Menu
-       Menu passwordMenu = I18N.menuForKey("connFile.contextMenu.password");
-
-       MenuItem setPasswordMenuItem = I18N.menuItemForKey("connFile.contextMenu.password.set");
-       setPasswordMenuItem.setOnAction((ActionEvent t) -> setPassword());
-       // Disable context menu Password - Set if ConnFile object state is not clear or empty clear
-       setPasswordMenuItem.disableProperty().bind(menuSetPasswordDisabled);
-
-       MenuItem enterPasswordMenuItem = I18N.menuItemForKey("connFile.contextMenu.password.enter");
-       enterPasswordMenuItem.setOnAction((ActionEvent t) -> enterPassword());
-       // Disable context menu Password - Enter if ConnFile object state is not encrypted
-       enterPasswordMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> !isEncrypted(), state));
-
-       MenuItem changePasswordMenuItem = I18N.menuItemForKey("connFile.contextMenu.password.change");
-       changePasswordMenuItem.setOnAction((ActionEvent t) -> changePassword());
-
-       MenuItem removePasswordMenuItem = I18N.menuItemForKey("connFile.contextMenu.password.remove");
-       removePasswordMenuItem.setOnAction((ActionEvent t) -> removePassword());
-
-       passwordMenu.getItems().addAll(setPasswordMenuItem, enterPasswordMenuItem, changePasswordMenuItem, removePasswordMenuItem);
-       // ###################################################################
-
-       // ### Repair File MenuItem
-       MenuItem repairFileMenuItem = I18N.menuItemForKey("connFile.contextMenu.file.repair");
-       repairFileMenuItem.setOnAction((ActionEvent t) -> openBrokenConnFile());
-       // Disable context menu Open File if ConnFile object state is not broken
-       repairFileMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> !isBroken(), state));
-       // ###################################################################
-
-       // ### Close File MenuItem
-       MenuItem closeFileMenuItem = I18N.menuItemForKey("connFile.contextMenu.file.close");
-       closeFileMenuItem.setOnAction((ActionEvent t) -> closeConnFile());
-       // ###################################################################
-
-       contextMenu.getItems().addAll(
-               newConnectionMenuItem,
-               new SeparatorMenuItem(),
-               passwordMenu,
-               new SeparatorMenuItem(),
-               repairFileMenuItem,
-               closeFileMenuItem);
-
-       this.setMenu(contextMenu);
-
    }
 
     /**
@@ -142,6 +88,8 @@ public class ConnFile extends ConnUnit<Conn> {
         this.fileName = fileName;
         setParent(parent);
         this.rootLayoutController = rootLayoutController;
+
+        setContextMenu();
     }
 
     // ### Getters and Setters #####################################################################
@@ -298,6 +246,92 @@ public class ConnFile extends ConnUnit<Conn> {
 
     public BooleanProperty menuSetPasswordDisabledProperty() {
         return menuSetPasswordDisabled;
+    }
+
+    public void setContextMenu() {
+
+        // ConnFile instance in treeView contextual menu
+        ContextMenu contextMenu = new ContextMenu();
+
+        // ### New Connection MenuItem
+        MenuItem newConnectionMenuItem = I18N.menuItemForKey("connFile.contextMenu.newConnection");
+        newConnectionMenuItem.setOnAction((ActionEvent t) -> newConn());
+        // Disable context menu New Connection if ConnFile object state is broken or encrypted
+        newConnectionMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> isBroken() || isEncrypted(), state));
+        // ###################################################################
+
+        // ### Password Menu
+
+        menuSetPasswordDisabled = new SimpleBooleanProperty();
+        menuSetPasswordDisabled.bind(Bindings.createBooleanBinding(() -> !isClear() && !isEmptyClear(), state));
+
+        passwordMenu = new Menu();
+
+        /*
+        passwordMenu = I18N.menuForKey("connFile.contextMenu.password");
+
+        MenuItem setPasswordMenuItem = I18N.menuItemForKey("connFile.contextMenu.password.set");
+        setPasswordMenuItem.setOnAction((ActionEvent t) -> setPassword());
+        // Disable context menu Password - Set if ConnFile object state is not clear or empty clear
+        setPasswordMenuItem.disableProperty().bind(menuSetPasswordDisabled);
+
+        MenuItem enterPasswordMenuItem = I18N.menuItemForKey("connFile.contextMenu.password.enter");
+        enterPasswordMenuItem.setOnAction((ActionEvent t) -> enterPassword());
+        // Disable context menu Password - Enter if ConnFile object state is not encrypted
+        enterPasswordMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> !isEncrypted(), state));
+
+        MenuItem changePasswordMenuItem = I18N.menuItemForKey("connFile.contextMenu.password.change");
+        changePasswordMenuItem.setOnAction((ActionEvent t) -> changePassword());
+
+        MenuItem removePasswordMenuItem = I18N.menuItemForKey("connFile.contextMenu.password.remove");
+        removePasswordMenuItem.setOnAction((ActionEvent t) -> removePassword());
+
+        passwordMenu.getItems().addAll(setPasswordMenuItem, enterPasswordMenuItem, changePasswordMenuItem, removePasswordMenuItem);
+        */
+
+        // ###################################################################
+
+        // ### Repair File MenuItem
+        MenuItem repairFileMenuItem = I18N.menuItemForKey("connFile.contextMenu.file.repair");
+        repairFileMenuItem.setOnAction((ActionEvent t) -> openBrokenConnFile());
+        // Disable context menu Open File if ConnFile object state is not broken
+        repairFileMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> !isBroken(), state));
+        // ###################################################################
+
+        // ### Close File MenuItem
+        MenuItem closeFileMenuItem = I18N.menuItemForKey("connFile.contextMenu.file.close");
+        closeFileMenuItem.setOnAction((ActionEvent t) -> closeConnFile());
+        // ###################################################################
+
+        contextMenu.getItems().addAll(
+                newConnectionMenuItem,
+                new SeparatorMenuItem(),
+                passwordMenu,
+                new SeparatorMenuItem(),
+                repairFileMenuItem,
+                closeFileMenuItem);
+
+        this.setMenu(contextMenu);
+
+        // Node can only be displayed once in Scene Graph.
+        // So, when context menu show, remove and get passwordMenu from controller...
+        getMenu().setOnShowing(e -> {
+            ObservableList<MenuItem> menuItems = getMenu().getItems();
+            int passwordMenuIndex = menuItems.indexOf(passwordMenu);
+            menuItems.remove(passwordMenu);
+            menuItems.add(passwordMenuIndex, rootLayoutController.getPasswordMenu());
+        });
+
+        // ...And, when context menu hide, remove and put passwordMenu to controller
+        getMenu().setOnHiding(e -> {
+            ObservableList<MenuItem> menuItems = getMenu().getItems();
+            Menu rootLayoutControllerPasswordMenu = rootLayoutController.getPasswordMenu();
+            int passwordMenuIndex = menuItems.indexOf(rootLayoutControllerPasswordMenu);
+            menuItems.remove(rootLayoutControllerPasswordMenu);
+            menuItems.add(passwordMenuIndex, passwordMenu);
+            rootLayoutController.setPasswordMenu(rootLayoutControllerPasswordMenu);
+        });
+
     }
 
     // ### Methods #####################################################################

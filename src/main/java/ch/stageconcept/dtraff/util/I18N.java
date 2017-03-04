@@ -28,6 +28,29 @@ import java.util.concurrent.Callable;
  *
  * @author P.J. Meisch (pj.meisch@sothawo.com).
  */
+
+/*
+
+Usage template:
+
+MenuItem newFileMenuItem = I18N.menuItemForKey("connRoot.contextMenu.file.new");
+
+FXMLLoader loader = new FXMLLoader();
+>
+loader.setResources(MainApp.TEXT_BUNDLE);
+>
+loader.setLocation(MainApp.class.getResource(FXML_RESOURCE_PATH));
+
+dialogStage.setTitle(MainApp.TEXT_BUNDLE.getString("connFileEditDialog.title"));
+
+.title=
+.header=
+.content=
+
+MainApp.TEXT_BUNDLE.getString("alerrLoadData.title")
+
+*/
+
 public final class I18N {
 
     private static final String I18N_BASE = MainApp.I18N_BASE;
