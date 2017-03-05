@@ -349,44 +349,6 @@ public class ConnFile extends ConnUnit<Conn> {
     }
 
     /**
-     * Set password
-     */
-    private void setPassword() {
-        parent.get().setPassword(this);
-    }
-
-    /**
-     * Enter password
-     */
-    private void enterPassword() {
-
-        parent.get().decryptPassword(this).populateSubUnit(this);
-
-        // Refactored (below replaced by above).
-
-        /*
-        if (getRootLayoutController().decryptConnFile(this)) {
-            getRootLayoutController().populateSubunit(this, getRootLayoutController().loadConnDataFromConnFile(this));
-        }
-        */
-
-    }
-
-    /**
-     * Change password
-     */
-    private void changePassword() {
-        parent.get().changePassword(this);
-    }
-
-    /**
-     * Remove password
-     */
-    private void removePassword() {
-        parent.get().removePassword(this);
-    }
-
-    /**
      * Close ConnFile
      */
     public void closeConnFile() {

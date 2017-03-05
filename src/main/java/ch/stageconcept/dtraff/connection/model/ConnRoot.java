@@ -751,7 +751,6 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      */
     public void setPassword(ConnFile connFile) {
         ConnFilePasswordContainerEditor.INSTANCE.supply(connFile, MainApp.TEXT_BUNDLE.getString("connFilePasswordContainerDialog.title.set"));
-        System.out.println("Set Password on: " + connFile);
     }
 
     /**
@@ -760,7 +759,60 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      * @param connFile
      */
     public void changePassword(ConnFile connFile) {
-        System.out.println("Change Password on: " + connFile);
+
+        ConnFile localConnFile = new ConnFile(connFile.getName(),
+                connFile.getFileName(),
+                connFile.getParent(),
+                connFile.getRootLayoutController());
+
+        System.out.print("Change Password ");
+
+        if (connFile.isEncrypted() || connFile.isEmptyDecrypted() || connFile.isDecrypted()) {
+
+            String password = getSubUnitPassword(connFile);
+
+            if (password != null) {
+
+                switch (connFile.getState()) {
+
+                    case ENCRYPTED:
+
+                        localConnFile.setEncrypted();
+                        localConnFile.setPasswordProtected(true);
+                        localConnFile.setPassword(password);
+                        populateSubUnit(localConnFile);
+
+                        ConnFilePasswordContainerEditor.INSTANCE.supply(localConnFile, MainApp.TEXT_BUNDLE.getString("connFilePasswordContainerDialog.title.change"));
+
+                        System.out.println("list " + localConnFile.getSubUnits());
+
+                        System.out.println("ENCRYPTED");
+                        break;
+
+                    case EMPTY_DECRYPTED:
+                        System.out.println("EMPTY_DECRYPTED");
+                        break;
+
+                    case DECRYPTED:
+                        System.out.println("DECRYPTED");
+                        break;
+
+                    default:
+                        System.out.println("default");
+                        break;
+                }
+
+            }
+
+        } else {
+            System.out.print("not allowed ");
+        }
+
+        System.out.println("on: " + connFile);
+
+        //if (connFile.isEncrypted()) this.decryptPassword(connFile).populateSubUnit(connFile);
+        //if (connFile.isEmptyDecrypted() || connFile.isDecrypted()) setPassword(connFile);
+
     }
 
     /**

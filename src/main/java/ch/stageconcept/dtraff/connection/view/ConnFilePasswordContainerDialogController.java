@@ -87,13 +87,15 @@ public class ConnFilePasswordContainerDialogController {
         connFile.setPasswordProtected(true);
         connFile.setPassword(connFilePasswordDialogController.getPassword());
 
-        connFile.getSubUnits().forEach(conn -> conn.setEncryptedPassword(conn.getPassword()));
+        //if (!connFile.isEncrypted()) {
+            connFile.getSubUnits().forEach(conn -> conn.setEncryptedPassword(conn.getPassword()));
 
-        if (connFile.isEmptyClear()) connFile.setEmptyDecrypted();
-        else {
-            connFile.setDecrypted();
-            connFile.saveConnDataToFile();
-        }
+            if (connFile.isEmptyClear()) connFile.setEmptyDecrypted();
+            else {
+                connFile.setDecrypted();
+                connFile.saveConnDataToFile();
+            }
+        //}
 
         okClicked = true;
         dialogStage.close();
