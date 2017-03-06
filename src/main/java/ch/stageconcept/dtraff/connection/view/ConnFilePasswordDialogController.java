@@ -1,5 +1,6 @@
 package ch.stageconcept.dtraff.connection.view;
 
+import ch.stageconcept.dtraff.connection.model.ConnFile;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -52,10 +53,15 @@ public class ConnFilePasswordDialogController {
     @FXML
     private ImageView repeatPasswordOkIcon;
 
+    private String passwordToCheck;
     private BooleanProperty passwordOk;
 
     // Getters & Setters
     // #################
+
+    public void setPasswordToCheck(String passwordToCheck) {
+        this.passwordToCheck = passwordToCheck;
+    }
 
     public boolean isPasswordOk() {
         return passwordOk.get();
@@ -78,6 +84,13 @@ public class ConnFilePasswordDialogController {
      */
     @FXML
     private void initialize() {
+        //
+    }
+
+    /**
+     * Initialization called from outside.
+     */
+    public void postInitialize() {
 
         // SRC: http://stackoverflow.com/questions/22841000/how-to-change-the-color-of-pane-in-javafx
         // Below code is used to check GridPane column width
@@ -98,24 +111,24 @@ public class ConnFilePasswordDialogController {
 
         passwordOk.bind(Bindings.createBooleanBinding(() -> {
 
-            String password = passwordField.getText();
-            String repeatPassword = repeatPasswordField.getText();
+                    String password = passwordField.getText();
+                    String repeatPassword = repeatPasswordField.getText();
 
-            Predicate<String> isEntryValid = entry -> entry != null && entry.length() > 0;
+                    Predicate<String> isEntryValid = entry -> entry != null && entry.length() > 0;
 
-            boolean passwordValid = isEntryValid.test(password);
-            boolean repeatPasswordValid = isEntryValid.test(repeatPassword);
+                    boolean passwordValid = isEntryValid.test(password) && !password.equals(passwordToCheck);
+                    boolean repeatPasswordValid = isEntryValid.test(repeatPassword);
 
-            if (passwordValid) passwordOkIcon.setImage(ok);
-            else passwordOkIcon.setImage(notOk);
+                    if (passwordValid) passwordOkIcon.setImage(ok);
+                    else passwordOkIcon.setImage(notOk);
 
-            if (passwordValid && repeatPasswordValid && password.equals(repeatPassword)) {
-                repeatPasswordOkIcon.setImage(ok);
-                return true;
-            }
+                    if (passwordValid && repeatPasswordValid && password.equals(repeatPassword)) {
+                        repeatPasswordOkIcon.setImage(ok);
+                        return true;
+                    }
 
-            repeatPasswordOkIcon.setImage(notOk);
-            return false;},
+                    repeatPasswordOkIcon.setImage(notOk);
+                    return false;},
 
                 passwordField.textProperty(),
                 repeatPasswordField.textProperty()));

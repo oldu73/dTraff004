@@ -465,15 +465,15 @@ public class RootLayoutController {
      */
     private void menusDisable() {
 
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // !!WARNING!! Steps 1 to 4 process, don't miss one!!
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // !!WARNING!! Steps 1 to 4 process, don't miss one (at least, check if necessary)!!
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         // 1. initial
 
         // Some File - menus disable property initial state
         //TODO refactor with a MenuItem list (or something alike) which will also be used a few line below (same treatment -> so, factorize!)
-        setMenusDisable(true, setPasswordMenuItem, enterPasswordMenuItem, newServerConnectionMenuItem, fileRepairMenuItem);
+        setMenusDisable(true, setPasswordMenuItem, enterPasswordMenuItem, changePasswordMenuItem, newServerConnectionMenuItem, fileRepairMenuItem);
 
         // Some File - menus disable property setting if the ConnRoot treeView
         // selected item is not a ConnFile object and other menu specific related conditions
@@ -495,15 +495,19 @@ public class RootLayoutController {
                     // selected item is not a broken ConnFile object
                     fileRepairMenuItem.setDisable(!selectedConnFile.isBroken());
 
-                    // ### File - Password - Enter: Disable if the ConnRoot treeView
-                    // selected item is not an encrypted ConnFile object
-                    enterPasswordMenuItem.setDisable(!selectedConnFile.isEncrypted());
-
                     // ### File - Password - Set: Disable if the ConnRoot treeView
                     // selected item is not a clear or empty clear ConnFile object
                     setPasswordMenuItem.setDisable(selectedConnFile.isMenuSetPasswordDisabled());
                     //TODO refactor with boolean bindings, see below, to avoid the actual menu enable/disable 4 steps process (initial, listener, reset, state change listener)
                     //setPasswordMenuItem.disableProperty().bind(selectedConnFile.menuSetPasswordDisabledProperty());
+
+                    // ### File - Password - Enter: Disable if the ConnRoot treeView
+                    // selected item is not an encrypted ConnFile object
+                    enterPasswordMenuItem.setDisable(!selectedConnFile.isEncrypted());
+
+                    // ### File - Password - Change: Disable if the ConnRoot treeView
+                    // selected item is not an encrypted, empty decrypted or decrypted ConnFile object
+                    changePasswordMenuItem.setDisable(!(selectedConnFile.isEncrypted() || selectedConnFile.isEmptyDecrypted() || selectedConnFile.isDecrypted()));
 
                     // ### File - Server Connection - New: Disable if the ConnRoot treeView
                     // selected item is not a clear or decrypted ConnFile object
@@ -513,7 +517,7 @@ public class RootLayoutController {
 
                     // 3. reset
 
-                    setMenusDisable(true, setPasswordMenuItem, enterPasswordMenuItem, newServerConnectionMenuItem, fileRepairMenuItem); // connTreeView selected item is NOT a ConnFile instance
+                    setMenusDisable(true, setPasswordMenuItem, enterPasswordMenuItem, changePasswordMenuItem, newServerConnectionMenuItem, fileRepairMenuItem); // connTreeView selected item is NOT a ConnFile instance
 
             } catch (NullPointerException ex) {
                 // ...

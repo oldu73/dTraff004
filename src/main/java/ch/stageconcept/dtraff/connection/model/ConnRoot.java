@@ -87,6 +87,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
     private ListenerHandle subUnitsListenerHandle;
 
     private final ObjectProperty<ConnRootState> state;
+    private String passwordToCheck = null;
 
     // Functional interface implementations, Predicate, Consumer, Function, ...
 
@@ -290,6 +291,10 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      */
     public void setRootLayoutController(RootLayoutController rootLayoutController) {
         this.rootLayoutController = rootLayoutController;
+    }
+
+    public String getPasswordToCheck() {
+        return passwordToCheck;
     }
 
     /**
@@ -760,58 +765,53 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      */
     public void changePassword(ConnFile connFile) {
 
-        ConnFile localConnFile = new ConnFile(connFile.getName(),
-                connFile.getFileName(),
-                connFile.getParent(),
-                connFile.getRootLayoutController());
+        ConnFile localConnFile = new ConnFile(connFile);
 
-        System.out.print("Change Password ");
+        switch (localConnFile.getState()) {
 
-        if (connFile.isEncrypted() || connFile.isEmptyDecrypted() || connFile.isDecrypted()) {
+            case ENCRYPTED:
 
-            String password = getSubUnitPassword(connFile);
+                decryptPassword(localConnFile).populateSubUnit(localConnFile);
 
-            if (password != null) {
+                if (localConnFile.isPasswordProtected()) {
 
-                switch (connFile.getState()) {
+                    passwordToCheck = localConnFile.getPassword();
 
-                    case ENCRYPTED:
+                    localConnFile.getSubUnits().forEach(conn -> {
 
-                        localConnFile.setEncrypted();
-                        localConnFile.setPasswordProtected(true);
-                        localConnFile.setPassword(password);
-                        populateSubUnit(localConnFile);
+                        Crypto crypto = new Crypto(conn.getParent().getPassword());
+                        conn.setPassword(crypto.getDecrypted(conn.getPassword()));
+                        conn.setPasswordEncrypted(false);
 
-                        ConnFilePasswordContainerEditor.INSTANCE.supply(localConnFile, MainApp.TEXT_BUNDLE.getString("connFilePasswordContainerDialog.title.change"));
+                    });
 
-                        System.out.println("list " + localConnFile.getSubUnits());
+                    localConnFile.setPasswordProtected(false);
+                    localConnFile.setPassword(null);
+                    localConnFile.setClear();
 
-                        System.out.println("ENCRYPTED");
-                        break;
+                    ConnFilePasswordContainerEditor.INSTANCE.supply(localConnFile, MainApp.TEXT_BUNDLE.getString("connFilePasswordContainerDialog.title.change"));
 
-                    case EMPTY_DECRYPTED:
-                        System.out.println("EMPTY_DECRYPTED");
-                        break;
-
-                    case DECRYPTED:
-                        System.out.println("DECRYPTED");
-                        break;
-
-                    default:
-                        System.out.println("default");
-                        break;
+                    passwordToCheck = null;
                 }
 
-            }
+                break;
 
-        } else {
-            System.out.print("not allowed ");
+            case EMPTY_DECRYPTED:
+
+                decryptPassword(localConnFile);
+
+                break;
+
+            case DECRYPTED:
+                //
+                break;
+
+            default:
+                //
+                break;
         }
 
-        System.out.println("on: " + connFile);
-
-        //if (connFile.isEncrypted()) this.decryptPassword(connFile).populateSubUnit(connFile);
-        //if (connFile.isEmptyDecrypted() || connFile.isDecrypted()) setPassword(connFile);
+        // !! Set enable/disable changePassword menu behavior !!
 
     }
 

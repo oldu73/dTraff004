@@ -4,10 +4,8 @@ import ch.stageconcept.dtraff.connection.model.ConnFile;
 import ch.stageconcept.dtraff.main.MainApp;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -35,7 +33,7 @@ public class ConnFilePasswordContainerDialogController {
     private Stage dialogStage;
     private ConnFile connFile;
     private boolean okClicked = false;
-    private ConnFilePasswordDialogController connFilePasswordDialogController;
+    private ConnFilePasswordDialogController controller;
 
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
@@ -51,6 +49,13 @@ public class ConnFilePasswordContainerDialogController {
      */
     @FXML
     private void initialize() {
+        //
+    }
+
+    /**
+     * Initialization called from outside.
+     */
+    public void postInitialize() {
         try {
             // Load the fxml file and create a new stage for the popup dialog.
             FXMLLoader loader = new FXMLLoader();
@@ -58,9 +63,11 @@ public class ConnFilePasswordContainerDialogController {
             loader.setLocation(MainApp.class.getResource(FXML_PASSWORD_DIALOG_RESOURCE_PATH));
             AnchorPane anchorPane = loader.load();
 
-            connFilePasswordDialogController = loader.getController();
+            controller = loader.getController();
+            controller.setPasswordToCheck(connFile.getParent().getPasswordToCheck());
+            controller.postInitialize();
 
-            okButton.disableProperty().bind(connFilePasswordDialogController.passwordOkProperty().not());
+            okButton.disableProperty().bind(controller.passwordOkProperty().not());
 
             passwordDialogAnchorPane.getChildren().add(anchorPane);
 
@@ -85,17 +92,15 @@ public class ConnFilePasswordContainerDialogController {
     private void handleOk() {
 
         connFile.setPasswordProtected(true);
-        connFile.setPassword(connFilePasswordDialogController.getPassword());
+        connFile.setPassword(controller.getPassword());
 
-        //if (!connFile.isEncrypted()) {
-            connFile.getSubUnits().forEach(conn -> conn.setEncryptedPassword(conn.getPassword()));
+        connFile.getSubUnits().forEach(conn -> conn.setEncryptedPassword(conn.getPassword()));
 
-            if (connFile.isEmptyClear()) connFile.setEmptyDecrypted();
-            else {
-                connFile.setDecrypted();
-                connFile.saveConnDataToFile();
-            }
-        //}
+        if (connFile.isEmptyClear()) connFile.setEmptyDecrypted();
+        else {
+            connFile.setDecrypted();
+            connFile.saveConnDataToFile();
+        }
 
         okClicked = true;
         dialogStage.close();

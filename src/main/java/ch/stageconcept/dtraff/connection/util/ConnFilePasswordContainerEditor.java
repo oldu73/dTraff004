@@ -53,6 +53,7 @@ public enum ConnFilePasswordContainerEditor {
             ConnFilePasswordContainerDialogController controller = loader.getController();
             controller.setDialogStage(dialogStage);
             controller.setConnFile(connFile);
+            controller.postInitialize();
 
             // Disable resize
             dialogStage.setResizable(false);

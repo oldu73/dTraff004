@@ -92,6 +92,21 @@ public class ConnFile extends ConnUnit<Conn> {
         setContextMenu();
     }
 
+    /**
+     * Constructor (copy).
+     *
+     * @param connFile
+     */
+    public ConnFile(ConnFile connFile) {
+        this(connFile.getName(), FXCollections.observableArrayList());
+
+        this.fileName = connFile.getFileName();
+        setParent(connFile.getParent());
+        this.rootLayoutController = connFile.getRootLayoutController();
+
+        setState(connFile.getState());
+    }
+
     // ### Getters and Setters #####################################################################
 
     public ConnRoot getParent() {
