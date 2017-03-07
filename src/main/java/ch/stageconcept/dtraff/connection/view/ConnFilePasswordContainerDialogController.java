@@ -96,10 +96,20 @@ public class ConnFilePasswordContainerDialogController {
 
         connFile.getSubUnits().forEach(conn -> conn.setEncryptedPassword(conn.getPassword()));
 
-        if (connFile.isEmptyClear()) connFile.setEmptyDecrypted();
-        else {
-            connFile.setDecrypted();
-            connFile.saveConnDataToFile();
+        switch (connFile.getState()) {
+
+            case EMPTY_CLEAR:
+                connFile.setEmptyDecrypted();
+                break;
+
+            case EMPTY_DECRYPTED:
+                // NOP is what we want to do in this case (not a missed implementation)
+                break;
+
+            default:
+                connFile.setDecrypted();
+                connFile.saveConnDataToFile();
+
         }
 
         okClicked = true;

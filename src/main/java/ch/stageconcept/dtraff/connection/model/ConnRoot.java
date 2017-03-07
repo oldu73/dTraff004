@@ -157,6 +157,36 @@ public class ConnRoot extends ConnUnit<ConnFile> {
             ((Predicate<ConnFile>) ConnFile::isEmptyClear).or(ConnFile::isEmptyDecrypted);
 
     /**
+     * Compare subUnit (ConnFile) subUnit (Conn) password
+     * against String password
+     */
+    private static BiPredicate<ConnFile, String> isConnPasswordOk = (ConnFile connFile, String password) -> {
+        try {
+
+            Crypto crypto = new Crypto(password);
+            // If no exception thrown by line below, means that password is correct.
+            // If first element (Conn (get(0))) of the list returned by loadConnsFromSubUnit
+            // method is encrypted, also all others are (with same password).
+            crypto.getDecrypted(loadConnsFromSubUnit(connFile).get(0).getPassword());
+
+            return true;
+
+        } catch (Exception e) {
+
+            //e.printStackTrace();
+
+        }
+        return false;
+    };
+
+    /**
+     * Compare subUnit (ConnFile) password
+     * against String password
+     */
+    private static BiPredicate<ConnFile, String> isConnFilePasswordOk =
+            (ConnFile connFile, String password) -> password.equals(connFile.getPassword());
+
+    /**
      * Set broken if OS file nonexistent or directory or damaged
      */
     private static Consumer<ConnFile> setBrokenIfFileNotExistOrDirectoryOrDamaged = subUnit -> {
@@ -192,7 +222,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      * Set decrypted if password (popup) ok
      */
     private static Consumer<ConnFile> setDecryptedIfPasswordOk = subUnit -> {
-        String password = getSubUnitPassword(subUnit);
+        String password = getSubUnitPassword(subUnit, isConnPasswordOk);
 
         if (password != null) {
             subUnit.setPasswordProtected(true);
@@ -690,9 +720,10 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      * to encrypt/decrypt connection (Conn) password
      *
      * @param connFile
+     * @param passwordOkBP
      * @return password if correct, null otherwise
      */
-    private static String getSubUnitPassword(ConnFile connFile) {
+    private static String getSubUnitPassword(ConnFile connFile, BiPredicate<ConnFile, String> passwordOkBP) {
 
         //TODO When TAB key is pressed to change focus on Cancel button and hit ENTER key
         //Bad password popup is displayed even if password field was let empty and hit enter key (not click)
@@ -709,19 +740,8 @@ public class ConnRoot extends ConnUnit<ConnFile> {
             if (passwordDialogResult.isPresent()) {
                 String password = passwordDialogResult.get();
 
-                try {
-                    Crypto crypto = new Crypto(password);
-                    // If no exception thrown by line below, means that password is correct.
-                    // If first element (Conn (get(0))) of the list returned by loadConnsFromSubUnit
-                    // method is encrypted, also all others are (with same password).
-                    crypto.getDecrypted(loadConnsFromSubUnit(connFile).get(0).getPassword());
-
-                    return password;
-
-                } catch (Exception e) {
-
-                    //e.printStackTrace();
-
+                if (passwordOkBP.test(connFile, password)) return password;
+                else {
                     Alert alert = AlertDialog.provide(stage,
                             Alert.AlertType.CONFIRMATION,
                             MainApp.TEXT_BUNDLE.getString("alcnfBadPassword.title"),
@@ -739,9 +759,8 @@ public class ConnRoot extends ConnUnit<ConnFile> {
                         tryAgain = false;
                     }
                 }
-            } else {
-                tryAgain = false;
-            }
+
+            } else tryAgain = false;
 
         } while (tryAgain);
 
@@ -765,6 +784,8 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      */
     public void changePassword(ConnFile connFile) {
 
+        //TODO factorize changePassword
+
         ConnFile localConnFile = new ConnFile(connFile);
 
         switch (localConnFile.getState()) {
@@ -774,7 +795,6 @@ public class ConnRoot extends ConnUnit<ConnFile> {
                 decryptPassword(localConnFile).populateSubUnit(localConnFile);
 
                 if (localConnFile.isPasswordProtected()) {
-
                     passwordToCheck = localConnFile.getPassword();
 
                     localConnFile.getSubUnits().forEach(conn -> {
@@ -798,20 +818,49 @@ public class ConnRoot extends ConnUnit<ConnFile> {
 
             case EMPTY_DECRYPTED:
 
-                decryptPassword(localConnFile);
+                String passwordTmp = getSubUnitPassword(connFile, isConnFilePasswordOk);
+                if (passwordTmp != null) {
+                    passwordToCheck = passwordTmp;
+
+                    connFile.setPasswordProtected(false);
+                    connFile.setPassword(null);
+
+                    ConnFilePasswordContainerEditor.INSTANCE.supply(connFile, MainApp.TEXT_BUNDLE.getString("connFilePasswordContainerDialog.title.change"));
+
+                    passwordToCheck = null;
+                }
 
                 break;
 
             case DECRYPTED:
-                //
+
+                String password = getSubUnitPassword(connFile, isConnPasswordOk);
+
+                if (password != null) {
+                    passwordToCheck = password;
+
+                    connFile.getSubUnits().forEach(conn -> {
+
+                        Crypto crypto = new Crypto(conn.getParent().getPassword());
+                        conn.setPassword(crypto.getDecrypted(conn.getPassword()));
+                        conn.setPasswordEncrypted(false);
+
+                    });
+
+                    connFile.setPasswordProtected(false);
+                    connFile.setPassword(null);
+
+                    ConnFilePasswordContainerEditor.INSTANCE.supply(connFile, MainApp.TEXT_BUNDLE.getString("connFilePasswordContainerDialog.title.change"));
+
+                    passwordToCheck = null;
+                }
+
                 break;
 
             default:
                 //
                 break;
         }
-
-        // !! Set enable/disable changePassword menu behavior !!
 
     }
 
