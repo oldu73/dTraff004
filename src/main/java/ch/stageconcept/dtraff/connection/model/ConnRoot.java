@@ -221,14 +221,19 @@ public class ConnRoot extends ConnUnit<ConnFile> {
     /**
      * Set decrypted if password (popup) ok
      */
-    private static Consumer<ConnFile> setDecryptedIfPasswordOk = subUnit -> {
-        String password = getSubUnitPassword(subUnit, isConnPasswordOk);
+    private static Consumer<ConnFile> setDecryptedIfPasswordOk = subUnit -> setPasswordAndState(subUnit,
+            getSubUnitPassword(subUnit, isConnPasswordOk),
+            ConnFileState.DECRYPTED);
 
-        if (password != null) {
-            subUnit.setPasswordProtected(true);
-            subUnit.setPassword(password);
-            subUnit.setDecrypted();
-        }
+    /**
+     * Set decrypted passwords to each Conn in ConnFile
+     */
+    private static Consumer<ConnFile> setDecryptedPasswords = subUnit -> {
+        subUnit.getSubUnits().forEach(conn -> {
+            Crypto crypto = new Crypto(conn.getParent().getPassword());
+            conn.setPassword(crypto.getDecrypted(conn.getPassword()));
+            conn.setPasswordEncrypted(false);
+        });
     };
 
     /**
@@ -778,82 +783,59 @@ public class ConnRoot extends ConnUnit<ConnFile> {
     }
 
     /**
+     * Set password and state
+     *
+     * @param connFile
+     * @param password
+     * @param connFileState
+     */
+    private static void setPasswordAndState(ConnFile connFile, String password, ConnFileState connFileState) {
+
+        connFile.setPasswordProtected(password != null);
+        connFile.setPassword(password);
+        if (connFileState != null) connFile.setState(connFileState);
+
+    }
+
+    /**
      * Change subUnit (ConnFile instance) password
      *
      * @param connFile
      */
     public void changePassword(ConnFile connFile) {
 
-        //TODO factorize changePassword
-
-        ConnFile localConnFile = new ConnFile(connFile);
-
-        switch (localConnFile.getState()) {
+        switch (connFile.getState()) {
 
             case ENCRYPTED:
 
-                decryptPassword(localConnFile).populateSubUnit(localConnFile);
-
-                if (localConnFile.isPasswordProtected()) {
-                    passwordToCheck = localConnFile.getPassword();
-
-                    localConnFile.getSubUnits().forEach(conn -> {
-
-                        Crypto crypto = new Crypto(conn.getParent().getPassword());
-                        conn.setPassword(crypto.getDecrypted(conn.getPassword()));
-                        conn.setPasswordEncrypted(false);
-
-                    });
-
-                    localConnFile.setPasswordProtected(false);
-                    localConnFile.setPassword(null);
-                    localConnFile.setClear();
-
-                    ConnFilePasswordContainerEditor.INSTANCE.supply(localConnFile, MainApp.TEXT_BUNDLE.getString("connFilePasswordContainerDialog.title.change"));
-
-                    passwordToCheck = null;
-                }
+                changePasswordCommon(new ConnFile(connFile),
+                        isConnPasswordOk,
+                        ConnFileState.DECRYPTED,
+                        true,
+                        setDecryptedPasswords,
+                        ConnFileState.CLEAR);
 
                 break;
 
             case EMPTY_DECRYPTED:
 
-                String passwordTmp = getSubUnitPassword(connFile, isConnFilePasswordOk);
-                if (passwordTmp != null) {
-                    passwordToCheck = passwordTmp;
-
-                    connFile.setPasswordProtected(false);
-                    connFile.setPassword(null);
-
-                    ConnFilePasswordContainerEditor.INSTANCE.supply(connFile, MainApp.TEXT_BUNDLE.getString("connFilePasswordContainerDialog.title.change"));
-
-                    passwordToCheck = null;
-                }
+                changePasswordCommon(connFile,
+                        isConnFilePasswordOk,
+                        null,
+                        false,
+                        null,
+                        null);
 
                 break;
 
             case DECRYPTED:
 
-                String password = getSubUnitPassword(connFile, isConnPasswordOk);
-
-                if (password != null) {
-                    passwordToCheck = password;
-
-                    connFile.getSubUnits().forEach(conn -> {
-
-                        Crypto crypto = new Crypto(conn.getParent().getPassword());
-                        conn.setPassword(crypto.getDecrypted(conn.getPassword()));
-                        conn.setPasswordEncrypted(false);
-
-                    });
-
-                    connFile.setPasswordProtected(false);
-                    connFile.setPassword(null);
-
-                    ConnFilePasswordContainerEditor.INSTANCE.supply(connFile, MainApp.TEXT_BUNDLE.getString("connFilePasswordContainerDialog.title.change"));
-
-                    passwordToCheck = null;
-                }
+                changePasswordCommon(connFile,
+                        isConnFilePasswordOk,
+                        null,
+                        false,
+                        setDecryptedPasswords,
+                        null);
 
                 break;
 
@@ -861,6 +843,42 @@ public class ConnRoot extends ConnUnit<ConnFile> {
                 //
                 break;
         }
+
+    }
+
+    /**
+     * Change password common treatment
+     *
+     * @param connFile
+     * @param passwordOkBP
+     * @param anteState
+     * @param doPopulateSubUnit
+     * @param coreTreatmentCS
+     * @param postState
+     */
+    private void changePasswordCommon(ConnFile connFile,
+                                      BiPredicate<ConnFile, String> passwordOkBP,
+                                      ConnFileState anteState,
+                                      boolean doPopulateSubUnit,
+                                      Consumer<ConnFile> coreTreatmentCS,
+                                      ConnFileState postState) {
+
+        passwordToCheck = getSubUnitPassword(connFile, passwordOkBP);
+
+        if (anteState != null) setPasswordAndState(connFile, passwordToCheck, anteState);
+
+        if (passwordToCheck != null) {
+
+            if (doPopulateSubUnit) populateSubUnit(connFile);
+
+            if (coreTreatmentCS != null) coreTreatmentCS.accept(connFile);
+
+            setPasswordAndState(connFile, null, postState);
+
+            ConnFilePasswordContainerEditor.INSTANCE.supply(connFile, MainApp.TEXT_BUNDLE.getString("connFilePasswordContainerDialog.title.change"));
+        }
+
+        passwordToCheck = null;
 
     }
 
