@@ -221,9 +221,14 @@ public class ConnRoot extends ConnUnit<ConnFile> {
     /**
      * Set decrypted if password (popup) ok
      */
-    private static Consumer<ConnFile> setDecryptedIfPasswordOk = subUnit -> setPasswordAndState(subUnit,
-            getSubUnitPassword(subUnit, isConnPasswordOk),
-            ConnFileState.DECRYPTED);
+    private static Consumer<ConnFile> setDecryptedIfPasswordOk = subUnit -> {
+
+        String password = getSubUnitPassword(subUnit, isConnPasswordOk);
+
+        setPasswordAndState(subUnit,
+                password,
+                password != null ? ConnFileState.DECRYPTED : subUnit.getState());
+    };
 
     /**
      * Set decrypted passwords to each Conn in ConnFile
