@@ -471,9 +471,18 @@ public class RootLayoutController {
 
         // 1. initial
 
+        // ### File - Password - Remove: Disable if the ConnRoot treeView
+        // selected item is not an encrypted, empty decrypted or decrypted ConnFile object (like change password above)
+        removePasswordMenuItem.disableProperty().bind(changePasswordMenuItem.disableProperty());
+
         // Some File - menus disable property initial state
         //TODO refactor with a MenuItem list (or something alike) which will also be used a few line below (same treatment -> so, factorize!)
-        setMenusDisable(true, setPasswordMenuItem, enterPasswordMenuItem, changePasswordMenuItem, newServerConnectionMenuItem, fileRepairMenuItem);
+        setMenusDisable(true,
+                enterPasswordMenuItem,
+                setPasswordMenuItem,
+                changePasswordMenuItem,
+                newServerConnectionMenuItem,
+                fileRepairMenuItem);
 
         // Some File - menus disable property setting if the ConnRoot treeView
         // selected item is not a ConnFile object and other menu specific related conditions
@@ -495,15 +504,15 @@ public class RootLayoutController {
                     // selected item is not a broken ConnFile object
                     fileRepairMenuItem.setDisable(!selectedConnFile.isBroken());
 
+                    // ### File - Password - Enter: Disable if the ConnRoot treeView
+                    // selected item is not an encrypted ConnFile object
+                    enterPasswordMenuItem.setDisable(!selectedConnFile.isEncrypted());
+
                     // ### File - Password - Set: Disable if the ConnRoot treeView
                     // selected item is not a clear or empty clear ConnFile object
                     setPasswordMenuItem.setDisable(selectedConnFile.isMenuSetPasswordDisabled());
                     //TODO refactor with boolean bindings, see below, to avoid the actual menu enable/disable 4 steps process (initial, listener, reset, state change listener)
                     //setPasswordMenuItem.disableProperty().bind(selectedConnFile.menuSetPasswordDisabledProperty());
-
-                    // ### File - Password - Enter: Disable if the ConnRoot treeView
-                    // selected item is not an encrypted ConnFile object
-                    enterPasswordMenuItem.setDisable(!selectedConnFile.isEncrypted());
 
                     // ### File - Password - Change: Disable if the ConnRoot treeView
                     // selected item is not an encrypted, empty decrypted or decrypted ConnFile object
@@ -517,7 +526,12 @@ public class RootLayoutController {
 
                     // 3. reset
 
-                    setMenusDisable(true, setPasswordMenuItem, enterPasswordMenuItem, changePasswordMenuItem, newServerConnectionMenuItem, fileRepairMenuItem); // connTreeView selected item is NOT a ConnFile instance
+                    setMenusDisable(true,
+                            enterPasswordMenuItem,
+                            setPasswordMenuItem,
+                            changePasswordMenuItem,
+                            newServerConnectionMenuItem,
+                            fileRepairMenuItem);    // connTreeView selected item is NOT a ConnFile instance
 
             } catch (NullPointerException ex) {
                 // ...
@@ -550,6 +564,19 @@ public class RootLayoutController {
             if (oldValue != null && ((oldValue.equals(ConnFileState.EMPTY_CLEAR) || oldValue.equals(ConnFileState.CLEAR)) &&
                     (newValue.equals(ConnFileState.EMPTY_DECRYPTED) || newValue.equals(ConnFileState.DECRYPTED)))) {
                 setPasswordMenuItem.setDisable(true);
+            }
+
+            if (oldValue != null && ((oldValue.equals(ConnFileState.ENCRYPTED) || oldValue.equals(ConnFileState.EMPTY_DECRYPTED) || oldValue.equals(ConnFileState.DECRYPTED)) &&
+                    (newValue.equals(ConnFileState.EMPTY_CLEAR) || newValue.equals(ConnFileState.CLEAR)))) {
+                enterPasswordMenuItem.setDisable(true);
+                setPasswordMenuItem.setDisable(false);
+                changePasswordMenuItem.setDisable(true);
+            }
+
+            if (oldValue != null && ((oldValue.equals(ConnFileState.CLEAR) || oldValue.equals(ConnFileState.EMPTY_CLEAR)) &&
+                    (newValue.equals(ConnFileState.ENCRYPTED) || newValue.equals(ConnFileState.EMPTY_DECRYPTED) || newValue.equals(ConnFileState.DECRYPTED)))) {
+                setPasswordMenuItem.setDisable(true);
+                changePasswordMenuItem.setDisable(false);
             }
 
         });

@@ -809,38 +809,43 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      */
     public void changePassword(ConnFile connFile) {
 
+        boolean askForPassword = true;
+
         switch (connFile.getState()) {
 
             case ENCRYPTED:
 
-                changePasswordCommon(new ConnFile(connFile),
+                passwordCommon(new ConnFile(connFile),
                         isConnPasswordOk,
                         ConnFileState.DECRYPTED,
                         true,
                         setDecryptedPasswords,
-                        ConnFileState.CLEAR);
+                        ConnFileState.CLEAR,
+                        askForPassword);
 
                 break;
 
             case EMPTY_DECRYPTED:
 
-                changePasswordCommon(connFile,
+                passwordCommon(connFile,
                         isConnFilePasswordOk,
                         null,
                         false,
                         null,
-                        null);
+                        null,
+                        askForPassword);
 
                 break;
 
             case DECRYPTED:
 
-                changePasswordCommon(connFile,
+                passwordCommon(connFile,
                         isConnFilePasswordOk,
                         null,
                         false,
                         setDecryptedPasswords,
-                        null);
+                        null,
+                        askForPassword);
 
                 break;
 
@@ -852,7 +857,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
     }
 
     /**
-     * Change password common treatment
+     * Password common treatment
      *
      * @param connFile
      * @param passwordOkBP
@@ -861,12 +866,13 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      * @param coreTreatmentCS
      * @param postState
      */
-    private void changePasswordCommon(ConnFile connFile,
-                                      BiPredicate<ConnFile, String> passwordOkBP,
-                                      ConnFileState anteState,
-                                      boolean doPopulateSubUnit,
-                                      Consumer<ConnFile> coreTreatmentCS,
-                                      ConnFileState postState) {
+    private void passwordCommon(ConnFile connFile,
+                                BiPredicate<ConnFile, String> passwordOkBP,
+                                ConnFileState anteState,
+                                boolean doPopulateSubUnit,
+                                Consumer<ConnFile> coreTreatmentCS,
+                                ConnFileState postState,
+                                boolean askForPassword) {
 
         passwordToCheck = getSubUnitPassword(connFile, passwordOkBP);
 
@@ -880,7 +886,8 @@ public class ConnRoot extends ConnUnit<ConnFile> {
 
             setPasswordAndState(connFile, null, postState);
 
-            ConnFilePasswordContainerEditor.INSTANCE.supply(connFile, MainApp.TEXT_BUNDLE.getString("connFilePasswordContainerDialog.title.change"));
+            if (askForPassword) ConnFilePasswordContainerEditor.INSTANCE.supply(connFile, MainApp.TEXT_BUNDLE.getString("connFilePasswordContainerDialog.title.change"));
+            else connFile.saveConnDataToFile();
         }
 
         passwordToCheck = null;
@@ -893,7 +900,52 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      * @param connFile
      */
     public void removePassword(ConnFile connFile) {
-        System.out.println("Remove Password on: " + connFile);
+
+        boolean askForPassword = false;
+
+        switch (connFile.getState()) {
+
+            case ENCRYPTED:
+
+                passwordCommon(connFile,
+                        isConnPasswordOk,
+                        ConnFileState.CLEAR,
+                        true,
+                        setDecryptedPasswords,
+                        null,
+                        askForPassword);
+
+                break;
+
+            case EMPTY_DECRYPTED:
+
+                passwordCommon(connFile,
+                        isConnFilePasswordOk,
+                        ConnFileState.EMPTY_CLEAR,
+                        false,
+                        null,
+                        null,
+                        askForPassword);
+
+                break;
+
+            case DECRYPTED:
+
+                passwordCommon(connFile,
+                        isConnFilePasswordOk,
+                        ConnFileState.CLEAR,
+                        false,
+                        setDecryptedPasswords,
+                        null,
+                        askForPassword);
+
+                break;
+
+            default:
+                //
+                break;
+        }
+
     }
 
     //TODO refactor (at least, review (name newConnFile vs newSubUnit?)): newConnFile
