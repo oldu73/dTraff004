@@ -40,7 +40,12 @@ public class ConnFile extends ConnUnit<Conn> {
     private String password;
     private final ObjectProperty<ConnFileState> state;
     private RootLayoutController rootLayoutController;
+    private BooleanProperty menuPasswordDisabled;
+    private BooleanProperty menuEnterPasswordDisabled;
+    private BooleanProperty menuLockPasswordDisabled;
     private BooleanProperty menuSetPasswordDisabled;
+    private BooleanProperty menuChangePasswordDisabled;
+    private BooleanProperty menuFileRepairDisabled;
     private Menu passwordMenu;
 
     // ### Constructors #####################################################################
@@ -165,6 +170,30 @@ public class ConnFile extends ConnUnit<Conn> {
         this.rootLayoutController = rootLayoutController;
     }
 
+    public BooleanProperty menuPasswordDisabledProperty() {
+        return menuPasswordDisabled;
+    }
+
+    public BooleanProperty menuEnterPasswordDisabledProperty() {
+        return menuEnterPasswordDisabled;
+    }
+
+    public BooleanProperty menuLockPasswordDisabledProperty() {
+        return menuLockPasswordDisabled;
+    }
+
+    public BooleanProperty menuSetPasswordDisabledProperty() {
+        return menuSetPasswordDisabled;
+    }
+
+    public BooleanProperty menuChangePasswordDisabledProperty() {
+        return menuChangePasswordDisabled;
+    }
+
+    public BooleanProperty menuFileRepairDisabledProperty() {
+        return menuFileRepairDisabled;
+    }
+
     /**
      * Test BROKEN state
      * @return true on BROKEN state, false otherwise
@@ -255,14 +284,6 @@ public class ConnFile extends ConnUnit<Conn> {
         setState(ConnFileState.DECRYPTED);
     }
 
-    public boolean isMenuSetPasswordDisabled() {
-        return menuSetPasswordDisabled.get();
-    }
-
-    public BooleanProperty menuSetPasswordDisabledProperty() {
-        return menuSetPasswordDisabled;
-    }
-
     public void setContextMenu() {
 
         // ConnFile instance in treeView contextual menu
@@ -277,8 +298,17 @@ public class ConnFile extends ConnUnit<Conn> {
 
         // ### Password Menu
 
+        menuEnterPasswordDisabled = new SimpleBooleanProperty();
+        menuEnterPasswordDisabled.bind(Bindings.createBooleanBinding(() -> !isEncrypted(), state));
+
         menuSetPasswordDisabled = new SimpleBooleanProperty();
         menuSetPasswordDisabled.bind(Bindings.createBooleanBinding(() -> !isClear() && !isEmptyClear(), state));
+
+        menuChangePasswordDisabled = new SimpleBooleanProperty();
+        menuChangePasswordDisabled.bind(Bindings.createBooleanBinding(() -> !(isEncrypted() || isEmptyDecrypted() || isDecrypted()), state));
+
+        menuPasswordDisabled = new SimpleBooleanProperty();
+        menuPasswordDisabled.bind(menuEnterPasswordDisabled.and(menuSetPasswordDisabled.and(menuChangePasswordDisabled)));
 
         passwordMenu = new Menu();
 
@@ -309,8 +339,10 @@ public class ConnFile extends ConnUnit<Conn> {
         // ### Repair File MenuItem
         MenuItem repairFileMenuItem = I18N.menuItemForKey("connFile.contextMenu.file.repair");
         repairFileMenuItem.setOnAction((ActionEvent t) -> openBrokenConnFile());
+        menuFileRepairDisabled = new SimpleBooleanProperty();
+        menuFileRepairDisabled.bind(Bindings.createBooleanBinding(() -> !isBroken(), state));
         // Disable context menu Open File if ConnFile object state is not broken
-        repairFileMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> !isBroken(), state));
+        repairFileMenuItem.disableProperty().bind(menuFileRepairDisabled);
         // ###################################################################
 
         // ### Close File MenuItem
