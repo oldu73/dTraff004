@@ -8,16 +8,15 @@ import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +31,9 @@ import java.util.concurrent.CountDownLatch;
 public class ConnFileEditDialogController {
 
     private static final String FILE_EXT = ".xml";
+
+    // Fxml resource
+    private static final String FXML_PASSWORD_DIALOG_RESOURCE_PATH = "../connection/view/ConnFilePasswordDialog.fxml";
 
     @FXML
     private Pane pane1;
@@ -58,16 +60,7 @@ public class ConnFileEditDialogController {
     private CheckBox passwordCheckBox;
 
     @FXML
-    private Label passwordLabel;
-
-    @FXML
-    private PasswordField passwordField;
-
-    @FXML
-    private Label repeatPasswordLabel;
-
-    @FXML
-    private PasswordField repeatPasswordField;
+    private AnchorPane passwordDialogAnchorPane;
 
     @FXML
     private Button browseButton;
@@ -81,6 +74,7 @@ public class ConnFileEditDialogController {
     private Stage dialogStage;
     private ConnFile connFile;
     private boolean okClicked = false;
+    private ConnFilePasswordDialogController controller;
 
     /**
      * Initializes the controller class. This method is automatically called
@@ -98,10 +92,28 @@ public class ConnFileEditDialogController {
         pane4.setBackground(new Background(new BackgroundFill(Color.web("#c4a155"), CornerRadii.EMPTY, Insets.EMPTY)));
         */
 
-        passwordLabel.disableProperty().bind(passwordCheckBox.selectedProperty().not());
-        passwordField.disableProperty().bind(passwordCheckBox.selectedProperty().not());
-        repeatPasswordLabel.disableProperty().bind(passwordCheckBox.selectedProperty().not());
-        repeatPasswordField.disableProperty().bind(passwordCheckBox.selectedProperty().not());
+        //TODO Factorize FXML loader.
+
+        try {
+            // Load the fxml file and create a new stage for the popup dialog.
+            FXMLLoader loader = new FXMLLoader();
+            loader.setResources(MainApp.TEXT_BUNDLE);
+            loader.setLocation(MainApp.class.getResource(FXML_PASSWORD_DIALOG_RESOURCE_PATH));
+            AnchorPane anchorPane = loader.load();
+
+            controller = loader.getController();
+            controller.setPasswordToCheck(null);
+            controller.postInitialize();
+
+            okButton.disableProperty().bind(controller.passwordOkProperty().not());
+
+            passwordDialogAnchorPane.getChildren().add(anchorPane);
+            passwordDialogAnchorPane.disableProperty().bind(passwordCheckBox.selectedProperty().not());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**
@@ -174,7 +186,8 @@ public class ConnFileEditDialogController {
         List<Button> buttonList = new ArrayList<>(Arrays.asList(browseButton, okButton, cancelButton));
 
         // SRC: https://www.mkyong.com/java8/java-8-foreach-examples/
-        buttonList.forEach(button -> button.setDisable(true));
+        //TODO Find a solution for ok button bind and therefor could not be set (see also commented line 243 for set disable to false revert action)
+        //buttonList.forEach(button -> button.setDisable(true));
 
         final Service<Void> browseService = new Service<Void>() {
 
@@ -227,7 +240,7 @@ public class ConnFileEditDialogController {
                 // debug mode
                 //System.out.println("Done");
 
-                buttonList.forEach(button -> button.setDisable(false));
+                //buttonList.forEach(button -> button.setDisable(false));
                 progressIndicator.setVisible(false);
             });
 
@@ -250,7 +263,7 @@ public class ConnFileEditDialogController {
             boolean isSafe = passwordCheckBox.isSelected();
             connFile.setPasswordProtected(isSafe);
             if (isSafe) {
-                connFile.setPassword(passwordField.getText());
+                connFile.setPassword(controller.getPassword());
             } else {
                 connFile.setPassword(null);
             }
@@ -273,8 +286,6 @@ public class ConnFileEditDialogController {
 
         String folder = folderField.getText();
         String file = fileField.getText();
-        String password = passwordField.getText();
-        String repeatPassword = repeatPasswordField.getText();
         String errorMessage = "";
 
         if (folder == null || folder.length() == 0) errorMessage += MainApp.TEXT_BUNDLE.getString("connFileEditDialog.alertInvalid.content.folder");
@@ -286,10 +297,6 @@ public class ConnFileEditDialogController {
                 errorMessage += "\n" + MainApp.TEXT_BUNDLE.getString("connFileEditDialog.alertInvalid.content.file.2") + existingConnFile.getFileName() + "\n\n";
             }
         }
-
-        if (passwordCheckBox.isSelected() && (password == null ||
-                password.length() == 0 ||
-                !password.equals(repeatPassword))) errorMessage += MainApp.TEXT_BUNDLE.getString("connFileEditDialog.alertInvalid.content.password");
 
         if (errorMessage.length() == 0) {
             return true;

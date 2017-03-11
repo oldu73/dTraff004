@@ -4,13 +4,11 @@
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ch.stageconcept.dtraff.connection.view.ConnFileEditDialogController">
@@ -26,33 +24,18 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
             <TextField fx:id="folderField" GridPane.columnIndex="2" />
             <TextField fx:id="fileField" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-            <Label fx:id="passwordLabel" text="%connFileEditDialog.password" GridPane.rowIndex="3" />
-            <Label fx:id="repeatPasswordLabel" text="%connFileEditDialog.repeatPassword" GridPane.rowIndex="4" />
             <Label text="%connFileEditDialog.file" GridPane.rowIndex="1" />
-            <Label fx:id="testConnectionLabel" GridPane.columnIndex="2" GridPane.rowIndex="9" />
             <CheckBox fx:id="passwordCheckBox" mnemonicParsing="false" text="%connFileEditDialog.password" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-            <PasswordField fx:id="passwordField" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-            <PasswordField fx:id="repeatPasswordField" GridPane.columnIndex="2" GridPane.rowIndex="4" />
             <Button fx:id="browseButton" mnemonicParsing="false" onAction="#handleBrowse" text="%connFileEditDialog.browse" GridPane.columnIndex="3" GridPane.halignment="RIGHT" />
             <Label text="%connFileEditDialog.folder" />
             <ProgressIndicator fx:id="progressIndicator" visible="false" GridPane.columnIndex="1" />
-            <Pane fx:id="pane1" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="5" />
-            <Pane fx:id="pane2" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-            <Pane fx:id="pane3" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-            <Pane fx:id="pane4" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="5" />
          </children>
       </GridPane>
+      <AnchorPane fx:id="passwordDialogAnchorPane" layoutY="104.0" prefHeight="200.0" prefWidth="600.0" />
       <ButtonBar layoutX="386.0" layoutY="346.0" prefHeight="40.0" prefWidth="353.0" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0">
         <buttons>
           <Button fx:id="okButton" mnemonicParsing="false" onAction="#handleOk" text="%button.ok" />
