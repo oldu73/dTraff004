@@ -803,6 +803,16 @@ public class ConnRoot extends ConnUnit<ConnFile> {
     }
 
     /**
+     * Lock subUnit (ConnFile instance) password
+     *
+     * @param connFile
+     */
+    public void lockPassword(ConnFile connFile) {
+        setPasswordAndState(connFile, null, ConnFileState.ENCRYPTED);
+        connFile.getSubUnits().clear();
+    }
+
+    /**
      * Change subUnit (ConnFile instance) password
      *
      * @param connFile

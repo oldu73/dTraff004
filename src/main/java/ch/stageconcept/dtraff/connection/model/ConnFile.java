@@ -301,6 +301,9 @@ public class ConnFile extends ConnUnit<Conn> {
         menuEnterPasswordDisabled = new SimpleBooleanProperty();
         menuEnterPasswordDisabled.bind(Bindings.createBooleanBinding(() -> !isEncrypted(), state));
 
+        menuLockPasswordDisabled = new SimpleBooleanProperty();
+        menuLockPasswordDisabled.bind(Bindings.createBooleanBinding(() -> !isDecrypted(), state));
+
         menuSetPasswordDisabled = new SimpleBooleanProperty();
         menuSetPasswordDisabled.bind(Bindings.createBooleanBinding(() -> !isClear() && !isEmptyClear(), state));
 
@@ -308,7 +311,10 @@ public class ConnFile extends ConnUnit<Conn> {
         menuChangePasswordDisabled.bind(Bindings.createBooleanBinding(() -> !(isEncrypted() || isEmptyDecrypted() || isDecrypted()), state));
 
         menuPasswordDisabled = new SimpleBooleanProperty();
-        menuPasswordDisabled.bind(menuEnterPasswordDisabled.and(menuSetPasswordDisabled.and(menuChangePasswordDisabled)));
+        menuPasswordDisabled.bind(menuEnterPasswordDisabled
+                .and(menuLockPasswordDisabled
+                        .and(menuSetPasswordDisabled
+                                .and(menuChangePasswordDisabled))));
 
         passwordMenu = new Menu();
 

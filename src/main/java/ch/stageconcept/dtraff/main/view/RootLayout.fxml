@@ -20,8 +20,10 @@
                   <SeparatorMenuItem mnemonicParsing="false" />
                   <Menu fx:id="passwordMenu" mnemonicParsing="false" text="Password">
                     <items>
-                      <MenuItem fx:id="setPasswordMenuItem" mnemonicParsing="false" onAction="#handleSetPassword" text="Set" />
                         <MenuItem fx:id="enterPasswordMenuItem" mnemonicParsing="false" onAction="#handleEnterPassword" text="Enter" />
+                        <MenuItem fx:id="lockPasswordMenuItem" mnemonicParsing="false" onAction="#handleLockPassword" text="Lock" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                      <MenuItem fx:id="setPasswordMenuItem" mnemonicParsing="false" onAction="#handleSetPassword" text="Set" />
                         <MenuItem fx:id="changePasswordMenuItem" mnemonicParsing="false" onAction="#handleChangePassword" text="Change" />
                         <MenuItem fx:id="removePasswordMenuItem" mnemonicParsing="false" onAction="#handleRemovePassword" text="Remove" />
                     </items>
