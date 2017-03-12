@@ -75,6 +75,22 @@ public class ConnFilePasswordDialogController {
         return passwordField.getText();
     }
 
+    public ImageView getPasswordOkIcon() {
+        return passwordOkIcon;
+    }
+
+    public PasswordField getPasswordField() {
+        return passwordField;
+    }
+
+    public PasswordField getRepeatPasswordField() {
+        return repeatPasswordField;
+    }
+
+    public ImageView getRepeatPasswordOkIcon() {
+        return repeatPasswordOkIcon;
+    }
+
     // Methods
     // #######
 

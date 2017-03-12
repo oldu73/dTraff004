@@ -4,6 +4,7 @@ import ch.stageconcept.dtraff.connection.model.ConnFile;
 import ch.stageconcept.dtraff.main.MainApp;
 import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import ch.stageconcept.dtraff.util.AlertDialog;
+import ch.stageconcept.dtraff.util.StringUtil;
 import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -16,6 +17,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -105,14 +107,29 @@ public class ConnFileEditDialogController {
             controller.setPasswordToCheck(null);
             controller.postInitialize();
 
-            okButton.disableProperty().bind(controller.passwordOkProperty().not());
+            bindOkButtonDisableProperty();
 
             passwordDialogAnchorPane.getChildren().add(anchorPane);
             passwordDialogAnchorPane.disableProperty().bind(passwordCheckBox.selectedProperty().not());
 
+            controller.getPasswordOkIcon().setVisible(false);
+            controller.getRepeatPasswordOkIcon().setVisible(false);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        passwordCheckBox.selectedProperty().addListener(((observable, oldValue, newValue) -> {
+
+            controller.getPasswordOkIcon().setVisible(newValue);
+            controller.getRepeatPasswordOkIcon().setVisible(newValue);
+
+            if (!newValue) {
+                controller.getPasswordField().clear();
+                controller.getRepeatPasswordField().clear();
+            }
+
+        }));
 
     }
 
@@ -141,6 +158,13 @@ public class ConnFileEditDialogController {
      */
     public boolean isOkClicked() {
         return okClicked;
+    }
+
+    /**
+     * Bind ok button disable property.
+     */
+    private void bindOkButtonDisableProperty() {
+        okButton.disableProperty().bind(passwordCheckBox.selectedProperty().and(controller.passwordOkProperty().not()));
     }
 
     /**
@@ -185,9 +209,9 @@ public class ConnFileEditDialogController {
         // SRC: http://stackoverflow.com/questions/1005073/initialization-of-an-arraylist-in-one-line
         List<Button> buttonList = new ArrayList<>(Arrays.asList(browseButton, okButton, cancelButton));
 
+        okButton.disableProperty().unbind();
         // SRC: https://www.mkyong.com/java8/java-8-foreach-examples/
-        //TODO Find a solution for ok button bind and therefor could not be set (see also commented line 243 for set disable to false revert action)
-        //buttonList.forEach(button -> button.setDisable(true));
+        buttonList.forEach(button -> button.setDisable(true));
 
         final Service<Void> browseService = new Service<Void>() {
 
@@ -240,7 +264,8 @@ public class ConnFileEditDialogController {
                 // debug mode
                 //System.out.println("Done");
 
-                //buttonList.forEach(button -> button.setDisable(false));
+                buttonList.forEach(button -> button.setDisable(false));
+                bindOkButtonDisableProperty();
                 progressIndicator.setVisible(false);
             });
 
@@ -294,7 +319,13 @@ public class ConnFileEditDialogController {
         else {
             ConnFile existingConnFile = connFile.getRootLayoutController().getConnFile(file);
             if (existingConnFile != null) {
-                errorMessage += "\n" + MainApp.TEXT_BUNDLE.getString("connFileEditDialog.alertInvalid.content.file.2") + existingConnFile.getFileName() + "\n\n";
+                errorMessage += "\n" + MainApp.TEXT_BUNDLE.getString("connFileEditDialog.alertInvalid.content.file.2")
+                        + StringUtil.nameFileNameToString(existingConnFile)
+                        + "\n\n";
+            } else if (new File(folder, file + FILE_EXT).exists()) {
+                errorMessage += "\n" + MainApp.TEXT_BUNDLE.getString("connFileEditDialog.alertInvalid.content.file.3")
+                        + StringUtil.nameFileNameToString(file, folder)
+                        + "\n\n";
             }
         }
 
