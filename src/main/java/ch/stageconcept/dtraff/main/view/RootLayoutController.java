@@ -414,6 +414,8 @@ public class RootLayoutController {
 
         connTreeView.getRoot().setExpanded(true);
 
+        connTreeView.setEditable(true);
+
     }
 
     /**

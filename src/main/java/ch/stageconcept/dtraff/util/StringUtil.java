@@ -35,4 +35,15 @@ public enum StringUtil {
         return name + " - " + folder + "\\" + name + ".xml";
     }
 
+    /**
+     * Check that the given String parameter is not null
+     * and length greater than zero.
+     *
+     * @param string
+     * @return true if string ok, false otherwise
+     */
+    public static boolean notNullAndLengthGreaterThanZero(String string) {
+        return string != null && string.length() > 0;
+    }
+
 }
