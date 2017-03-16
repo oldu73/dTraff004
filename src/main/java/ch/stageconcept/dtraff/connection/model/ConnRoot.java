@@ -96,12 +96,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      * - exist
      * - is not a directory
      */
-    private static Predicate<ConnFile> isFileInSubUnitOk = subUnit -> {
-
-        File file = new File(subUnit.getFileName());
-        return file.exists() && !file.isDirectory();
-
-    };
+    private static Predicate<ConnFile> isFileInSubUnitOk = subUnit -> subUnit.getFile().exists() && !subUnit.getFile().isDirectory();
 
     /**
      * Check if subUnit.fileName represent a not empty OS file

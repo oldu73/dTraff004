@@ -11,6 +11,7 @@ import java.util.prefs.Preferences;
 import ch.stageconcept.dtraff.connection.model.Conn;
 import ch.stageconcept.dtraff.connection.model.ConnFile;
 import ch.stageconcept.dtraff.connection.model.ConnRoot;
+import ch.stageconcept.dtraff.connection.model.ConnUnit;
 import ch.stageconcept.dtraff.util.StringUtil;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener.Change;
@@ -97,40 +98,81 @@ public class ModelTree<T> {
 
             private void commitEdit() {
 
+                T item = getItem();
+
+                boolean isConnFile = getItem().getClass().equals(ConnFile.class);
+                boolean isConn = !isConnFile && getItem().getClass().equals(Conn.class);
+
+                String newName = textField.getText();
+
+                if (isConnFile) {
+                    ConnFile connFile = (ConnFile) getItem();
+
+                    connFile.setName(newName);
+
+                    /*
+                    if (connFile.getFile().exists() && !connFile.getFile().isDirectory()) {
+
+                        String prefKeyToRemove = connFile.getName();
+                        String newFileName = connFile.getFileName().replace(connFile.getName(), newName);
+                        boolean fileRenameOk = connFile.getFile().renameTo(new File(newFileName));
+
+                        if (fileRenameOk) {
+
+                            connFile.setName(newName);
+                            connFile.setFileName(newFileName);
+                            //((ConnFile) getItem()).getParent().sortSubUnits();
+
+                            // update preference
+                            prefs.remove(prefKeyToRemove);
+                            prefs.put(newName, newFileName);
+
+                        } else {
+                            System.out.println("Rename file fail: " + newFileName);
+                        }
+
+                    }
+*/
+                }
+                else if (isConn) {
+                    Conn conn = (Conn) getItem();
+                    conn.setName(newName);
+                }
+
+                super.commitEdit(getItem());
+
+                /*
                 String newName = textField.getText();
 
                 if (StringUtil.notNullAndLengthGreaterThanZero(newName)) {
 
                     if (getItem().getClass().equals(ConnFile.class)) {
 
-                        File file = new File(((ConnFile) getItem()).getFileName());
-                        if (file.exists() && !file.isDirectory()) {
+                        if (((ConnFile) getItem()).getFile().exists() && !((ConnFile) getItem()).getFile().isDirectory()) {
 
-                            // update preference
-                            prefs.remove(((ConnFile) getItem()).getName());
-
+                            String prefKeyToRemove = ((ConnFile) getItem()).getName();
                             String newFileName = ((ConnFile) getItem()).getFileName().replace(((ConnFile) getItem()).getName(), newName);
+                            boolean fileRenameOk = ((ConnFile) getItem()).getFile().renameTo(new File(newFileName));
 
-                            /*
-                            boolean fileRenameOk = false;
-                            int index = 0;
+                            if (fileRenameOk) {
 
-                            do {
-                                fileRenameOk = file.renameTo(new File(newFileName));
-                                index++;
-                            } while (!fileRenameOk);
+                                ((ConnFile) getItem()).setName(newName);
+                                ((ConnFile) getItem()).setFileName(newFileName);
+                                setGraphic(((ConnFile) getItem()).getIcon());
+                                //((ConnFile) getItem()).getParent().sortSubUnits();
 
-                            System.out.println(index);
-                            */
+                                textProperty().bind(text.apply(getItem()));
+                                graphicProperty().bind(icon.apply(getItem()));
+                                contextMenuProperty().bind(menu.apply(getItem()));
 
-                            System.out.println(file.renameTo(new File(newFileName)) + " " + newFileName);
+                                // update preference
+                                prefs.remove(prefKeyToRemove);
+                                prefs.put(newName, newFileName);
 
-                            // update preference
-                            prefs.put(newName, newFileName);
+                            } else {
+                                System.out.println("Rename file fail: " + newFileName);
+                            }
 
-                            ((ConnFile) getItem()).setName(newName);
-                            ((ConnFile) getItem()).setFileName(newFileName);
-                            //((ConnFile) getItem()).getParent().sortSubUnits();
                         }
 
                     }
@@ -138,12 +180,17 @@ public class ModelTree<T> {
                     if (getItem().getClass().equals(Conn.class)) {
                         ((Conn) getItem()).setName(newName);
                         ((Conn) getItem()).getParent().saveConnDataToFile();
+                        setGraphic(((Conn) getItem()).getIcon());
                     }
 
                 }
 
-                cancelEdit();
+                super.commitEdit(getItem());
 
+                textField = null;
+
+                //super.cancelEdit();
+*/
             }
 
             @Override
@@ -160,6 +207,8 @@ public class ModelTree<T> {
                     setText(((Conn) getItem()).getName());
                     setGraphic(((Conn) getItem()).getIcon());
                 }
+
+                textField = null;
 
             }
 

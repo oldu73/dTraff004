@@ -36,6 +36,7 @@ public class ConnFile extends ConnUnit<Conn> {
     private final ObjectProperty<ConnRoot> parent;
 
     private String fileName;    // path
+    private File file;
     private boolean isPasswordProtected = false;
     private String password;
     private final ObjectProperty<ConnFileState> state;
@@ -91,6 +92,7 @@ public class ConnFile extends ConnUnit<Conn> {
         this(name, FXCollections.observableArrayList());
 
         this.fileName = fileName;
+        this.file = new File(fileName);
         setParent(parent);
         this.rootLayoutController = rootLayoutController;
 
@@ -106,6 +108,7 @@ public class ConnFile extends ConnUnit<Conn> {
         this(connFile.getName(), FXCollections.observableArrayList());
 
         this.fileName = connFile.getFileName();
+        this.file = connFile.getFile();
         setParent(connFile.getParent());
         this.rootLayoutController = connFile.getRootLayoutController();
 
@@ -132,6 +135,10 @@ public class ConnFile extends ConnUnit<Conn> {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public File getFile() {
+        return file;
     }
 
     public boolean isPasswordProtected() {
