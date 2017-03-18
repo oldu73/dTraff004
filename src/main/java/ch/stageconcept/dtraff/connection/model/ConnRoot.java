@@ -25,6 +25,7 @@ import java.io.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.function.*;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -115,6 +116,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
 
         try {
             if (br.readLine() != null) {
+                br.close(); // !!! MOST IMPORTANT !!!
                 return true;
             }
         } catch (IOException e) {
@@ -656,10 +658,28 @@ public class ConnRoot extends ConnUnit<ConnFile> {
 
         File file = new java.io.File(connFile.getFileName());
 
+        /*
+        File fileSource = new java.io.File(connFile.getFileName());
+
+        // SRC: http://www.javapractices.com/topic/TopicAction.do?Id=62
+        Random randomGenerator = new Random();
+        int randomInt = randomGenerator.nextInt(1000000);
+
+        String fileExt = ".xml";
+        String tmpFileName = connFile.getFileName().replace(fileExt, "");
+
+        File fileDest = new java.io.File(tmpFileName + "-tmp-" + randomInt + fileExt);
+        */
+
         // debug mode
         //System.out.println(file.toString());
 
         try {
+
+            //copyFileUsingStream(fileSource, fileDest);
+
+            //InputStream inputStream = new FileInputStream(connFile.getFileName());
+
             JAXBContext context = JAXBContext.newInstance(ConnListWrapper.class);
 
             // debug mode
@@ -669,6 +689,8 @@ public class ConnRoot extends ConnUnit<ConnFile> {
 
             // Reading XML from the file and unmarshalling.
             ConnListWrapper wrapper = (ConnListWrapper) um.unmarshal(file);
+            //ConnListWrapper wrapper = (ConnListWrapper) um.unmarshal(fileDest);
+            //ConnListWrapper wrapper = (ConnListWrapper) um.unmarshal(inputStream);
 
             // debug mode
             /*
@@ -677,14 +699,43 @@ public class ConnRoot extends ConnUnit<ConnFile> {
             }
             */
 
+            //inputStream.close();
+
+            //fileDest.delete();
+
             return wrapper.getConns();
 
         } catch (Exception e) { // catches ANY exception
-            //e.printStackTrace();
+            e.printStackTrace();
         }
 
         return null;
 
+    }
+
+    /**
+     * Copy file.
+     * SRC: http://www.journaldev.com/861/java-copy-file
+     *
+     * @param source
+     * @param dest
+     * @throws IOException
+     */
+    private static void copyFileUsingStream(File source, File dest) throws IOException {
+        InputStream is = null;
+        OutputStream os = null;
+        try {
+            is = new FileInputStream(source);
+            os = new FileOutputStream(dest);
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = is.read(buffer)) > 0) {
+                os.write(buffer, 0, length);
+            }
+        } finally {
+            is.close();
+            os.close();
+        }
     }
 
     /**

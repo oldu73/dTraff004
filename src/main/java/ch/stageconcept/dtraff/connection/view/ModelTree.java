@@ -85,7 +85,8 @@ public class ModelTree<T> {
             private void createTextField() {
                 textField = new TextField(getString());
                 textField.setOnKeyReleased((KeyEvent t) -> {
-                    if (t.getCode() == KeyCode.ENTER) commitEdit();
+                    //TODO If ConnFile check that file with this "new" name does not exist in directory or in treeView, if Conn check that not exist in ConnFile container
+                    if (t.getCode() == KeyCode.ENTER) commitEdit(getItem());
                     else if (t.getCode() == KeyCode.ESCAPE) cancelEdit();
                 });
             }
@@ -96,101 +97,71 @@ public class ModelTree<T> {
                 else return "not applicable!";
             }
 
-            private void commitEdit() {
+            @Override
+            public void commitEdit(T newValue) {
 
-                T item = getItem();
+                super.commitEdit(newValue);
 
-                boolean isConnFile = getItem().getClass().equals(ConnFile.class);
-                boolean isConn = !isConnFile && getItem().getClass().equals(Conn.class);
+                boolean isConnFile = newValue.getClass().equals(ConnFile.class);
+                boolean isConn = !isConnFile && newValue.getClass().equals(Conn.class);
 
-                String newName = textField.getText();
-
-                if (isConnFile) {
-                    ConnFile connFile = (ConnFile) getItem();
-
-                    connFile.setName(newName);
-
-                    /*
-                    if (connFile.getFile().exists() && !connFile.getFile().isDirectory()) {
-
-                        String prefKeyToRemove = connFile.getName();
-                        String newFileName = connFile.getFileName().replace(connFile.getName(), newName);
-                        boolean fileRenameOk = connFile.getFile().renameTo(new File(newFileName));
-
-                        if (fileRenameOk) {
-
-                            connFile.setName(newName);
-                            connFile.setFileName(newFileName);
-                            //((ConnFile) getItem()).getParent().sortSubUnits();
-
-                            // update preference
-                            prefs.remove(prefKeyToRemove);
-                            prefs.put(newName, newFileName);
-
-                        } else {
-                            System.out.println("Rename file fail: " + newFileName);
-                        }
-
-                    }
-*/
-                }
-                else if (isConn) {
-                    Conn conn = (Conn) getItem();
-                    conn.setName(newName);
-                }
-
-                super.commitEdit(getItem());
-
-                /*
                 String newName = textField.getText();
 
                 if (StringUtil.notNullAndLengthGreaterThanZero(newName)) {
 
-                    if (getItem().getClass().equals(ConnFile.class)) {
+                    // ### ConnFile #####################################################
+                    if (isConnFile) {
 
-                        if (((ConnFile) getItem()).getFile().exists() && !((ConnFile) getItem()).getFile().isDirectory()) {
+                        //TODO test for all states
 
-                            String prefKeyToRemove = ((ConnFile) getItem()).getName();
-                            String newFileName = ((ConnFile) getItem()).getFileName().replace(((ConnFile) getItem()).getName(), newName);
-                            boolean fileRenameOk = ((ConnFile) getItem()).getFile().renameTo(new File(newFileName));
+                        ConnFile connFile = (ConnFile) newValue;
+
+                        if (connFile.getFile().exists() && !connFile.getFile().isDirectory()) {
+
+                            String prefKeyToRemove = connFile.getName();
+                            String newFileName = connFile.getFileName().replace(connFile.getName(), newName);
+                            boolean fileRenameOk = connFile.getFile().renameTo(new File(newFileName));
 
                             if (fileRenameOk) {
 
-                                ((ConnFile) getItem()).setName(newName);
-                                ((ConnFile) getItem()).setFileName(newFileName);
-                                setGraphic(((ConnFile) getItem()).getIcon());
-                                //((ConnFile) getItem()).getParent().sortSubUnits();
+                                connFile.setName(newName);
+                                connFile.setFileName(newFileName);
+                                connFile.setFile(new File(newFileName));
 
-                                textProperty().bind(text.apply(getItem()));
-                                graphicProperty().bind(icon.apply(getItem()));
-                                contextMenuProperty().bind(menu.apply(getItem()));
+                                // The treeView selection doesn't follow item renaming, so we store selection before sorting,
+                                // clear selection, sort and reselect previously selected.
+
+                                // Get treeView selected item
+                                TreeView<ConnUnit<?>> connTreeView = connFile.getRootLayoutController().getConnTreeView();
+                                TreeItem<ConnUnit<?>> selectedItem = connTreeView.getSelectionModel().getSelectedItem();
+                                connTreeView.getSelectionModel().clearSelection();
+                                connFile.getParent().sortSubUnits();
+                                // After sort (above) reselect just modified connFile in treeView
+                                connFile.getRootLayoutController().getConnTreeView().getSelectionModel().select(selectedItem);
 
                                 // update preference
                                 prefs.remove(prefKeyToRemove);
                                 prefs.put(newName, newFileName);
 
                             } else {
-                                System.out.println("Rename file fail: " + newFileName);
+                                // Debug mode
+                                //System.out.println("Rename file fail: " + newFileName);
                             }
-
                         }
-
                     }
 
-                    if (getItem().getClass().equals(Conn.class)) {
-                        ((Conn) getItem()).setName(newName);
-                        ((Conn) getItem()).getParent().saveConnDataToFile();
-                        setGraphic(((Conn) getItem()).getIcon());
+                    // ### Conn #####################################################
+                    else if (isConn) {
+                        Conn conn = (Conn) newValue;
+                        conn.setName(newName);
+
+                        conn.getParent().saveConnDataToFile();
                     }
 
                 }
 
-                super.commitEdit(getItem());
-
                 textField = null;
 
-                //super.cancelEdit();
-*/
             }
 
             @Override

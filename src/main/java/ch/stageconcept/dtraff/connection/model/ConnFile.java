@@ -141,6 +141,10 @@ public class ConnFile extends ConnUnit<Conn> {
         return file;
     }
 
+    public void setFile(File file) {
+        this.file = file;
+    }
+
     public boolean isPasswordProtected() {
         return isPasswordProtected;
     }
