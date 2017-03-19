@@ -6,10 +6,13 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.input.KeyCodeCombination?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
 
-<BorderPane fx:id="rootBorderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ch.stageconcept.dtraff.main.view.RootLayoutController">
+<BorderPane prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ch.stageconcept.dtraff.main.view.RootLayoutController">
    <top>
       <MenuBar BorderPane.alignment="CENTER">
         <menus>
@@ -64,10 +67,45 @@
         </menus>
       </MenuBar>
    </top>
-   <center>
-      <Label fx:id="initializingLabel" text="%initializingLabel" textFill="#000000ba" BorderPane.alignment="BOTTOM_LEFT">
-         <BorderPane.margin>
-            <Insets bottom="200.0" left="370.0" />
-         </BorderPane.margin></Label>
-   </center>
+    <center>
+        <SplitPane dividerPositions="0.1506849315068493" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <items>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" SplitPane.resizableWithParent="false">
+               <children>
+                  <StackPane fx:id="treeViewStackPane" prefHeight="741.0" prefWidth="151.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <Label fx:id="initializingLabel" text="%initializingLabel" textFill="#808080" StackPane.alignment="CENTER_LEFT">
+                           <StackPane.margin>
+                              <Insets left="47.5" />
+                           </StackPane.margin></Label>
+                     </children>
+                  </StackPane>
+               </children></AnchorPane>
+                <SplitPane dividerPositions="0.9059945504087193" orientation="VERTICAL" prefHeight="736.0" prefWidth="856.0">
+                    <items>
+                        <SplitPane dividerPositions="0.9004629629629629" prefHeight="663.0" prefWidth="856.0">
+                            <items>
+                                <SplitPane dividerPositions="0.27601809954751133" orientation="VERTICAL" prefHeight="663.0" prefWidth="774.0">
+                                    <items>
+                                        <AnchorPane fx:id="dynTableViewAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" SplitPane.resizableWithParent="false" />
+                                        <SplitPane dividerPositions="0.2668067226890756" orientation="VERTICAL" prefHeight="478.0" prefWidth="772.0">
+                                            <items>
+                                                <AnchorPane fx:id="dynTableViewFilterAnchorPane" SplitPane.resizableWithParent="false" />
+                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" SplitPane.resizableWithParent="false" />
+                                            </items>
+                                        </SplitPane>
+                                    </items>
+                                </SplitPane>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" SplitPane.resizableWithParent="false" />
+                            </items>
+                        </SplitPane>
+                        <AnchorPane fx:id="consoleAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" SplitPane.resizableWithParent="false">
+                     <children>
+                        <StackPane fx:id="consoleStackPane" layoutX="308.0" layoutY="-34.0" prefHeight="67.0" prefWidth="865.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                     </children></AnchorPane>
+                    </items>
+                </SplitPane>
+            </items>
+        </SplitPane>
+    </center>
 </BorderPane>

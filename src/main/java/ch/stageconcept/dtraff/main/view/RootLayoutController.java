@@ -9,6 +9,7 @@ import ch.stageconcept.dtraff.preference.util.PrefEditor;
 import ch.stageconcept.dtraff.util.AlertDialog;
 import ch.stageconcept.dtraff.util.I18N;
 import ch.stageconcept.dtraff.util.Is1st;
+import ch.stageconcept.dtraff.util.TextAreaAppender;
 import ch.stageconcept.dtraff.xrelease.Release;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
@@ -26,10 +27,13 @@ import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
+import org.apache.log4j.Logger;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -49,6 +53,8 @@ import java.util.prefs.Preferences;
  * @author Olivier Durand
  */
 public class RootLayoutController {
+
+    private Logger logger = Logger.getLogger(this.getClass());
 
     // Attributes
     // #####################################################################
@@ -73,6 +79,12 @@ public class RootLayoutController {
 
     @FXML
     private BorderPane rootBorderPane;
+
+    @FXML
+    private StackPane treeViewStackPane;
+
+    @FXML
+    private StackPane consoleStackPane;
 
     @FXML
     private Label initializingLabel;
@@ -143,6 +155,7 @@ public class RootLayoutController {
     private Preferences preferences = Preferences.userRoot().node(ConnRoot.PREFS_PATH);  // User preferences
     private ObjectProperty<ConnFileState> selectedConnFileState = new SimpleObjectProperty<>();
     private int passwordMenuIndex;
+    private final TextArea loggingView = new TextArea();
 
     // Functional interface implementations
     // #####################################################################
@@ -238,6 +251,10 @@ public class RootLayoutController {
         fileMenu.getItems().add(passwordMenuIndex, passwordMenu);
     }
 
+    public StackPane getTreeViewStackPane() {
+        return treeViewStackPane;
+    }
+
     // Methods
     // #####################################################################
 
@@ -300,7 +317,7 @@ public class RootLayoutController {
         boolean initializingLabelAnimation = connRoot.isUserActionNeededAtStart();
 
         if (initializingLabelAnimation) initializingLabelTextAnimation();
-        else rootBorderPane.getChildren().remove(initializingLabel);
+        else treeViewStackPane.getChildren().remove(initializingLabel);
 
         // If connRoot has broken file and user pref is set then,
         // popup an alert message to inform user about broken files.
@@ -319,7 +336,7 @@ public class RootLayoutController {
 
             // When fade out finished, remove label and continue initialization process.
             fadeOut.setOnFinished((ActionEvent event) -> {
-                rootBorderPane.getChildren().remove(initializingLabel);
+                treeViewStackPane.getChildren().remove(initializingLabel);
                 postInitialize();
             });
         } else {
@@ -426,8 +443,12 @@ public class RootLayoutController {
      */
     private void postInitialize() {
 
-        // Set connTreeView on the left part of the rootBorderPane
-        rootBorderPane.setLeft(connTreeView);
+        // Set connTreeView on the left part (treeViewStackPane)
+        treeViewStackPane.getChildren().add(connTreeView);
+
+        // Logging view (bottom)
+        TextAreaAppender.setTextArea(loggingView);
+        consoleStackPane.getChildren().add(loggingView);
 
         // Handle double click behavior on a broken or encrypted ConnFile instance
         connTreeView.setOnMouseClicked(connTreeViewOnMouseClicked());
@@ -442,6 +463,8 @@ public class RootLayoutController {
         menusAction();
 
         // #####################
+
+        logger.info(ALINF_ABOUT_HEADER + ": " + MainApp.TEXT_BUNDLE.getString("loadingCompleted"));
 
     }
 

@@ -21,10 +21,13 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import org.apache.log4j.Logger;
 
 //TODO javadoc (cf. connection.model.ConnRoot class header documentation)
 
 public class ModelTree<T> {
+
+    private Logger logger = Logger.getLogger(this.getClass());
 
     // User preferences (file node)
     private Preferences prefs = Preferences.userRoot().node(ConnRoot.PREFS_PATH);
@@ -145,7 +148,7 @@ public class ModelTree<T> {
 
                             } else {
                                 // Debug mode
-                                //System.out.println("Rename file fail: " + newFileName);
+                                logger.info("Rename file fail: " + newFileName);
                             }
                         }
                     }

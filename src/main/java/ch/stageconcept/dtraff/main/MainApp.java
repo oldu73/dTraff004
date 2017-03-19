@@ -109,7 +109,7 @@ public class MainApp extends Application {
         primaryStage.setScene(scene);
 
         if (!Pref.isDecryptFilePassPopUpAtStartOrOnOpen() && !Pref.isErrorLoadingFilePopUpAtStartOrOnOpen()) {
-            controller.getRootBorderPane().getChildren().remove(controller.getInitializingLabel());
+            controller.getTreeViewStackPane().getChildren().remove(controller.getInitializingLabel());
         }
 
         // Show PRIMARY_STAGE.
