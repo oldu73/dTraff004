@@ -5,13 +5,17 @@ import static java.util.stream.Collectors.toList;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.prefs.Preferences;
 
 import ch.stageconcept.dtraff.connection.model.Conn;
 import ch.stageconcept.dtraff.connection.model.ConnFile;
 import ch.stageconcept.dtraff.connection.model.ConnRoot;
 import ch.stageconcept.dtraff.connection.model.ConnUnit;
+import ch.stageconcept.dtraff.main.MainApp;
 import ch.stageconcept.dtraff.util.StringUtil;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener.Change;
@@ -52,21 +56,31 @@ public class ModelTree<T> {
 
         treeView.setCellFactory(tv -> new TreeCell<T>() {
 
+            //TODO Refactor all the CellFactory
+
             private TextField textField;
 
             private Set<PseudoClass> pseudoClassesSet = new HashSet<>();
 
+            private BiPredicate<T, Class> isClass = (item, clazz) -> item.getClass().equals(clazz);
+            private Predicate<T> isConnRoot = item -> isClass.test(item, ConnRoot.class);
+            private Predicate<T> isConnFile = item -> isClass.test(item, ConnFile.class);
+            private Predicate<T> isConn = item -> isClass.test(item, Conn.class);
+            private BiFunction<ConnFile, String, String> newConnFileFileName = (connFile, newName) -> connFile.getFileName().replace(connFile.getName(), newName);
+
             @Override
             public void startEdit() {
 
+                T item = getItem();
                 boolean okToEdit = true;
 
-                if (getItem().getClass().equals(ConnRoot.class)) {
+                if (isConnRoot.test(item)) {
                     okToEdit = false;
                 }
 
-                if (getItem().getClass().equals(ConnFile.class)) {
-                    okToEdit = okToEdit && !((ConnFile) getItem()).isBroken() && !((ConnFile) getItem()).isEncrypted();
+                if (isConnFile.test(item)) {
+                    ConnFile connFile = (ConnFile) item;
+                    okToEdit = okToEdit && !connFile.isBroken() && !connFile.isEncrypted();
                 }
 
                 if (okToEdit) {
@@ -88,8 +102,35 @@ public class ModelTree<T> {
             private void createTextField() {
                 textField = new TextField(getString());
                 textField.setOnKeyReleased((KeyEvent t) -> {
+
+                    T item = getItem();
+                    boolean okToCommit = true;
+
                     //TODO If ConnFile check that file with this "new" name does not exist in directory or in treeView, if Conn check that not exist in ConnFile container
-                    if (t.getCode() == KeyCode.ENTER) commitEdit(getItem());
+                    if (t.getCode() == KeyCode.ENTER) {
+
+                        if (isConnFile.test(item)) {
+
+                            ConnFile connFile = (ConnFile) item;
+                            ConnFile existingConnFile = connFile.getRootLayoutController().getConnFile(textField.getText());
+
+                            if (existingConnFile != null) {
+                                //TODO refactor text below
+                                logger.info(MainApp.TEXT_BUNDLE.getString("logger.connfile.alreadyPresentInTreeView")
+                                        + StringUtil.nameFileNameToString(existingConnFile));
+                                okToCommit = false;
+                            } else if (new File(newConnFileFileName.apply(connFile, textField.getText())).exists()) {
+                                logger.info(MainApp.TEXT_BUNDLE.getString("logger.connfile.alreadyPresentInFolder")
+                                        + StringUtil.nameFileNameToString(textField.getText(),
+                                        connFile.getFileName().replace("\\" + connFile.getName() + ".xml", "")));
+                                okToCommit = false;
+                            }
+
+                        }
+
+                        if (okToCommit) commitEdit(getItem());
+                        else cancelEdit();
+                    }
                     else if (t.getCode() == KeyCode.ESCAPE) cancelEdit();
                 });
             }
@@ -105,56 +146,59 @@ public class ModelTree<T> {
 
                 super.commitEdit(newValue);
 
-                boolean isConnFile = newValue.getClass().equals(ConnFile.class);
-                boolean isConn = !isConnFile && newValue.getClass().equals(Conn.class);
-
                 String newName = textField.getText();
 
                 if (StringUtil.notNullAndLengthGreaterThanZero(newName)) {
 
                     // ### ConnFile #####################################################
-                    if (isConnFile) {
+                    if (isConnFile.test(newValue)) {
 
                         //TODO test for all states
 
                         ConnFile connFile = (ConnFile) newValue;
 
-                        if (connFile.getFile().exists() && !connFile.getFile().isDirectory()) {
+                        if (!connFile.isEmptyClear() && !connFile.isEmptyDecrypted()) {
+                            if (connFile.getFile().exists() && !connFile.getFile().isDirectory()) {
 
-                            String prefKeyToRemove = connFile.getName();
-                            String newFileName = connFile.getFileName().replace(connFile.getName(), newName);
-                            boolean fileRenameOk = connFile.getFile().renameTo(new File(newFileName));
+                                String prefKeyToRemove = connFile.getName();
+                                String newFileName = newConnFileFileName.apply(connFile, newName);
+                                boolean fileRenameOk = connFile.getFile().renameTo(new File(newFileName));
 
-                            if (fileRenameOk) {
+                                if (fileRenameOk) {
 
-                                connFile.setName(newName);
-                                connFile.setFileName(newFileName);
-                                connFile.setFile(new File(newFileName));
+                                    connFile.setName(newName);
+                                    connFile.setFileName(newFileName);
+                                    connFile.setFile(new File(newFileName));
 
-                                // The treeView selection doesn't follow item renaming, so we store selection before sorting,
-                                // clear selection, sort and reselect previously selected.
+                                    // The treeView selection doesn't follow item renaming, so we store selection before sorting,
+                                    // clear selection, sort and reselect previously selected.
 
-                                // Get treeView selected item
-                                TreeView<ConnUnit<?>> connTreeView = connFile.getRootLayoutController().getConnTreeView();
-                                TreeItem<ConnUnit<?>> selectedItem = connTreeView.getSelectionModel().getSelectedItem();
-                                connTreeView.getSelectionModel().clearSelection();
-                                connFile.getParent().sortSubUnits();
-                                // After sort (above) reselect just modified connFile in treeView
-                                connFile.getRootLayoutController().getConnTreeView().getSelectionModel().select(selectedItem);
+                                    // Get treeView selected item
+                                    TreeView<ConnUnit<?>> connTreeView = connFile.getRootLayoutController().getConnTreeView();
+                                    TreeItem<ConnUnit<?>> selectedItem = connTreeView.getSelectionModel().getSelectedItem();
+                                    connTreeView.getSelectionModel().clearSelection();
+                                    connFile.getParent().sortSubUnits();
+                                    // After sort (above) reselect just modified connFile in treeView
+                                    connFile.getRootLayoutController().getConnTreeView().getSelectionModel().select(selectedItem);
 
-                                // update preference
-                                prefs.remove(prefKeyToRemove);
-                                prefs.put(newName, newFileName);
+                                    // update preference
+                                    prefs.remove(prefKeyToRemove);
+                                    prefs.put(newName, newFileName);
 
-                            } else {
-                                // Debug mode
-                                logger.info("Rename file fail: " + newFileName);
+                                } else
+                                    logger.info(MainApp.TEXT_BUNDLE.getString("logger.renameFileFail") + newFileName);
                             }
+                        } else {
+                            String newFileName = newConnFileFileName.apply(connFile, newName);
+
+                            connFile.setName(newName);
+                            connFile.setFileName(newFileName);
+                            connFile.setFile(new File(newFileName));
                         }
                     }
 
                     // ### Conn #####################################################
-                    else if (isConn) {
+                    else if (isConn.test(newValue)) {
                         Conn conn = (Conn) newValue;
                         conn.setName(newName);
 

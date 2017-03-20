@@ -27,7 +27,6 @@ import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
@@ -464,7 +463,7 @@ public class RootLayoutController {
 
         // #####################
 
-        logger.info(ALINF_ABOUT_HEADER + ": " + MainApp.TEXT_BUNDLE.getString("loadingCompleted"));
+        logger.info(ALINF_ABOUT_HEADER + ": " + MainApp.TEXT_BUNDLE.getString("logger.loadingCompleted"));
 
     }
 
