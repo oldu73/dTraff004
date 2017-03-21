@@ -32,7 +32,7 @@ import java.util.concurrent.CountDownLatch;
  */
 public class ConnFileEditDialogController {
 
-    private static final String FILE_EXT = ".xml";
+    private static final String FILE_EXT = ConnFile.FILE_EXT;
 
     // Fxml resource
     private static final String FXML_PASSWORD_DIALOG_RESOURCE_PATH = "../connection/view/ConnFilePasswordDialog.fxml";
@@ -317,12 +317,11 @@ public class ConnFileEditDialogController {
 
         if (file == null || file.length() == 0) errorMessage += MainApp.TEXT_BUNDLE.getString("connFileEditDialog.alertInvalid.content.file.1");
         else {
-            ConnFile existingConnFile = connFile.getRootLayoutController().getConnFile(file);
-            if (existingConnFile != null) {
+            if (ConnFile.isInConnRoot(file)) {
                 errorMessage += "\n" + MainApp.TEXT_BUNDLE.getString("connFileEditDialog.alertInvalid.content.file.2")
-                        + StringUtil.nameFileNameToString(existingConnFile)
+                        + StringUtil.nameFileNameToString(ConnFile.getFromConnRoot(file))
                         + "\n\n";
-            } else if (new File(folder, file + FILE_EXT).exists()) {
+            } else if (ConnFile.isFileInFolder(file, folder)) {
                 errorMessage += "\n" + MainApp.TEXT_BUNDLE.getString("connFileEditDialog.alertInvalid.content.file.3")
                         + StringUtil.nameFileNameToString(file, folder)
                         + "\n\n";

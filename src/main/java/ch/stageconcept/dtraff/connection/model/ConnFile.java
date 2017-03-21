@@ -13,11 +13,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
-import javafx.stage.WindowEvent;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -30,10 +27,13 @@ public class ConnFile extends ConnUnit<Conn> {
 
     // ### Attributes #####################################################################
 
+    // ConnFile file extension
+    public static final String FILE_EXT = ".xml";
+
     private static final String ICON_FILENAME = ConnFileState.EMPTY_CLEAR.getIconFileName();
 
     // Reference to parent object
-    private final ObjectProperty<ConnRoot> parent;
+    private static final ObjectProperty<ConnRoot> parent = new SimpleObjectProperty<>();
 
     private String fileName;    // path
     private File file;
@@ -59,8 +59,6 @@ public class ConnFile extends ConnUnit<Conn> {
      */
    public ConnFile(String name, ObservableList<Conn> subUnits) {
        super(name, subUnits, Conn::new, ICON_FILENAME);
-
-       this.parent = new SimpleObjectProperty<>();
 
        // State
        state = new SimpleObjectProperty<>(ConnFileState.EMPTY_CLEAR);
@@ -495,6 +493,60 @@ public class ConnFile extends ConnUnit<Conn> {
                     MainApp.TEXT_BUNDLE.getString("connFile.alertSaveData.content") + file.getPath(), true);
 
         }
+    }
+
+    /**
+     * Check if a ConnFile object with given String name parameter
+     * is present in ConnRoot.
+     *
+     * @param name
+     * @return ConnFile object if one with name attribute exist in ConnRoot,
+     * null otherwise.
+     */
+    public static ConnFile getFromConnRoot(String name) {
+        System.out.println(">> " + name);
+        // SRC: http://stackoverflow.com/questions/23407014/return-from-lambda-foreach-in-java
+        return parent.get()
+                .getSubUnits()
+                .stream()
+                .filter(connFile -> connFile.getName().contains(name))  // TODO contains not enough
+                .findFirst().orElse(null);
+    }
+
+    /**
+     * Check if a ConnFile object with given String name parameter
+     * is present in ConnRoot.
+     *
+     * @param name
+     * @return true if one ConnFile instance with name attribute exist in ConnRoot,
+     * false otherwise.
+     */
+    public static boolean isInConnRoot(String name) {
+        System.out.println("> " + getFromConnRoot(name) + " > " + name);
+        return getFromConnRoot(name) != null;
+    }
+
+    /**
+     * Check if a file is present in folder.
+     *
+     * @param file
+     * @param folder
+     * @return true if one file with name exist in folder,
+     * false otherwise.
+     */
+    public static boolean isFileInFolder(String file, String folder) {
+        return (new File(folder, file + ConnFile.FILE_EXT).exists());
+    }
+
+    /**
+     * New file name from connFile with newName.
+     *
+     * @param connFile
+     * @param newName
+     * @return new file name
+     */
+    public static String newFileName(ConnFile connFile, String newName) {
+        return connFile.getFileName().replace(connFile.getName(), newName);
     }
 
 }

@@ -66,7 +66,6 @@ public class ModelTree<T> {
             private Predicate<T> isConnRoot = item -> isClass.test(item, ConnRoot.class);
             private Predicate<T> isConnFile = item -> isClass.test(item, ConnFile.class);
             private Predicate<T> isConn = item -> isClass.test(item, Conn.class);
-            private BiFunction<ConnFile, String, String> newConnFileFileName = (connFile, newName) -> connFile.getFileName().replace(connFile.getName(), newName);
 
             @Override
             public void startEdit() {
@@ -100,35 +99,42 @@ public class ModelTree<T> {
             }
 
             private void createTextField() {
+
                 textField = new TextField(getString());
                 textField.setOnKeyReleased((KeyEvent t) -> {
 
-                    T item = getItem();
-                    boolean okToCommit = true;
-
                     //TODO If ConnFile check that file with this "new" name does not exist in directory or in treeView, if Conn check that not exist in ConnFile container
+
                     if (t.getCode() == KeyCode.ENTER) {
+
+                        T item = getItem();
+                        String newName = textField.getText();
+                        System.out.println(newName);
+                        boolean okToCommit = true;
 
                         if (isConnFile.test(item)) {
 
                             ConnFile connFile = (ConnFile) item;
-                            ConnFile existingConnFile = connFile.getRootLayoutController().getConnFile(textField.getText());
 
-                            if (existingConnFile != null) {
-                                //TODO refactor text below
-                                logger.info(MainApp.TEXT_BUNDLE.getString("logger.connfile.alreadyPresentInTreeView")
-                                        + StringUtil.nameFileNameToString(existingConnFile));
+                            if (ConnFile.isInConnRoot(newName)) {
+                                logger.info(MainApp.TEXT_BUNDLE.getString("logger.connFile.alreadyPresentInTreeView")
+                                        + StringUtil.nameFileNameToString(ConnFile.getFromConnRoot(newName)));
+                                System.out.println(newName);
                                 okToCommit = false;
-                            } else if (new File(newConnFileFileName.apply(connFile, textField.getText())).exists()) {
-                                logger.info(MainApp.TEXT_BUNDLE.getString("logger.connfile.alreadyPresentInFolder")
-                                        + StringUtil.nameFileNameToString(textField.getText(),
-                                        connFile.getFileName().replace("\\" + connFile.getName() + ".xml", "")));
-                                okToCommit = false;
+                            } else {
+
+                                String folder = connFile.getFileName().replace(File.separator + connFile.getName() + ConnFile.FILE_EXT, "");
+
+                                if (ConnFile.isFileInFolder(folder, newName)) {
+                                    logger.info(MainApp.TEXT_BUNDLE.getString("logger.connFile.alreadyPresentInFolder")
+                                            + StringUtil.nameFileNameToString(newName, folder));
+                                    okToCommit = false;
+                                }
                             }
 
                         }
 
-                        if (okToCommit) commitEdit(getItem());
+                        if (okToCommit) commitEdit(item);
                         else cancelEdit();
                     }
                     else if (t.getCode() == KeyCode.ESCAPE) cancelEdit();
@@ -161,7 +167,7 @@ public class ModelTree<T> {
                             if (connFile.getFile().exists() && !connFile.getFile().isDirectory()) {
 
                                 String prefKeyToRemove = connFile.getName();
-                                String newFileName = newConnFileFileName.apply(connFile, newName);
+                                String newFileName = ConnFile.newFileName(connFile, newName);
                                 boolean fileRenameOk = connFile.getFile().renameTo(new File(newFileName));
 
                                 if (fileRenameOk) {
@@ -189,7 +195,7 @@ public class ModelTree<T> {
                                     logger.info(MainApp.TEXT_BUNDLE.getString("logger.renameFileFail") + newFileName);
                             }
                         } else {
-                            String newFileName = newConnFileFileName.apply(connFile, newName);
+                            String newFileName = ConnFile.newFileName(connFile, newName);
 
                             connFile.setName(newName);
                             connFile.setFileName(newFileName);

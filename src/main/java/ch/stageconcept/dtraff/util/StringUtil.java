@@ -2,6 +2,8 @@ package ch.stageconcept.dtraff.util;
 
 import ch.stageconcept.dtraff.connection.model.ConnFile;
 
+import java.io.File;
+
 /**
  * Helper enum class to provide
  * common String treatment.
@@ -32,7 +34,7 @@ public enum StringUtil {
      * @return formatted String
      */
     public static String nameFileNameToString(String name, String folder) {
-        return name + " - " + folder + "\\" + name + ".xml";
+        return name + " - " + folder + File.separator + name + ConnFile.FILE_EXT;
     }
 
     /**

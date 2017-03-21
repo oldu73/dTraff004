@@ -6,6 +6,7 @@ import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import ch.stageconcept.dtraff.preference.model.Pref;
 import ch.stageconcept.dtraff.util.AlertDialog;
 import ch.stageconcept.dtraff.util.I18N;
+import ch.stageconcept.dtraff.util.StringUtil;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -245,7 +246,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      *
      * SRC: http://www.studytrails.com/java/java8/Java8_Lambdas_FunctionalProgramming/
      */
-    private static Function<ConnFile, String> nameFileNameToString = subUnit -> subUnit.getName() + " - " + subUnit.getFileName();
+    private static Function<ConnFile, String> nameFileNameToString = subUnit -> StringUtil.nameFileNameToString(subUnit);
 
     // #####################################################################################
 
@@ -665,7 +666,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
         Random randomGenerator = new Random();
         int randomInt = randomGenerator.nextInt(1000000);
 
-        String fileExt = ".xml";
+        String fileExt = ConnFile.FILE_EXT;
         String tmpFileName = connFile.getFileName().replace(fileExt, "");
 
         File fileDest = new java.io.File(tmpFileName + "-tmp-" + randomInt + fileExt);

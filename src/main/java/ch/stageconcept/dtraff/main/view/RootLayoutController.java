@@ -39,6 +39,7 @@ import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -158,6 +159,14 @@ public class RootLayoutController {
 
     // Functional interface implementations
     // #####################################################################
+
+    /**
+     * Get file name without extension.
+     */
+    private Function<File, String> getFileNameWithoutExtension = file -> {
+        //OLD: String name = file.getName().substring(0, file.getName().indexOf("."));
+        return file.getName().replace(ConnFile.FILE_EXT, "");
+    };
 
     /**
      * Manage possible empty clear/decrypted files,
@@ -643,14 +652,11 @@ public class RootLayoutController {
         File file = getXmlFile();
 
         if (file != null) {
-            // name without extension
-            String name = file.getName().substring(0, file.getName().indexOf("."));
-            // file name (path)
+
+            String name = getFileNameWithoutExtension.apply(file);
             String fileName = file.getAbsolutePath();
 
-            ConnFile connFile = getConnFile(name);
-
-            if (connFile != null) alertAlreadyPresent(connFile);
+            if (ConnFile.isInConnRoot(name)) alertAlreadyPresent(ConnFile.getFromConnRoot(name));
             else {
                 // Create new ConnRoot treeView entry (ConnFile instance)
                 connRoot.createSubUnit(name, fileName, this);
@@ -688,12 +694,10 @@ public class RootLayoutController {
 
                 // ### Implementation ###
 
-                // name without extension
-                String name = file.getName().substring(0, file.getName().indexOf("."));
-                // file name (path)
+                String name = getFileNameWithoutExtension.apply(file);
                 String fileName = file.getAbsolutePath();
 
-                if (!name.equals(connFile.getName()) && (getConnFile(name) != null)) alertAlreadyPresent(getConnFile(name));
+                if (!name.equals(connFile.getName()) && ConnFile.isInConnRoot(name)) alertAlreadyPresent(ConnFile.getFromConnRoot(name));
                 else {
                     // update and open (treat..)
                     preferences.remove(connFile.getName());
@@ -937,23 +941,6 @@ public class RootLayoutController {
         }
 
         return null;
-    }
-
-    /**
-     * Check if a ConnFile object with given String name parameter
-     * is present in ConnRoot treeView.
-     *
-     * @param name
-     * @return ConnFile object if one with name attribute exist in ConnRoot treeView,
-     * null otherwise.
-     */
-    public ConnFile getConnFile(String name) {
-        // SRC: http://stackoverflow.com/questions/23407014/return-from-lambda-foreach-in-java
-        return connRoot
-                .getSubUnits()
-                .stream()
-                .filter(connFile -> connFile.getName().contains(name))
-                .findFirst().orElse(null);
     }
 
     /**
