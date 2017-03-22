@@ -144,8 +144,13 @@ public class Conn extends ConnUnit<DataBase> {
      * Edit connection
      */
     public void editConnection() {
+        String currentName = getName();
+
         ConnEditor.INSTANCE.supply(this, MainApp.TEXT_BUNDLE.getString("connEditDialog.title.edit"));
-        this.getParent().saveConnDataToFile();
+
+        //TODO Rollback also all other conn fields (not only name (which is sufficient when editing name in place (directly in treeView))
+        // If saveConnDataToFile method fail (returned false), rollback conn.name
+        if(!this.getParent().saveConnDataToFile()) setName(currentName);
     }
 
     /**

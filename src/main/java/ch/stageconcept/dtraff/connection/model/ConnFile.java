@@ -452,8 +452,9 @@ public class ConnFile extends ConnUnit<Conn> {
     /**
      * Saves the current connection data to file.
      *
+     * @return true if ok, false otherwise
      */
-    public void saveConnDataToFile() {
+    public boolean saveConnDataToFile() {
 
         File file = new java.io.File(this.fileName);
 
@@ -482,7 +483,10 @@ public class ConnFile extends ConnUnit<Conn> {
             // Marshalling and saving XML to the file.
             m.marshal(wrapper, file);
 
-        } catch (Exception e) { // catches ANY exception
+        } catch (Exception e) {
+
+            // catches ANY exception
+            // May happen if file is e.g. read only
 
             //e.printStackTrace();
 
@@ -492,7 +496,10 @@ public class ConnFile extends ConnUnit<Conn> {
                     MainApp.TEXT_BUNDLE.getString("connFile.alertSaveData.header"),
                     MainApp.TEXT_BUNDLE.getString("connFile.alertSaveData.content") + file.getPath(), true);
 
+            return false;
         }
+
+        return true;
     }
 
     /**
@@ -504,12 +511,11 @@ public class ConnFile extends ConnUnit<Conn> {
      * null otherwise.
      */
     public static ConnFile getFromConnRoot(String name) {
-        System.out.println(">> " + name);
         // SRC: http://stackoverflow.com/questions/23407014/return-from-lambda-foreach-in-java
         return parent.get()
                 .getSubUnits()
                 .stream()
-                .filter(connFile -> connFile.getName().contains(name))  // TODO contains not enough
+                .filter(connFile -> connFile.getName().equalsIgnoreCase(name))
                 .findFirst().orElse(null);
     }
 
@@ -522,20 +528,32 @@ public class ConnFile extends ConnUnit<Conn> {
      * false otherwise.
      */
     public static boolean isInConnRoot(String name) {
-        System.out.println("> " + getFromConnRoot(name) + " > " + name);
         return getFromConnRoot(name) != null;
     }
 
     /**
      * Check if a file is present in folder.
      *
-     * @param file
+     * @param name
      * @param folder
      * @return true if one file with name exist in folder,
      * false otherwise.
      */
-    public static boolean isFileInFolder(String file, String folder) {
-        return (new File(folder, file + ConnFile.FILE_EXT).exists());
+    public static boolean isFileInFolder(String name, String folder) {
+
+        File file = new File(folder, name + ConnFile.FILE_EXT);
+
+        return file.exists() && !file.isDirectory();
+    }
+
+    /**
+     * Check if a file is present in folder.
+     *
+     * @return true if one file with name exist in folder,
+     * false otherwise.
+     */
+    public boolean isFileInFolder() {
+        return file.exists() && !file.isDirectory();
     }
 
     /**
@@ -546,7 +564,16 @@ public class ConnFile extends ConnUnit<Conn> {
      * @return new file name
      */
     public static String newFileName(ConnFile connFile, String newName) {
-        return connFile.getFileName().replace(connFile.getName(), newName);
+
+        // Be aware that name can be contained in path,
+        // so pattern below is used to clearly targeting
+        // name of the file at the end of the path (fileName).
+        String pattern = File.separator + "%s" + FILE_EXT;
+
+        String target = String.format(pattern, connFile.getName());
+        String replacement = String.format(pattern, newName);
+
+        return connFile.getFileName().replace(target, replacement);
     }
 
 }

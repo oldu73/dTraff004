@@ -56,8 +56,6 @@ public class ModelTree<T> {
 
         treeView.setCellFactory(tv -> new TreeCell<T>() {
 
-            //TODO Refactor all the CellFactory
-
             private TextField textField;
 
             private Set<PseudoClass> pseudoClassesSet = new HashSet<>();
@@ -103,13 +101,10 @@ public class ModelTree<T> {
                 textField = new TextField(getString());
                 textField.setOnKeyReleased((KeyEvent t) -> {
 
-                    //TODO If ConnFile check that file with this "new" name does not exist in directory or in treeView, if Conn check that not exist in ConnFile container
-
                     if (t.getCode() == KeyCode.ENTER) {
 
                         T item = getItem();
                         String newName = textField.getText();
-                        System.out.println(newName);
                         boolean okToCommit = true;
 
                         if (isConnFile.test(item)) {
@@ -119,13 +114,12 @@ public class ModelTree<T> {
                             if (ConnFile.isInConnRoot(newName)) {
                                 logger.info(MainApp.TEXT_BUNDLE.getString("logger.connFile.alreadyPresentInTreeView")
                                         + StringUtil.nameFileNameToString(ConnFile.getFromConnRoot(newName)));
-                                System.out.println(newName);
                                 okToCommit = false;
                             } else {
 
                                 String folder = connFile.getFileName().replace(File.separator + connFile.getName() + ConnFile.FILE_EXT, "");
 
-                                if (ConnFile.isFileInFolder(folder, newName)) {
+                                if (ConnFile.isFileInFolder(newName, folder)) {
                                     logger.info(MainApp.TEXT_BUNDLE.getString("logger.connFile.alreadyPresentInFolder")
                                             + StringUtil.nameFileNameToString(newName, folder));
                                     okToCommit = false;
@@ -133,6 +127,8 @@ public class ModelTree<T> {
                             }
 
                         }
+
+                        //TODO If is Conn check that a conn with this "new" name does not exist in ConnFile container
 
                         if (okToCommit) commitEdit(item);
                         else cancelEdit();
@@ -159,15 +155,13 @@ public class ModelTree<T> {
                     // ### ConnFile #####################################################
                     if (isConnFile.test(newValue)) {
 
-                        //TODO test for all states
-
                         ConnFile connFile = (ConnFile) newValue;
+                        String prefKeyToRemove = connFile.getName();
+                        String newFileName = ConnFile.newFileName(connFile, newName);
 
                         if (!connFile.isEmptyClear() && !connFile.isEmptyDecrypted()) {
-                            if (connFile.getFile().exists() && !connFile.getFile().isDirectory()) {
+                            if (connFile.isFileInFolder()) {
 
-                                String prefKeyToRemove = connFile.getName();
-                                String newFileName = ConnFile.newFileName(connFile, newName);
                                 boolean fileRenameOk = connFile.getFile().renameTo(new File(newFileName));
 
                                 if (fileRenameOk) {
@@ -191,24 +185,34 @@ public class ModelTree<T> {
                                     prefs.remove(prefKeyToRemove);
                                     prefs.put(newName, newFileName);
 
-                                } else
-                                    logger.info(MainApp.TEXT_BUNDLE.getString("logger.renameFileFail") + newFileName);
+                                } else {
+                                    logger.info(MainApp.TEXT_BUNDLE.getString("logger.renameFileFail") + StringUtil.nameFileNameToString(connFile));
+                                }
+                            } else {
+                                // Means, connFile file is not in folder
+                                logger.info(MainApp.TEXT_BUNDLE.getString("logger.renameFileFail") + StringUtil.nameFileNameToString(connFile));
                             }
                         } else {
-                            String newFileName = ConnFile.newFileName(connFile, newName);
+                            // Means, connFile is EmptyClear or connFile is EmptyDecrypted
 
                             connFile.setName(newName);
                             connFile.setFileName(newFileName);
                             connFile.setFile(new File(newFileName));
+
+                            // update preference
+                            prefs.remove(prefKeyToRemove);
+                            prefs.put(newName, newFileName);
                         }
                     }
 
                     // ### Conn #####################################################
                     else if (isConn.test(newValue)) {
                         Conn conn = (Conn) newValue;
+                        String currentName = conn.getName();
                         conn.setName(newName);
 
-                        conn.getParent().saveConnDataToFile();
+                        // If saveConnDataToFile method fail (returned false), rollback conn.name
+                        if (!conn.getParent().saveConnDataToFile()) conn.setName(currentName);
                     }
 
                 }
