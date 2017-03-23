@@ -683,7 +683,7 @@ public class RootLayoutController {
                 // -> Alert already present and nothing else!
 
                 // Chosen file differ from connFile and is not present
-                // connFile update name, fileName (path), state
+                // connFile update name, fileName (path), file, state
                 // -> Open
 
                 // Chosen file name == connFile.name
@@ -699,21 +699,27 @@ public class RootLayoutController {
 
                 if (!name.equals(connFile.getName()) && ConnFile.isInConnRoot(name)) alertAlreadyPresent(ConnFile.getFromConnRoot(name));
                 else {
+                    // Get treeView selected item and clear selection
+                    TreeItem<ConnUnit<?>> selectedItem = connTreeView.getSelectionModel().getSelectedItem();
+                    connTreeView.getSelectionModel().clearSelection();
+
                     // update and open (treat..)
                     preferences.remove(connFile.getName());
                     connFile.setName(name);
                     connFile.setFileName(fileName);
+                    connFile.setFile(new File(fileName));
                     // Reset state to default
                     connFile.setClear();
 
                     connRoot.treatSubUnit(connFile);
-
                     //treatSubUnit(connFile, true);
-                }
 
-                // ConnRoot treeView entry modification in place, so no list change triggered
-                // therefore the sort method should be called "manually".
-                connRoot.sortSubUnits();
+                    // ConnRoot treeView entry modification in place, so no list change triggered
+                    // therefore the sort method should be called "manually".
+                    connRoot.sortSubUnits();
+                    // After sort (above) reselect just modified connFile in treeView
+                    connTreeView.getSelectionModel().select(selectedItem);
+                }
 
                 // ######################
 
@@ -928,7 +934,7 @@ public class RootLayoutController {
      * @return If selected item is an instance of ConnFile, return this object,
      * null otherwise
      */
-    private ConnFile getSelectedConnFile() {
+    public ConnFile getSelectedConnFile() {
 
         try {
             Object selectedObject = connTreeView.getSelectionModel().getSelectedItem().getValue();

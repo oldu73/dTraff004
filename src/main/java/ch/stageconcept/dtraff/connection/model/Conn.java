@@ -10,8 +10,11 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import org.jasypt.util.text.StrongTextEncryptor;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -82,7 +85,23 @@ public class Conn extends ConnUnit<DataBase> {
         ContextMenu contextMenu = new ContextMenu();
         MenuItem editConnectionMenuItem = I18N.menuItemForKey("conn.contextMenu.editConnection");
         editConnectionMenuItem.setOnAction((ActionEvent t) -> editConnection());
-        contextMenu.getItems().add(editConnectionMenuItem);
+
+        MenuItem renameMenuItem = new MenuItem("Rename");
+
+        renameMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent arg0) {
+                // Get treeView selected item
+                TreeView<ConnUnit<?>> connTreeView = getParent().getRootLayoutController().getConnTreeView();
+                TreeItem<ConnUnit<?>> selectedItem = connTreeView.getSelectionModel().getSelectedItem();
+
+                System.out.println(selectedItem);
+
+                //startEdit();
+            }
+        });
+
+        contextMenu.getItems().addAll(editConnectionMenuItem, renameMenuItem);
         this.setMenu(contextMenu);
 
         //#####

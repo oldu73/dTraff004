@@ -290,6 +290,7 @@ public class ConnFile extends ConnUnit<Conn> {
      * Set to DECRYPTED state
      */
     public void setDecrypted() {
+        System.out.println("hello");
         setState(ConnFileState.DECRYPTED);
     }
 
@@ -444,7 +445,7 @@ public class ConnFile extends ConnUnit<Conn> {
         // Change state
         if (getSubUnits() != null) {
             if (isEmptyClear()) setClear();
-            else setDecrypted();
+            else if (isEmptyDecrypted()) setDecrypted();
         }
 
     }
@@ -512,11 +513,15 @@ public class ConnFile extends ConnUnit<Conn> {
      */
     public static ConnFile getFromConnRoot(String name) {
         // SRC: http://stackoverflow.com/questions/23407014/return-from-lambda-foreach-in-java
-        return parent.get()
-                .getSubUnits()
-                .stream()
-                .filter(connFile -> connFile.getName().equalsIgnoreCase(name))
-                .findFirst().orElse(null);
+        try {
+            return parent.get()
+                    .getSubUnits()
+                    .stream()
+                    .filter(connFile -> connFile.getName().equalsIgnoreCase(name))
+                    .findFirst().orElse(null);
+        } catch (NullPointerException ex) {
+            return null;
+        }
     }
 
     /**

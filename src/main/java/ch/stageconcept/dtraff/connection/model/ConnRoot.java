@@ -707,10 +707,12 @@ public class ConnRoot extends ConnUnit<ConnFile> {
             return wrapper.getConns();
 
         } catch (Exception e) { // catches ANY exception
-            e.printStackTrace();
-        }
 
-        return null;
+            //e.printStackTrace();
+
+            return null;
+
+        }
 
     }
 

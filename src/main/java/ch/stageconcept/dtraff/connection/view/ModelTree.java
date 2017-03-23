@@ -16,6 +16,7 @@ import ch.stageconcept.dtraff.connection.model.ConnFile;
 import ch.stageconcept.dtraff.connection.model.ConnRoot;
 import ch.stageconcept.dtraff.connection.model.ConnUnit;
 import ch.stageconcept.dtraff.main.MainApp;
+import ch.stageconcept.dtraff.main.view.RootLayoutController;
 import ch.stageconcept.dtraff.util.StringUtil;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener.Change;
