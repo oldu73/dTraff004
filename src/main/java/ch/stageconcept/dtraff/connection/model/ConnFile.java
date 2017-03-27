@@ -46,6 +46,7 @@ public class ConnFile extends ConnUnit<Conn> {
     private BooleanProperty menuLockPasswordDisabled;
     private BooleanProperty menuSetPasswordDisabled;
     private BooleanProperty menuChangePasswordDisabled;
+    private BooleanProperty menuFileRenameDisabled;
     private BooleanProperty menuFileRepairDisabled;
     private Menu passwordMenu;
 
@@ -199,6 +200,10 @@ public class ConnFile extends ConnUnit<Conn> {
         return menuChangePasswordDisabled;
     }
 
+    public BooleanProperty menuFileRenameDisabledProperty() {
+        return menuFileRenameDisabled;
+    }
+
     public BooleanProperty menuFileRepairDisabledProperty() {
         return menuFileRepairDisabled;
     }
@@ -290,7 +295,6 @@ public class ConnFile extends ConnUnit<Conn> {
      * Set to DECRYPTED state
      */
     public void setDecrypted() {
-        System.out.println("hello");
         setState(ConnFileState.DECRYPTED);
     }
 
@@ -352,12 +356,21 @@ public class ConnFile extends ConnUnit<Conn> {
 
         // ###################################################################
 
+        // ### Rename File MenuItem
+        MenuItem renameFileMenuItem = I18N.menuItemForKey("connFile.contextMenu.file.rename");
+        renameFileMenuItem.setOnAction((ActionEvent t) -> rename());
+        menuFileRenameDisabled = new SimpleBooleanProperty();
+        menuFileRenameDisabled.bind(Bindings.createBooleanBinding(() -> isBroken() || isEncrypted(), state));
+        // Disable context menu Rename File if ConnFile object state is broken or encrypted
+        renameFileMenuItem.disableProperty().bind(menuFileRenameDisabled);
+        // ###################################################################
+
         // ### Repair File MenuItem
         MenuItem repairFileMenuItem = I18N.menuItemForKey("connFile.contextMenu.file.repair");
         repairFileMenuItem.setOnAction((ActionEvent t) -> openBrokenConnFile());
         menuFileRepairDisabled = new SimpleBooleanProperty();
         menuFileRepairDisabled.bind(Bindings.createBooleanBinding(() -> !isBroken(), state));
-        // Disable context menu Open File if ConnFile object state is not broken
+        // Disable context menu Repair File if ConnFile object state is not broken
         repairFileMenuItem.disableProperty().bind(menuFileRepairDisabled);
         // ###################################################################
 
@@ -371,6 +384,7 @@ public class ConnFile extends ConnUnit<Conn> {
                 new SeparatorMenuItem(),
                 passwordMenu,
                 new SeparatorMenuItem(),
+                renameFileMenuItem,
                 repairFileMenuItem,
                 closeFileMenuItem);
 
@@ -398,6 +412,19 @@ public class ConnFile extends ConnUnit<Conn> {
     }
 
     // ### Methods #####################################################################
+
+    /**
+     * Rename ConnFile object (file).
+     */
+    public void rename() {
+        //TODO Try to factorize (how??), almost same method as Conn.renameConnection() method
+        // Get treeView selected item
+        TreeView<ConnUnit<?>> connTreeView = rootLayoutController.getConnTreeView();
+        TreeItem<ConnUnit<?>> selectedItem = connTreeView.getSelectionModel().getSelectedItem();
+
+        // Put selected item in edit mode
+        connTreeView.edit(selectedItem);
+    }
 
     /**
      * Open broken state ConnFile object (file).

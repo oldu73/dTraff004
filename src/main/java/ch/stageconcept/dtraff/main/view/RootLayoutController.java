@@ -117,6 +117,9 @@ public class RootLayoutController {
     private MenuItem removePasswordMenuItem;
 
     @FXML
+    private MenuItem fileRenameMenuItem;
+
+    @FXML
     private MenuItem fileRepairMenuItem;
 
     @FXML
@@ -130,6 +133,9 @@ public class RootLayoutController {
 
     @FXML
     private MenuItem editServerConnectionMenuItem;
+
+    @FXML
+    private MenuItem renameServerConnectionMenuItem;
 
     @FXML
     private MenuItem fileExitMenuItem;
@@ -280,11 +286,12 @@ public class RootLayoutController {
         fileMenu.textProperty().bind(I18N.createStringBinding("fileMenu"));
         fileNewMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.new"));
         fileOpenMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.open"));
+        fileRenameMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.rename"));
         fileRepairMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.repair"));
         fileCloseMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.close"));
 
         passwordMenu.textProperty().bind(I18N.createStringBinding("passwordMenu"));
-        enterPasswordMenuItem.textProperty().bind(I18N.createStringBinding("passwordMenuItem.enter"));
+        enterPasswordMenuItem.textProperty().bind(I18N.createStringBinding("passwordMenuItem.unlock"));
         lockPasswordMenuItem.textProperty().bind(I18N.createStringBinding("passwordMenuItem.lock"));
         setPasswordMenuItem.textProperty().bind(I18N.createStringBinding("passwordMenuItem.set"));
         changePasswordMenuItem.textProperty().bind(I18N.createStringBinding("passwordMenuItem.change"));
@@ -293,6 +300,7 @@ public class RootLayoutController {
         serverConnectionMenu.textProperty().bind(I18N.createStringBinding("serverConnectionMenu"));
         newServerConnectionMenuItem.textProperty().bind(I18N.createStringBinding("serverConnectionMenuItem.new"));
         editServerConnectionMenuItem.textProperty().bind(I18N.createStringBinding("serverConnectionMenuItem.edit"));
+        renameServerConnectionMenuItem.textProperty().bind(I18N.createStringBinding("serverConnectionMenuItem.rename"));
 
         fileExitMenuItem.textProperty().bind(I18N.createStringBinding("fileMenuItem.exit"));
 
@@ -517,6 +525,9 @@ public class RootLayoutController {
                 changePasswordMenuItem,
                 removePasswordMenuItem,
                 newServerConnectionMenuItem,
+                editServerConnectionMenuItem,
+                renameServerConnectionMenuItem,
+                fileRenameMenuItem,
                 fileRepairMenuItem);
 
         // Some File - menus disable property setting if the ConnRoot treeView
@@ -538,6 +549,7 @@ public class RootLayoutController {
                     changePasswordMenuItem.disableProperty().bind(selectedConnFile.menuChangePasswordDisabledProperty());
                     removePasswordMenuItem.disableProperty().bind(changePasswordMenuItem.disableProperty());
 
+                    fileRenameMenuItem.disableProperty().bind(selectedConnFile.menuFileRenameDisabledProperty());
                     fileRepairMenuItem.disableProperty().bind(selectedConnFile.menuFileRepairDisabledProperty());
 
                     // Following line is related to double click action that may
@@ -578,6 +590,10 @@ public class RootLayoutController {
                     newServerConnectionMenuItem.setDisable(false);
                 }
 
+                if (oldValue.equals(ConnFileState.DECRYPTED) && newValue.equals(ConnFileState.ENCRYPTED)) {
+                    newServerConnectionMenuItem.setDisable(true);
+                }
+
                 // ...
 
             }
@@ -590,11 +606,17 @@ public class RootLayoutController {
                                 !(connTreeView.getSelectionModel().getSelectedItem().getValue() instanceof Conn),
                 connTreeView.getSelectionModel().selectedItemProperty()));
 
+        // Disable tool bar menu File - Server Connection - Rename if no item or not a Conn object instance are selected in ConnRoot treeView
+        renameServerConnectionMenuItem.disableProperty().bind(editServerConnectionMenuItem.disableProperty());
+
         // Disable tool bar menu File - Server Connection if File - Server Connection - New and Edit are disabled
         serverConnectionMenu.disableProperty().bind(Bindings.createBooleanBinding(() ->
-                        newServerConnectionMenuItem.isDisable() && editServerConnectionMenuItem.isDisable(),
+                        newServerConnectionMenuItem.isDisable() &&
+                                editServerConnectionMenuItem.isDisable() &&
+                                renameServerConnectionMenuItem.isDisable(),
                 newServerConnectionMenuItem.disableProperty(),
-                editServerConnectionMenuItem.disableProperty()));
+                editServerConnectionMenuItem.disableProperty(),
+                renameServerConnectionMenuItem.disableProperty()));
 
     }
 
@@ -630,6 +652,17 @@ public class RootLayoutController {
     private void handleFileOpen() {
 
         openConnFile();
+
+    }
+
+    /**
+     * Called when the user selects the tool bar File - Rename menu.
+     */
+    @FXML
+    private void handleFileRename() {
+
+        ConnFile connFile = getSelectedConnFile();
+        if (connFile != null && !connFile.isBroken() && !connFile.isEncrypted()) connFile.rename();
 
     }
 
@@ -878,6 +911,18 @@ public class RootLayoutController {
 
         //TODO Find a solution for the ConnEditDialogController Test Conn button side effect that update the edited conn:
         //- pass a temporary copy of the edited conn for testing.
+    }
+
+    /**
+     * Called when the user selects the tool bar File - Server Connection - Rename, menu.
+     * Put the selected connection in edit mode.
+     */
+    @FXML
+    private void handleRenameConnection() {
+        // The tool bar menu is disabled if none or not a Conn is selected in Connection treeView,
+        // so the item could only be a Conn -> (cast)
+        Conn conn = (Conn) connTreeView.getSelectionModel().getSelectedItem().getValue();
+        conn.renameConnection();
     }
 
     /**

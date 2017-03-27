@@ -32,6 +32,7 @@
                     </items>
                   </Menu>
                   <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem fx:id="fileRenameMenuItem" mnemonicParsing="false" onAction="#handleFileRename" text="Rename" />
                   <MenuItem fx:id="fileRepairMenuItem" mnemonicParsing="false" onAction="#handleFileRepair" text="Repair" />
                   <MenuItem fx:id="fileCloseMenuItem" mnemonicParsing="false" onAction="#handleFileClose" text="Close" />
                   <SeparatorMenuItem mnemonicParsing="false" />
@@ -43,6 +44,7 @@
                            </accelerator>
                         </MenuItem>
                       <MenuItem fx:id="editServerConnectionMenuItem" mnemonicParsing="false" onAction="#handleEditConnection" text="Edit" />
+                        <MenuItem fx:id="renameServerConnectionMenuItem" mnemonicParsing="false" onAction="#handleRenameConnection" text="Rename" />
                     </items>
                   </Menu>
                   <SeparatorMenuItem mnemonicParsing="false" />

@@ -83,23 +83,12 @@ public class Conn extends ConnUnit<DataBase> {
         //#####
         // treeView context menu
         ContextMenu contextMenu = new ContextMenu();
+
         MenuItem editConnectionMenuItem = I18N.menuItemForKey("conn.contextMenu.editConnection");
         editConnectionMenuItem.setOnAction((ActionEvent t) -> editConnection());
 
-        MenuItem renameMenuItem = new MenuItem("Rename");
-
-        renameMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent arg0) {
-                // Get treeView selected item
-                TreeView<ConnUnit<?>> connTreeView = getParent().getRootLayoutController().getConnTreeView();
-                TreeItem<ConnUnit<?>> selectedItem = connTreeView.getSelectionModel().getSelectedItem();
-
-                System.out.println(selectedItem);
-
-                //startEdit();
-            }
-        });
+        MenuItem renameMenuItem = I18N.menuItemForKey("conn.contextMenu.renameConnection");
+        renameMenuItem.setOnAction((ActionEvent t) -> renameConnection());
 
         contextMenu.getItems().addAll(editConnectionMenuItem, renameMenuItem);
         this.setMenu(contextMenu);
@@ -170,6 +159,18 @@ public class Conn extends ConnUnit<DataBase> {
         //TODO Rollback also all other conn fields (not only name (which is sufficient when editing name in place (directly in treeView))
         // If saveConnDataToFile method fail (returned false), rollback conn.name
         if(!this.getParent().saveConnDataToFile()) setName(currentName);
+    }
+
+    /**
+     * Rename connection
+     */
+    public void renameConnection() {
+        // Get treeView selected item
+        TreeView<ConnUnit<?>> connTreeView = getParent().getRootLayoutController().getConnTreeView();
+        TreeItem<ConnUnit<?>> selectedItem = connTreeView.getSelectionModel().getSelectedItem();
+
+        // Put selected item in edit mode
+        connTreeView.edit(selectedItem);
     }
 
     /**
