@@ -46,7 +46,6 @@ public class ConnFile extends ConnUnit<Conn> {
     private BooleanProperty menuLockPasswordDisabled;
     private BooleanProperty menuSetPasswordDisabled;
     private BooleanProperty menuChangePasswordDisabled;
-    private BooleanProperty menuFileRenameDisabled;
     private BooleanProperty menuFileRepairDisabled;
     private Menu passwordMenu;
 
@@ -198,10 +197,6 @@ public class ConnFile extends ConnUnit<Conn> {
 
     public BooleanProperty menuChangePasswordDisabledProperty() {
         return menuChangePasswordDisabled;
-    }
-
-    public BooleanProperty menuFileRenameDisabledProperty() {
-        return menuFileRenameDisabled;
     }
 
     public BooleanProperty menuFileRepairDisabledProperty() {
@@ -359,10 +354,8 @@ public class ConnFile extends ConnUnit<Conn> {
         // ### Rename File MenuItem
         MenuItem renameFileMenuItem = I18N.menuItemForKey("connFile.contextMenu.file.rename");
         renameFileMenuItem.setOnAction((ActionEvent t) -> rename());
-        menuFileRenameDisabled = new SimpleBooleanProperty();
-        menuFileRenameDisabled.bind(Bindings.createBooleanBinding(() -> isBroken() || isEncrypted(), state));
-        // Disable context menu Rename File if ConnFile object state is broken or encrypted
-        renameFileMenuItem.disableProperty().bind(menuFileRenameDisabled);
+        // Disable context menu Rename if ConnFile object state is broken or encrypted
+        renameFileMenuItem.disableProperty().bind(Bindings.createBooleanBinding(() -> isBroken() || isEncrypted(), state));
         // ###################################################################
 
         // ### Repair File MenuItem
@@ -370,7 +363,7 @@ public class ConnFile extends ConnUnit<Conn> {
         repairFileMenuItem.setOnAction((ActionEvent t) -> openBrokenConnFile());
         menuFileRepairDisabled = new SimpleBooleanProperty();
         menuFileRepairDisabled.bind(Bindings.createBooleanBinding(() -> !isBroken(), state));
-        // Disable context menu Repair File if ConnFile object state is not broken
+        // Disable context menu Repair if ConnFile object state is not broken
         repairFileMenuItem.disableProperty().bind(menuFileRepairDisabled);
         // ###################################################################
 

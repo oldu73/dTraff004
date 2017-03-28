@@ -946,7 +946,7 @@ public class ConnRoot extends ConnUnit<ConnFile> {
             setPasswordAndState(connFile, null, postState);
 
             if (askForPassword) ConnFilePasswordContainerEditor.INSTANCE.supply(connFile, MainApp.TEXT_BUNDLE.getString("connFilePasswordContainerDialog.title.change"));
-            else connFile.saveConnDataToFile();
+            else if (!connFile.isEmptyClear()) connFile.saveConnDataToFile();
         }
 
         passwordToCheck = null;

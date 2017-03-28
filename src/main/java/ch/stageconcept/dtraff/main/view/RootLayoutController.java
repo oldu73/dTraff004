@@ -538,18 +538,26 @@ public class RootLayoutController {
 
                 if (newValue.getValue() instanceof ConnFile) {
 
-                    // 2. bindings
+                    // 2. bindings (or setDisable(...))
 
                     ConnFile selectedConnFile = (ConnFile) newValue.getValue();
 
-                    passwordMenu.disableProperty().bind(selectedConnFile.menuPasswordDisabledProperty());
                     enterPasswordMenuItem.disableProperty().bind(selectedConnFile.menuEnterPasswordDisabledProperty());
                     lockPasswordMenuItem.disableProperty().bind(selectedConnFile.menuLockPasswordDisabledProperty());
-                    setPasswordMenuItem.disableProperty().bind(selectedConnFile.menuSetPasswordDisabledProperty());
+
+                    setPasswordMenuItem.setDisable(!selectedConnFile.isClear() && !selectedConnFile.isEmptyClear());
+
                     changePasswordMenuItem.disableProperty().bind(selectedConnFile.menuChangePasswordDisabledProperty());
                     removePasswordMenuItem.disableProperty().bind(changePasswordMenuItem.disableProperty());
 
-                    fileRenameMenuItem.disableProperty().bind(selectedConnFile.menuFileRenameDisabledProperty());
+                    passwordMenu.setDisable(enterPasswordMenuItem.isDisable() &&
+                        lockPasswordMenuItem.isDisable() &&
+                        setPasswordMenuItem.isDisable() &&
+                        changePasswordMenuItem.isDisable() &&
+                        removePasswordMenuItem.isDisable());
+
+                    fileRenameMenuItem.setDisable(selectedConnFile.isBroken() || selectedConnFile.isEncrypted());
+
                     fileRepairMenuItem.disableProperty().bind(selectedConnFile.menuFileRepairDisabledProperty());
 
                     // Following line is related to double click action that may
@@ -567,6 +575,9 @@ public class RootLayoutController {
                     // 3. reset
 
                 setMenusDisable(true,
+                        passwordMenu,
+                        setPasswordMenuItem,
+                        fileRenameMenuItem,
                         newServerConnectionMenuItem);
 
             } catch (NullPointerException ex) {
@@ -587,12 +598,22 @@ public class RootLayoutController {
             if (oldValue != null) {
 
                 if (oldValue.equals(ConnFileState.ENCRYPTED) && newValue.equals(ConnFileState.DECRYPTED)) {
+                    fileRenameMenuItem.setDisable(false);
                     newServerConnectionMenuItem.setDisable(false);
                 }
 
                 if (oldValue.equals(ConnFileState.DECRYPTED) && newValue.equals(ConnFileState.ENCRYPTED)) {
+                    fileRenameMenuItem.setDisable(true);
                     newServerConnectionMenuItem.setDisable(true);
                 }
+
+                if (newValue.equals(ConnFileState.BROKEN)) {
+                    passwordMenu.setDisable(true);
+                    fileRenameMenuItem.setDisable(true);
+                }
+
+                if (newValue.equals(ConnFileState.CLEAR) || newValue.equals(ConnFileState.EMPTY_CLEAR)) setPasswordMenuItem.setDisable(false);
+                else setPasswordMenuItem.setDisable(true);
 
                 // ...
 
