@@ -434,7 +434,7 @@ public class ConnFile extends ConnUnit<Conn> {
      * Rename ConnFile object (file).
      */
     public void rename() {
-        //TODO Try to factorize (how??), almost same method as Conn.renameConnection() method
+        //TODO Try to factorize (how??), almost same method as Conn.rename() method
         // Get treeView selected item
         TreeView<ConnUnit<?>> connTreeView = rootLayoutController.getConnTreeView();
         TreeItem<ConnUnit<?>> selectedItem = connTreeView.getSelectionModel().getSelectedItem();

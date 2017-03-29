@@ -10,7 +10,6 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
@@ -88,7 +87,7 @@ public class Conn extends ConnUnit<DataBase> {
         editConnectionMenuItem.setOnAction((ActionEvent t) -> editConnection());
 
         MenuItem renameMenuItem = I18N.menuItemForKey("conn.contextMenu.renameConnection");
-        renameMenuItem.setOnAction((ActionEvent t) -> renameConnection());
+        renameMenuItem.setOnAction((ActionEvent t) -> rename());
 
         contextMenu.getItems().addAll(editConnectionMenuItem, renameMenuItem);
         this.setMenu(contextMenu);
@@ -164,7 +163,7 @@ public class Conn extends ConnUnit<DataBase> {
     /**
      * Rename connection
      */
-    public void renameConnection() {
+    public void rename() {
         // Get treeView selected item
         TreeView<ConnUnit<?>> connTreeView = getParent().getRootLayoutController().getConnTreeView();
         TreeItem<ConnUnit<?>> selectedItem = connTreeView.getSelectionModel().getSelectedItem();

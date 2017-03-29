@@ -943,7 +943,7 @@ public class RootLayoutController {
         // The tool bar menu is disabled if none or not a Conn is selected in Connection treeView,
         // so the item could only be a Conn -> (cast)
         Conn conn = (Conn) connTreeView.getSelectionModel().getSelectedItem().getValue();
-        conn.renameConnection();
+        conn.rename();
     }
 
     /**

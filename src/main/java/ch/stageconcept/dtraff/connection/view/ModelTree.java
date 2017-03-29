@@ -175,12 +175,11 @@ public class ModelTree<T> {
                                     // clear selection, sort and reselect previously selected.
 
                                     // Get treeView selected item
-                                    TreeView<ConnUnit<?>> connTreeView = connFile.getRootLayoutController().getConnTreeView();
-                                    TreeItem<ConnUnit<?>> selectedItem = connTreeView.getSelectionModel().getSelectedItem();
-                                    connTreeView.getSelectionModel().clearSelection();
+                                    TreeItem<T> selectedItem = treeView.getSelectionModel().getSelectedItem();
+                                    treeView.getSelectionModel().clearSelection();
                                     connFile.getParent().sortSubUnits();
                                     // After sort (above) reselect just modified connFile in treeView
-                                    connFile.getRootLayoutController().getConnTreeView().getSelectionModel().select(selectedItem);
+                                    treeView.getSelectionModel().select(selectedItem);
 
                                     // update preference
                                     prefs.remove(prefKeyToRemove);
