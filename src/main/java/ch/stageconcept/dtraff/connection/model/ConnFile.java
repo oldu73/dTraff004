@@ -407,6 +407,30 @@ public class ConnFile extends ConnUnit<Conn> {
     // ### Methods #####################################################################
 
     /**
+     * To String
+     *
+     * @return string representation of connFile instance
+     */
+    @Override
+    public String toString() {
+        return "ConnFile{" +
+                "fileName='" + fileName + '\'' +
+                ", file=" + file +
+                ", isPasswordProtected=" + isPasswordProtected +
+                ", password='" + password + '\'' +
+                ", state=" + state +
+                ", rootLayoutController=" + rootLayoutController +
+                ", menuPasswordDisabled=" + menuPasswordDisabled +
+                ", menuEnterPasswordDisabled=" + menuEnterPasswordDisabled +
+                ", menuLockPasswordDisabled=" + menuLockPasswordDisabled +
+                ", menuSetPasswordDisabled=" + menuSetPasswordDisabled +
+                ", menuChangePasswordDisabled=" + menuChangePasswordDisabled +
+                ", menuFileRepairDisabled=" + menuFileRepairDisabled +
+                ", passwordMenu=" + passwordMenu +
+                '}';
+    }
+
+    /**
      * Rename ConnFile object (file).
      */
     public void rename() {

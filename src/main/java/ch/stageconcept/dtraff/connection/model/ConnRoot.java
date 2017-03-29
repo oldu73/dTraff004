@@ -880,7 +880,8 @@ public class ConnRoot extends ConnUnit<ConnFile> {
                         true,
                         setDecryptedPasswords,
                         ConnFileState.CLEAR,
-                        askForPassword);
+                        askForPassword,
+                        !askForPassword);
 
                 break;
 
@@ -892,7 +893,8 @@ public class ConnRoot extends ConnUnit<ConnFile> {
                         false,
                         null,
                         null,
-                        askForPassword);
+                        askForPassword,
+                        !askForPassword);
 
                 break;
 
@@ -904,7 +906,8 @@ public class ConnRoot extends ConnUnit<ConnFile> {
                         false,
                         setDecryptedPasswords,
                         null,
-                        askForPassword);
+                        askForPassword,
+                        !askForPassword);
 
                 break;
 
@@ -924,6 +927,8 @@ public class ConnRoot extends ConnUnit<ConnFile> {
      * @param doPopulateSubUnit
      * @param coreTreatmentCS
      * @param postState
+     * @param askForPassword
+     * @param saveConnDataToFile
      */
     private void passwordCommon(ConnFile connFile,
                                 BiPredicate<ConnFile, String> passwordOkBP,
@@ -931,13 +936,18 @@ public class ConnRoot extends ConnUnit<ConnFile> {
                                 boolean doPopulateSubUnit,
                                 Consumer<ConnFile> coreTreatmentCS,
                                 ConnFileState postState,
-                                boolean askForPassword) {
+                                boolean askForPassword,
+                                boolean saveConnDataToFile) {
 
         passwordToCheck = getSubUnitPassword(connFile, passwordOkBP);
 
-        if (anteState != null) setPasswordAndState(connFile, passwordToCheck, anteState);
+        //OLD
+        //if (anteState != null) setPasswordAndState(connFile, passwordToCheck, anteState);
 
         if (passwordToCheck != null) {
+
+            //NEW
+            if (anteState != null) setPasswordAndState(connFile, passwordToCheck, anteState);
 
             if (doPopulateSubUnit) populateSubUnit(connFile);
 
@@ -946,10 +956,10 @@ public class ConnRoot extends ConnUnit<ConnFile> {
             setPasswordAndState(connFile, null, postState);
 
             if (askForPassword) ConnFilePasswordContainerEditor.INSTANCE.supply(connFile, MainApp.TEXT_BUNDLE.getString("connFilePasswordContainerDialog.title.change"));
-            else if (!connFile.isEmptyClear()) connFile.saveConnDataToFile();
-        }
+            else if (saveConnDataToFile) connFile.saveConnDataToFile();
 
-        passwordToCheck = null;
+            passwordToCheck = null;
+        }
 
     }
 
@@ -972,7 +982,8 @@ public class ConnRoot extends ConnUnit<ConnFile> {
                         true,
                         setDecryptedPasswords,
                         null,
-                        askForPassword);
+                        askForPassword,
+                        !askForPassword);
 
                 break;
 
@@ -984,7 +995,8 @@ public class ConnRoot extends ConnUnit<ConnFile> {
                         false,
                         null,
                         null,
-                        askForPassword);
+                        askForPassword,
+                        false);
 
                 break;
 
@@ -996,7 +1008,8 @@ public class ConnRoot extends ConnUnit<ConnFile> {
                         false,
                         setDecryptedPasswords,
                         null,
-                        askForPassword);
+                        askForPassword,
+                        !askForPassword);
 
                 break;
 

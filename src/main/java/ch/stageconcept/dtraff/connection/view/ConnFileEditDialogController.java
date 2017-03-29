@@ -283,6 +283,8 @@ public class ConnFileEditDialogController {
 
         if (isInputValid()) {
             connFile.setFileName(folderField.getText() + "\\" + fileField.getText() + FILE_EXT);
+            connFile.setFile(new File(connFile.getFileName()));
+
             connFile.setName(fileField.getText());
 
             boolean isSafe = passwordCheckBox.isSelected();
